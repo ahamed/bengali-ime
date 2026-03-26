@@ -1,8 +1,4 @@
-import {
-  BengaliIME,
-  transpileRomanDocument,
-  type IMEAction,
-} from '@ahamed/bengali-ime';
+import { BengaliIME, transpileRomanDocument, type IMEAction } from '@ahamed/bengali-ime';
 
 const applyImeActionsAtCaret = (
   value: string,
@@ -13,15 +9,13 @@ const applyImeActionsAtCaret = (
   let nextCaret = caret;
   for (const action of actions) {
     if (action.type === 'insert') {
-      nextValue =
-        nextValue.slice(0, nextCaret) + action.text + nextValue.slice(nextCaret);
+      nextValue = nextValue.slice(0, nextCaret) + action.text + nextValue.slice(nextCaret);
       nextCaret += action.text.length;
       continue;
     }
     if (action.type === 'replace') {
       const start = nextCaret - action.charsBack;
-      nextValue =
-        nextValue.slice(0, start) + action.text + nextValue.slice(nextCaret);
+      nextValue = nextValue.slice(0, start) + action.text + nextValue.slice(nextCaret);
       nextCaret = start + action.text.length;
       continue;
     }
@@ -32,19 +26,14 @@ const applyImeActionsAtCaret = (
       continue;
     }
     if (action.type === 'splitBlock') {
-      nextValue =
-        nextValue.slice(0, nextCaret) + '\n' + nextValue.slice(nextCaret);
+      nextValue = nextValue.slice(0, nextCaret) + '\n' + nextValue.slice(nextCaret);
       nextCaret += 1;
     }
   }
   return { value: nextValue, caret: nextCaret };
 };
 
-const resyncImeIfPrefixDrifted = (
-  ime: BengaliIME,
-  value: string,
-  caret: number,
-) => {
+const resyncImeIfPrefixDrifted = (ime: BengaliIME, value: string, caret: number) => {
   const prefix = value.slice(0, caret);
   if (prefix === ime.output) {
     return;
@@ -114,17 +103,15 @@ streamInput.addEventListener('keydown', (e) => {
     actions = ime.process(e.key, {
       textBeforeCaret: beforeValue.slice(0, caret),
     });
+
+    console.log({ actions });
   }
 
   if (actions.length === 0) {
     return;
   }
 
-  const { value, caret: nextCaret } = applyImeActionsAtCaret(
-    beforeValue,
-    caret,
-    actions,
-  );
+  const { value, caret: nextCaret } = applyImeActionsAtCaret(beforeValue, caret, actions);
   streamInput.value = value;
   streamInput.selectionStart = nextCaret;
   streamInput.selectionEnd = nextCaret;
