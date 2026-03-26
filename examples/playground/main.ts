@@ -103,8 +103,6 @@ streamInput.addEventListener('keydown', (e) => {
     actions = ime.process(e.key, {
       textBeforeCaret: beforeValue.slice(0, caret),
     });
-
-    console.log({ actions });
   }
 
   if (actions.length === 0) {
