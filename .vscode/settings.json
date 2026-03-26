@@ -1,0 +1,78 @@
+{
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.formatOnType": true,
+  "editor.tabSize": 2,
+  "editor.insertSpaces": true,
+  "editor.detectIndentation": false,
+  "prettier.useTabs": false,
+  "prettier.tabWidth": 2,
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "all",
+  "prettier.semi": true,
+  "prettier.printWidth": 100,
+  "prettier.bracketSpacing": true,
+  "prettier.arrowParens": "always",
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "editor.codeActionsOnSave": {
+    "source.organizeImports": "always",
+    "source.fixAll": "always",
+    "source.fixAll.eslint": "always"
+  },
+  "[html]": {
+    "editor.defaultFormatter": "vscode.html-language-features"
+  },
+  "eslint.validate": ["javascript", "javascriptreact", "typescript", "typescriptreact"],
+  "eslint.run": "onSave",
+  "eslint.useFlatConfig": true,
+  "eslint.workingDirectories": [
+    {
+      "directory": "./wordpress/wp-content/plugins/growfund/resources/ts",
+      "changeProcessCWD": true
+    }
+  ],
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "javascript.preferences.importModuleSpecifier": "non-relative",
+  "omlet.rootPath": "wordpress/wp-content/plugins/growfund/resources/ts",
+  "cSpell.words": [
+    "Akkhar",
+    "BISHORGO",
+    "BORGIYO",
+    "CHAY",
+    "CHHO",
+    "CHONDROBINDU",
+    "DARI",
+    "DIRGHA",
+    "DONTO",
+    "hasant",
+    "KHONDO",
+    "Kkhiyo",
+    "KONTHYO",
+    "MURDHONNO",
+    "ONTOSTHO",
+    "ONUSHWAR",
+    "OSHTHO",
+    "pageless",
+    "PHANCH",
+    "RASSAW",
+    "SHUNNO",
+    "SWAR",
+    "TALOBBO",
+    "UNGO",
+    "USHMO"
+  ]
+}

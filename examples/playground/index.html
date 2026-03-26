@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bengali IME — examples</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <h1>Bengali IME examples</h1>
+        <p class="lede">
+          Live typing via <code>BengaliIME</code> and bulk conversion via
+          <code>transpileRomanDocument</code>. Phonetic roman (Avro-style), not
+          translation.
+        </p>
+      </header>
+
+      <section class="panel" aria-labelledby="stream-title">
+        <h2 id="stream-title">Streaming IME</h2>
+        <p class="hint">
+          Keystrokes go through <code>process</code> / <code>processBackspace</code>.
+          If the text before the caret drifts from the IME (paste, native edit), state
+          resyncs and any half-typed cluster is cleared.
+        </p>
+        <div class="row">
+          <textarea
+            id="stream-input"
+            class="field"
+            rows="6"
+            autocomplete="off"
+            spellcheck="false"
+            aria-label="Bengali output, phonetic roman input"
+          ></textarea>
+        </div>
+        <div class="controls">
+          <button type="button" id="toggle-english" class="btn">
+            Toggle English mode
+          </button>
+          <span id="mode-label" class="badge" aria-live="polite"></span>
+        </div>
+      </section>
+
+      <section class="panel" aria-labelledby="bulk-title">
+        <h2 id="bulk-title">Bulk transliteration</h2>
+        <p class="hint">
+          Whole-document pass with optional line breaks (same as Enter in the IME).
+        </p>
+        <label class="roman-label" for="roman-input">Roman input</label>
+        <textarea
+          id="roman-input"
+          class="field"
+          rows="5"
+          spellcheck="false"
+          aria-label="Roman text to transliterate"
+        >ami banglay gan gai
+ami banglar gan gai</textarea>
+        <div class="controls">
+          <button type="button" id="transpile-run" class="btn btn-primary">
+            Run transpileRomanDocument
+          </button>
+          <label class="check">
+            <input type="checkbox" id="preserve-breaks" checked />
+            preserveLineBreaks
+          </label>
+        </div>
+        <label class="roman-label" for="bengali-output">Bengali output</label>
+        <textarea
+          id="bengali-output"
+          class="field out"
+          rows="5"
+          readonly
+          aria-label="Transliterated Bengali"
+        ></textarea>
+      </section>
+    </div>
+    <script type="module" src="/main.ts"></script>
+  </body>
+</html>
