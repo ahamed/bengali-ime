@@ -23,10 +23,10 @@
 
 - [ ] 3.1 Add `Config` (Bengali digits, দাঁড়ি for `.`, smart quotes; default = TS behaviour) to `Engine`, and verify all engine fixtures still pass with the default plus new `fixtures/composer/config.json` cases for each toggle turned off
 - [ ] 3.2 Implement `Composer::key` with the commit/pending split and `Update { replace_before, commit, pending, handled }`, and verify the "Commit and pending split" scenarios in `fixtures/composer/split.json`
-- [ ] 3.3 Implement dash holding and `replace_before` for engine rewrites before the committed boundary, and verify the "Dash holding" and "Rewriting text outside the composer" scenarios in `fixtures/composer/dash.json`
-- [ ] 3.4 Implement the context fallback (host text, else the composer's own output) and `reset(Option<context>)` / `flush()`, and verify the "Document context with fallback" and "Flush and reset" scenarios in `fixtures/composer/context.json`
-- [ ] 3.5 Implement grapheme Backspace (last extended grapheme of the pending text, engine buffer emptied, `handled = false` when nothing is pending), and verify the "Grapheme backspace in pending text" scenarios in `fixtures/composer/backspace.json`
-- [ ] 3.6 Add a property test that replays every `random.json` sequence through the composer, asserting committed + pending == engine output and `replace_before == 0` when no host context was supplied. Verify it passes under `cargo test`
+- [ ] 3.3 Implement holding a trailing `-` or `।` and `replace_before` for engine rewrites before the committed boundary, and verify the "Holding a trailing hyphen or dari" and "Rewriting text outside the composer" scenarios in `fixtures/composer/hold.json`
+- [ ] 3.4 Implement context passing (host text + pending text, else `None` so the engine reads its own output) and `reset(Option<context>)` / `flush()`, and verify the "Document context with fallback" and "Flush and reset" scenarios in `fixtures/composer/context.json`
+- [ ] 3.5 Implement grapheme Backspace with a pinned `unicode-segmentation` (last extended grapheme of the pending text, cluster ended, `handled = false` plus reset when nothing is pending), and verify the "Grapheme backspace in pending text" scenarios in `fixtures/composer/backspace.json`
+- [ ] 3.6 Add a property test that replays the key steps of every `random.json` sequence through the composer, asserting committed + pending == engine output, pending == buffer (or a held `-`/`।`), and `replace_before == 0` when no host context was supplied. Verify it passes under `cargo test`
 - [ ] 3.7 Document the Rust crate API and the intentional TS differences (design D6) in `crates/bengali-ime-core/README.md`, and verify `cargo doc --no-deps` builds without warnings
 
 ## 4. M3 — UniFFI bindings and XCFramework (Linux for bindings, Mac for the framework)

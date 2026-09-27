@@ -6,10 +6,14 @@
   that rewrite recently emitted text, and `buffer` holds the cluster that can still change.
   `textBeforeCaret` is consulted only for vowels (kar vs independent vowel), `-` (em dash) and
   quotes (balancing). When it is `undefined`, a vowel on an empty buffer is always independent.
-- Checked by fuzzing 20,000 random 12-key sequences against the TS engine:
-  `buffer` is always a suffix of `output`, and the only key that rewrites text before the buffer
-  is the second `-` of `--`. The commit/pending split in `specs/ime-composer` depends on this.
-- `vowel-attach-context.ts` uses `Intl.Segmenter` (ICU) to find the last grapheme.
+- Since the engine rework on main (#1): Backspace undoes the last keystroke via an undo stack,
+  kars attach only to a consonant directly before the caret (`endsWithKarTakingConsonant`, no
+  grapheme segmentation), unmapped keys pass through, and without `textBeforeCaret` the engine
+  reads its own output.
+- Checked by fuzzing 30,000 random 12-key sequences against the reworked TS engine: `buffer` is
+  always a suffix of `output`, and while typing (Backspace aside) only two keys rewrite text before
+  the buffer: `-` after `-` (→ `—`) and `.` after `।` (→ `..`). The commit/pending split in
+  `specs/ime-composer` depends on this.
 - macOS input methods can reliably control only their own marked text. Changing committed text
   needs `insertText(_:replacementRange:)`, which Terminal, many Electron apps and Java apps ignore.
   Reading the document (`attributedSubstring(from:)`) has the same limits.
@@ -58,15 +62,15 @@ CI runs the generator and fails on `git diff --exit-code fixtures/`, then runs `
 - *Alternative:* hand-writing Rust tests that mirror vitest. Rejected: two suites drift, and random
   coverage would be lost.
 
-### D3. Grapheme segmentation via `unicode-segmentation`, pinned
-Used for the last-grapheme check and for composer Backspace. The crate version is pinned in
-`Cargo.lock`, and the Node major version is pinned in CI. Conjunct contexts in the fixtures detect
-any ICU/crate disagreement (see Risks).
+### D3. Grapheme segmentation via `unicode-segmentation`, pinned, composer only
+The engine no longer segments graphemes, so there is no ICU/crate parity risk in the engine. The
+composer uses `unicode-segmentation` (pinned) for grapheme Backspace, a Rust-only behaviour with its
+own fixtures.
 
 ### D4. Composer in Rust, not Swift
 `Composer` wraps `Engine` and keeps `committed_len` (UTF-16). After each key:
 `pending = output[committed_len..]` is recomputed with the held part being `buffer`, or a lone
-trailing `-` (dash holding). The update is
+trailing `-` or `।` that the key just inserted. The update is
 `Update { replace_before: u32, commit: String, pending: String, handled: bool }`, where
 `replace_before` is non-zero only when the engine rewrote text before `committed_len`
 (specs/ime-composer, "Rewriting text outside the composer").
@@ -74,22 +78,19 @@ trailing `-` (dash holding). The update is
   fuzz-tested on Linux, and a future iOS extension reuses it unchanged.
 - *Alternative:* diffing in Swift. Rejected: it is untestable without a Mac and would be duplicated for iOS.
 
-### D5. Context fallback lives in the composer
-The host passes `Option<String>` for the text before the caret. The composer passes it through when
-it is present, and otherwise passes `engine.output` (what it produced since the last reset), the same
-way `transpileRomanDocument` does. This matters because the TS engine treats `undefined` as "never
-attach a kar". Passing the composer's own output keeps behaviour identical to the web typing flow in
-apps without text access.
+### D5. Context fallback lives in the engine
+The host passes `Option<String>` for the committed text before the pending text. The composer
+passes host text + pending text when present, and `None` otherwise; since #1 the engine then reads
+its own output (what it produced since the last reset), exactly as the web typing flow does.
 
 ### D6. Intentional differences from the TS engine (all Rust-side, outside `Engine`)
 | Behaviour | TS engine | Rust |
 |---|---|---|
-| Backspace in pending text | 1 UTF-16 unit (`processBackspace`) | 1 grapheme cluster (`Composer::backspace`). `Engine::process_backspace` keeps TS behaviour for parity. |
-| Backspace with nothing pending | deletes from `output` | not handled; the host app deletes |
+| Backspace in pending text | undoes the last keystroke (`processBackspace`) | removes 1 grapheme cluster and ends the cluster (`Composer::backspace`, the author's choice). `Engine::process_backspace` keeps TS behaviour for parity. |
+| Backspace with nothing pending | undoes the last keystroke | not handled; the host app deletes and the composer resets |
 | Enter | `splitBlock` action | host commits pending text and passes Return to the app; the engine never sees Enter |
 | Output toggles | none | `Config { bengali_digits, dari_for_period, smart_quotes }`, applied as a post-mapping in `Engine` key classification. `Config::default()` reproduces TS exactly, and all fixtures run with the default. |
-| Lone `-` | committed immediately | held as pending by the composer (output text is identical) |
-| Keys with no mapping (`?`, `!`, `(`, …) | dropped (no actions) | the composer commits pending text, then the literal character, and flushes the engine buffer (`Engine::insert_literal`) |
+| Lone `-` or `।` | committed immediately | held as pending by the composer (output text is identical) |
 
 ### D7. UniFFI proc-macro bindings + XCFramework
 `bengali-ime-ffi` exposes `Composer` as a UniFFI `Object` (interior `Mutex`), plus `Update`,
@@ -123,15 +124,16 @@ IMK's `commitComposition` (sent on clicks and focus changes) is relied on instea
 
 ## Risks / Trade-offs
 
-- **ICU vs `unicode-segmentation` disagree on conjunct graphemes (Unicode 15.1 GB9c).** Kar
-  decisions after conjuncts could then differ from the web. → Conjunct-context fixtures, pinned
-  versions, and a documented expected result per case. If they disagree, match the TS/ICU result in
-  `Engine` by splitting at hasant, and record it.
+- **Upstream engine changes.** The TS engine can change under this work (as #1 did). → The
+  fixture freshness check fails CI until fixtures are regenerated, and `cargo test` then fails until
+  the port follows; composer assumptions (buffer is a suffix; which keys rewrite committed text) are
+  re-checked by the composer property test (task 3.6).
 - **Apps that ignore the no-underline attribute.** → Accepted. Only 1–4 pending characters are
   underlined (specs/macos-input-source).
 - **Apps with no text access** (Terminal, some Electron/Java apps) lose kar attachment after a caret
   move, and `replace_before` can't be applied. → Documented degraded behaviour. `replace_before` only
-  occurs for `-` next to an existing `-`, so the worst case is `-—` instead of `—`.
+  occurs for `-` or `.` typed right after an existing `-` or `।` in the document, so the worst case
+  is `-—` instead of `—` or `।..` instead of `..`.
 - **Input method crash while typing.** → Keep ABC enabled; log with `os.Logger`; no `panic!` crosses
   the FFI (UniFFI turns panics into Swift errors, which the controller treats as "not handled").
 - **Ad-hoc signing on newer macOS.** Future macOS versions may refuse ad-hoc signed input

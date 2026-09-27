@@ -12,7 +12,7 @@ keystroke shows its exact Bengali immediately.
 After every key, the composer SHALL report (a) text to commit, which becomes final in the document,
 and (b) the complete pending text that replaces any previous pending text. Committed text plus
 pending text SHALL always equal the engine output accumulated since the last reset. The pending
-text SHALL be exactly the engine's buffer, except for the held dash (see "Dash holding").
+text SHALL be exactly the engine's buffer, except for a held `-` or `।` (see "Holding a trailing hyphen or dari").
 
 #### Scenario: Consonant stays pending
 - **WHEN** `k` is pressed
@@ -35,10 +35,9 @@ text SHALL be exactly the engine's buffer, except for the held dash (see "Dash h
 - **THEN** after `O` the pending text is `কো`, and after `i`, `কৈ` is committed with nothing pending
 
 ### Requirement: Keys the engine does not map are typed literally
-When a key produces no engine actions (for example `?`, `!`, `/`, `(`, `)`, `@`, `;`), the composer
-SHALL commit any pending text and then commit the key's own character unchanged. The engine SHALL
-treat that character as flushed text, so later keys never rewrite across it. The TypeScript engine,
-which drops such keys, is unchanged.
+A single-character key with no Bengali mapping (for example `?`, `!`, `/`, `(`, `)`, `@`, `;`) SHALL
+commit any pending text followed by the key's own character, and end the cluster, so later keys
+never rewrite across it. This is the engine's own behaviour; the composer passes it through.
 
 #### Scenario: Question mark after a word
 - **WHEN** `k`, `i`, `?` are pressed
@@ -57,10 +56,10 @@ sequences from the engine fixtures through the composer.
 - **WHEN** every seeded random key sequence is replayed through the composer
 - **THEN** no update asks the host to replace or delete committed text
 
-### Requirement: Dash holding
-When a key makes the engine output end in a single `-` with an empty buffer, the composer SHALL hold
-that `-` as pending instead of committing it, so a following `-` can become `—`. Any other key SHALL
-commit the held `-` along with that key's own result.
+### Requirement: Holding a trailing hyphen or dari
+When a key inserts a `-` or a `।` and leaves the engine buffer empty, the composer SHALL hold that
+character as pending instead of committing it, because the next key may rewrite it (`--` → `—`,
+`।` + `.` → `..`). Any other key SHALL commit the held character along with that key's own result.
 
 #### Scenario: Double hyphen becomes an em dash
 - **WHEN** `-` then `-` are pressed
@@ -69,6 +68,10 @@ commit the held `-` along with that key's own result.
 #### Scenario: Single hyphen followed by a letter
 - **WHEN** `-` then `k` are pressed
 - **THEN** after `k`, `-` is committed and the pending text is `ক`
+
+#### Scenario: Ellipsis after a dari
+- **WHEN** `a`, `.`, `.`, `.` are pressed
+- **THEN** after the first `.` the pending text is `।`, and the total committed text at the end is `আ...` with nothing pending
 
 ### Requirement: Rewriting text outside the composer
 When the engine rewrites text that precedes the composer's pending text (for example a `-` that
@@ -79,11 +82,16 @@ units of committed text to replace, together with the text that replaces them.
 - **WHEN** after a reset, `-` is pressed with text-before-caret ending in `-`
 - **THEN** the update asks the host to replace 1 unit before the caret with `—`
 
+#### Scenario: Dari already in the document
+- **WHEN** after a reset, `.` is pressed with text-before-caret ending in `।`
+- **THEN** the update asks the host to replace 1 unit before the caret with `..`
+
 ### Requirement: Grapheme backspace in pending text
 When pending text exists, Backspace SHALL remove the last extended grapheme cluster of the pending
-text. After that, the engine buffer SHALL be empty, as after a TypeScript backspace, so any remaining
-pending text is committed. When no pending text exists, the composer SHALL report Backspace as not
-handled so the host application deletes text by its own rules.
+text and end the cluster: any remaining pending text is committed and the next key starts a new
+cluster. This intentionally differs from the engine's keystroke-undo Backspace. When no pending text
+exists, the composer SHALL report Backspace as not handled so the host application deletes text by
+its own rules, and SHALL reset itself.
 
 #### Scenario: Remove a whole conjunct
 - **WHEN** `k`, `k`, `h` are pressed (pending `ক্ষ`) and then Backspace
@@ -98,9 +106,9 @@ handled so the host application deletes text by its own rules.
 - **THEN** the update reports the key as not handled and changes nothing
 
 ### Requirement: Document context with fallback
-When the host supplies the text before the caret, the composer SHALL pass it to the engine. When the
-host cannot supply it, the composer SHALL pass the text it has itself produced since the last reset.
-It SHALL never pass "no context" while it knows its own output.
+When the host supplies the text before the pending text, the composer SHALL give the engine that text
+followed by the pending text. When the host cannot supply it, the text the composer has itself
+produced since the last reset SHALL be used instead (the engine's own output).
 
 #### Scenario: Host provides context
 - **WHEN** after a reset the host supplies text-before-caret `ক` and `i` is pressed

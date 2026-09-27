@@ -70,7 +70,7 @@ method to commit its composition, pending text SHALL be committed and never disc
 - **THEN** `খ` remains in the document as normal text
 
 ### Requirement: Reading the text before the caret
-When a key could depend on the document (nothing pending, and the key is a vowel, a quote or `-`),
+When a key could depend on the document (nothing pending, and the key is a vowel, a quote, `-` or `.`),
 the input source SHALL read the text before the caret from the app, up to a bounded window, and give
 it to the composer. When the app cannot supply that text, the input source SHALL continue without it.
 

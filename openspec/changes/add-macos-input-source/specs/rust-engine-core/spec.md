@@ -31,14 +31,23 @@ TypeScript engine with default settings.
 - **THEN** the output is `কআ`
 
 #### Scenario: Numbers and punctuation
-- **WHEN** the keys `1`, then `.`, are processed on a fresh engine
-- **THEN** the output is `১।`
+- **WHEN** the keys `a`, `.` are processed on a fresh engine
+- **THEN** the output is `আ।`
+
+#### Scenario: Decimal point after a digit
+- **WHEN** the keys `1`, `.`, `5` are processed on a fresh engine
+- **THEN** the output is `১.৫`
+
+#### Scenario: Unmapped keys pass through
+- **WHEN** the keys `k`, `?`, `k` are processed
+- **THEN** the output is `ক?ক`
 
 ### Requirement: Document-aware vowels
-When the buffer is empty and text-before-caret is supplied, a vowel key SHALL produce the dependent
-vowel sign (kar) if and only if the last grapheme cluster of that text ends in a Bengali consonant
-letter with no vowel sign or modifier. The rules are the same as the TypeScript engine's. When no
-text-before-caret is supplied and the buffer is empty, a vowel key SHALL produce the independent vowel.
+A vowel key SHALL produce the dependent vowel sign (kar) only when the character immediately before
+the caret (ignoring one trailing combining nukta) is a consonant that can carry a kar, and no silent
+`o` came just before; otherwise it SHALL produce the independent vowel. The text before the caret is
+the supplied text-before-caret, or the engine's own output when none is supplied. The rules are the
+same as the TypeScript engine's.
 
 #### Scenario: Kar attaches to a consonant already in the document
 - **WHEN** a fresh engine processes `i` with text-before-caret `ক`
@@ -48,13 +57,19 @@ text-before-caret is supplied and the buffer is empty, a vowel key SHALL produce
 - **WHEN** a fresh engine processes `i` with no text-before-caret
 - **THEN** it inserts `ই`
 
-### Requirement: Code-unit backspace parity
-Engine-level backspace SHALL behave like the TypeScript `processBackspace`: it removes one UTF-16
-code unit from the end of the output, empties the buffer, and does nothing on an empty output.
+### Requirement: Keystroke-undo backspace parity
+Engine-level backspace SHALL behave like the TypeScript `processBackspace`: it undoes the last
+keystroke, restoring output, buffer and flags exactly. After the host assigns the output (a resync)
+there is no history, and it deletes one code point plus a hasant that would be left dangling. It does
+nothing on an empty output.
 
 #### Scenario: Backspace inside a conjunct
 - **WHEN** the keys `k`, `k`, `h` are processed and then backspace
-- **THEN** a delete of 1 unit is returned, the output is `ক্`, and the buffer is empty
+- **THEN** a replace of 3 units with `ক্ক` is returned, and the output and buffer are both `ক্ক`
+
+#### Scenario: Backspace after a resync
+- **WHEN** the output is assigned `ক্ত` and then backspace is processed
+- **THEN** a delete of 2 units is returned and the output is `ক`
 
 #### Scenario: Backspace on empty output
 - **WHEN** backspace is processed on a fresh engine
@@ -91,9 +106,9 @@ fail when regenerating the fixtures changes them or when any fixture fails to re
 - **WHEN** a TypeScript rule changes but the committed fixtures are not regenerated
 - **THEN** the CI fixture freshness check fails
 
-#### Scenario: Conjunct grapheme cases are covered
+#### Scenario: Unicode edge cases are covered
 - **WHEN** the fixtures are generated
-- **THEN** they include vowel-after-conjunct cases (for example a vowel typed with text-before-caret ending in `ক্ষ` or `ন্ত`), so that a grapheme segmentation difference between the engines shows up as a failure
+- **THEN** they include text-before-caret ending in a decomposed nukta letter, in a surrogate pair (emoji), and in consonant + chandrabindu, so that a UTF-16 handling difference between the engines shows up as a failure
 
 ### Requirement: Platform independence
 The native engine SHALL have no dependency on any operating system UI framework or I/O. It SHALL
