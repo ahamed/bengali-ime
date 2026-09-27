@@ -1,0 +1,13 @@
+{
+  "format": 1,
+  "description": "ime-composer spec: Holding a trailing hyphen or dari; Rewriting text outside the composer",
+  "cases": [
+    {"name": "double hyphen becomes an em dash", "steps": [{"key": "-", "expect": {"replaceBefore": 0, "commit": "", "pending": "-", "handled": true}}, {"key": "-", "expect": {"replaceBefore": 0, "commit": "—", "pending": "", "handled": true}}], "committed": "—"},
+    {"name": "single hyphen followed by a letter", "steps": [{"key": "-"}, {"key": "k", "expect": {"replaceBefore": 0, "commit": "-", "pending": "ক", "handled": true}}]},
+    {"name": "ellipsis after a dari", "steps": [{"key": "a", "expect": {"replaceBefore": 0, "commit": "আ", "pending": "", "handled": true}}, {"key": ".", "expect": {"replaceBefore": 0, "commit": "", "pending": "।", "handled": true}}, {"key": ".", "expect": {"replaceBefore": 0, "commit": "..", "pending": "", "handled": true}}, {"key": ".", "expect": {"replaceBefore": 0, "commit": ".", "pending": "", "handled": true}}], "committed": "আ..."},
+    {"name": "dari then space", "steps": [{"key": "a"}, {"key": "."}, {"key": " ", "expect": {"replaceBefore": 0, "commit": "। ", "pending": "", "handled": true}}], "committed": "আ। "},
+    {"name": "decimal point is not held", "steps": [{"key": "1", "expect": {"replaceBefore": 0, "commit": "১", "pending": "", "handled": true}}, {"key": ".", "expect": {"replaceBefore": 0, "commit": ".", "pending": "", "handled": true}}, {"key": "5", "expect": {"replaceBefore": 0, "commit": "৫", "pending": "", "handled": true}}], "committed": "১.৫"},
+    {"name": "hyphen already in the document", "steps": [{"reset": 1}, {"key": "-", "ctx": "ক-", "expect": {"replaceBefore": 1, "commit": "—", "pending": "", "handled": true}}]},
+    {"name": "dari already in the document", "steps": [{"reset": 1}, {"key": ".", "ctx": "ক।", "expect": {"replaceBefore": 1, "commit": "..", "pending": "", "handled": true}}]}
+  ]
+}

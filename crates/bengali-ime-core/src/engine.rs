@@ -99,6 +99,28 @@ fn single_quote_from_prior(prior: &str) -> &'static str {
     )
 }
 
+/// Output options. `Config::default()` reproduces the TypeScript engine
+/// exactly; the toggles are Rust-only (the macOS input menu).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Config {
+    /// `1` → `১`. Off: digits stay ASCII.
+    pub bengali_digits: bool,
+    /// `.` → `।` (with the decimal point and ellipsis rules). Off: `.` stays `.`.
+    pub dari_for_period: bool,
+    /// `"` and `'` become typographic quotes. Off: they stay ASCII.
+    pub smart_quotes: bool,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            bengali_digits: true,
+            dari_for_period: true,
+            smart_quotes: true,
+        }
+    }
+}
+
 /// Undo record for one keystroke: the state to restore when it is backspaced.
 #[derive(Debug, Clone)]
 struct UndoEntry {
@@ -122,6 +144,7 @@ pub struct Engine {
     pub(crate) buffer: Vec<u16>,
     pub(crate) output: Vec<u16>,
     english_mode: bool,
+    config: Config,
     actions: Vec<Action>,
     skip_document_kar_for_next_vowel: bool,
     /// One entry per keystroke, so Backspace can restore the exact prior state.
@@ -135,6 +158,22 @@ pub struct Engine {
 impl Engine {
     pub fn new() -> Self {
         Self::default()
+    }
+
+    pub fn with_config(config: Config) -> Self {
+        Self {
+            config,
+            ..Self::default()
+        }
+    }
+
+    pub fn config(&self) -> Config {
+        self.config
+    }
+
+    /// Changes the output options; applies from the next key.
+    pub fn set_config(&mut self, config: Config) {
+        self.config = config;
     }
 
     /// `processBackspace`: undoes the last keystroke, so output, buffer and
@@ -216,6 +255,23 @@ impl Engine {
 
     pub fn buffer(&self) -> String {
         String::from_utf16_lossy(&self.buffer)
+    }
+
+    /// Ends the current cluster, as toggling English mode does: the next key
+    /// cannot rewrite what came before.
+    pub fn end_cluster(&mut self) {
+        self.flush_buffer();
+        self.skip_document_kar_for_next_vowel = false;
+        self.track_state();
+    }
+
+    /// Removes the last `count` UTF-16 units of the output and ends the
+    /// cluster. The undo history is dropped, since it no longer matches.
+    pub(crate) fn delete_tail(&mut self, count: usize) {
+        self.pop(count);
+        self.actions.clear();
+        self.undo_stack.clear();
+        self.track_state();
     }
 
     /// Length of `output` in UTF-16 code units.
@@ -332,6 +388,10 @@ impl Engine {
     }
 
     fn process_number(&mut self, key: &str) {
+        if !self.config.bengali_digits {
+            self.append_and_flush_buffer(key);
+            return;
+        }
         if let Some(digit) = lookup(NUMBER_MAP, key) {
             self.append_and_flush_buffer(digit);
         }
@@ -501,6 +561,11 @@ impl Engine {
             return true;
         }
 
+        if !self.config.smart_quotes && (key == "\"" || key == "'") {
+            self.append_and_flush_buffer(key);
+            return true;
+        }
+
         if key == "\"" {
             let prior = text_before_caret.map_or_else(|| self.output(), str::to_owned);
             let quote = balanced_typographic_quote(
@@ -528,6 +593,10 @@ impl Engine {
     /// `.` after a digit stays a decimal point, `.` after `।` turns it into `..`
     /// (so `...` is an ellipsis), and `.` after `.` stays `.`; otherwise `।`.
     fn process_full_stop(&mut self, prior: &[u16]) {
+        if !self.config.dari_for_period {
+            self.append_and_flush_buffer(FULL_STOP);
+            return;
+        }
         let ends_with_digit = prior
             .last()
             .is_some_and(|unit| is_ascii_or_bengali_digit(&String::from_utf16_lossy(&[*unit])));

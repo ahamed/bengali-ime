@@ -1,0 +1,12 @@
+{
+  "format": 1,
+  "description": "ime-composer spec: Grapheme backspace in pending text",
+  "cases": [
+    {"name": "remove a whole conjunct", "steps": [{"key": "k"}, {"key": "k"}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "ক্ষ", "handled": true}}, {"backspace": 1, "expect": {"replaceBefore": 0, "commit": "", "pending": "", "handled": true}}]},
+    {"name": "remove an aspirated consonant", "steps": [{"key": "k"}, {"key": "h"}, {"backspace": 1, "expect": {"replaceBefore": 0, "commit": "", "pending": "", "handled": true}}]},
+    {"name": "nothing pending", "steps": [{"key": "k"}, {"key": "h"}, {"key": "u"}, {"key": " "}, {"backspace": 1, "expect": {"replaceBefore": 0, "commit": "", "pending": "", "handled": false}}]},
+    {"name": "remaining pending text is committed", "steps": [{"key": "O"}, {"key": "C", "expect": {"replaceBefore": 0, "commit": "", "pending": "ওছ", "handled": true}}, {"backspace": 1, "expect": {"replaceBefore": 0, "commit": "ও", "pending": "", "handled": true}}], "committed": "ও"},
+    {"name": "held hyphen", "steps": [{"key": "-"}, {"backspace": 1, "expect": {"replaceBefore": 0, "commit": "", "pending": "", "handled": true}}], "committed": ""},
+    {"name": "next key starts a new cluster", "steps": [{"key": "k"}, {"key": "h"}, {"backspace": 1}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "হ", "handled": true}}]}
+  ]
+}

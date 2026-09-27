@@ -141,8 +141,8 @@ behaviour. With a setting off, the matching key SHALL produce its ASCII characte
 `.`, `"` or `'`.
 
 #### Scenario: Defaults
-- **WHEN** `1` and `.` are pressed with default settings
-- **THEN** `১।` is committed
+- **WHEN** `1`, space, `.`, space are pressed with default settings
+- **THEN** `১ । ` is committed
 
 #### Scenario: ASCII digits
 - **WHEN** Bengali digits is off and `2` is pressed
