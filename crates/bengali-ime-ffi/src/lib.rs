@@ -140,6 +140,14 @@ impl Composer {
     }
 }
 
+/// Whether `key` can depend on the document text before the caret. Read the
+/// document (and pass it as `text_before_caret`) only for these keys, and only
+/// while nothing is pending.
+#[uniffi::export]
+pub fn key_reads_document(key: String) -> bool {
+    bengali_ime_core::Composer::key_reads_document(&key)
+}
+
 /// Bulk conversion of a roman document (the "Convert selection" command).
 #[uniffi::export]
 pub fn transpile_roman_document(
@@ -175,6 +183,13 @@ mod tests {
         let composer = Composer::new(default_config());
         assert_eq!(type_keys(&composer, "khub "), "খুব ");
         assert_eq!(composer.pending(), "");
+    }
+
+    #[test]
+    fn document_keys() {
+        assert!(key_reads_document("i".into()));
+        assert!(key_reads_document("-".into()));
+        assert!(!key_reads_document("k".into()));
     }
 
     #[test]

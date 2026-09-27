@@ -1,0 +1,3 @@
+/* The input source name in System Settings and the input menu. */
+CFBundleName = "Seher";
+CFBundleDisplayName = "Seher";

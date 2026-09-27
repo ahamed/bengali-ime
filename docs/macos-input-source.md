@@ -1,7 +1,10 @@
 # macOS input source for bengali-ime — tech stack and design
 
-Status: agreed design, not yet implemented. Decisions below came out of a design interview; the
-"Defaults chosen" section lists the smaller calls made without asking, which are easy to change.
+Status: implemented. This was the original design interview write-up. The specs, the design as
+built and the task list live in the OpenSpec change
+[`openspec/changes/add-macos-input-source/`](../openspec/changes/add-macos-input-source/), and build
+and install steps are in [`macos/README.md`](../macos/README.md). Where this page and the change
+disagree, the change is correct.
 
 ## Decisions
 
@@ -23,7 +26,7 @@ Status: agreed design, not yet implemented. Decisions below came out of a design
 | Layer | Choice | Why |
 |---|---|---|
 | Engine core | **Rust** (stable, edition 2021), crate `bengali-ime-core`, no `unsafe`, no I/O | Single native engine for macOS and iOS (and later other platforms). Pure string state machine, same shape as the TS code. |
-| Grapheme segmentation | `unicode-segmentation` crate | Replaces `Intl.Segmenter` used by `vowel-attach-context.ts`; also powers grapheme backspace. |
+| Grapheme segmentation | `unicode-segmentation` crate | Powers the composer's grapheme Backspace (the engine itself no longer segments). |
 | FFI | **UniFFI** (proc-macro mode), crate `bengali-ime-ffi` | Generates an idiomatic Swift API (strings, structs, enums) with no hand-written C. The same generated binding works in an iOS keyboard extension. |
 | Native packaging | Static lib for `aarch64-apple-darwin` packaged as an **XCFramework** (`scripts/build-xcframework.sh`) | Xcode links it like any framework; iOS slices (`aarch64-apple-ios`, `aarch64-apple-ios-sim`) are added to the same XCFramework later. |
 | Input method | **Swift 6 + AppKit + InputMethodKit** (`IMKServer`, `IMKInputController`) | The only supported API for a third-party input source on macOS. No SwiftUI needed. |
@@ -41,7 +44,7 @@ flowchart LR
   subgraph App["Any macOS app (TextEdit, Chrome, Slack, Terminal…)"]
     Field["Text field (IMK client)"]
   end
-  subgraph IM["BanglaPhonetic.app (~/Library/Input Methods)"]
+  subgraph IM["Seher.app (~/Library/Input Methods)"]
     Server["IMKServer"]
     Ctrl["InputController (Swift)<br/>key routing, marked text,<br/>context read, menu"]
     Bind["Generated Swift binding (UniFFI)"]
@@ -74,7 +77,9 @@ bengali-ime/
 │   └── bengali-ime-ffi/        # #[uniffi::export] surface only
 ├── macos/
 │   ├── project.yml             # XcodeGen
-│   ├── BanglaPhonetic/         # main.swift, InputController.swift, ClientContext.swift, Menu.swift, Info.plist, icon
+│   ├── BengaliIMECore/         # Swift package: generated bindings + key routing/context helpers, XCTest
+│   ├── Seher/                  # main.swift, InputController.swift, ClientText.swift, Settings.swift, Info.plist
+│   ├── Tools/make-icon.swift   # renders the menu bar icon at build time
 │   └── Makefile
 └── docs/macos-input-source.md  # this file
 ```
@@ -169,26 +174,30 @@ the TS `charsBack` means), even though Rust stores UTF-8.
 ### 4. Reading `textBeforeCaret`
 
 When `pending` is empty and a key could depend on the document (a vowel, which becomes a kar or an
-independent vowel; `"` / `'` smart quotes; `-`), the controller reads:
+independent vowel; `"` / `'` smart quotes; `-`; `.`), the controller reads the text before the caret.
+The Rust `key_reads_document(key)` decides which keys qualify:
 
 ```
 range = client.selectedRange()
 text  = client.attributedSubstring(from: NSRange(location: max(0, range.location - N), length: …))
 ```
 
-`N` is bounded (the current paragraph, capped at ~1–2k UTF-16 units). The kar decision needs only the
-last grapheme; smart quotes count opening vs closing quotes in the prior text, so they need the wider
-window. If the client returns `nil` (Terminal, many Electron and Java apps), `text_before_caret` is
-`None` and the engine falls back to its own `output`, the same as the TS engine does today.
+`N` is 1,024 UTF-16 units, and the text is clipped at the paragraph start. The kar decision needs only
+the last character; smart quotes count opening vs closing quotes in the prior text, so they need the
+wider window. If the client returns `nil` (Terminal, many Electron and Java apps), `text_before_caret`
+is `None`, and the engine uses its own output: the text it produced since the composer's last reset.
+The composer resets on every caret move, focus change and Return, so after a click in such an app a
+vowel is independent (`কই`, not `কি`). That is the documented degraded behaviour (design D5).
 
 **Caret-move detection:** before each key the controller compares `selectedRange()` with where it
-expects the caret. On a mismatch (click, arrow keys handled by the app, paste) it calls `reset()`,
-so the engine never builds a cluster on text that isn't there.
+expects the caret. On a mismatch (click, paste, edits by the app) it calls `reset()`, so the engine
+never builds a cluster on text that isn't there. Arrow keys, Return and shortcuts commit and reset
+directly.
 
 ### 5. Menu (`InputController.menu()`)
 
 - Bengali digits (on) — `1` → ১
-- `.` types দাঁড়ি (on) — `.` → ।
+- `.` types দাঁড়ি (on) — `.` → ।
 - Smart quotes (on)
 - Convert selection to Bengali — reads the selected text, runs `transpile_roman_document`, and
   replaces it with `insertText(_:replacementRange:)`. Works in apps that expose their text (Cocoa,
@@ -196,14 +205,16 @@ so the engine never builds a cluster on text that isn't there.
 
 ### 6. Bundle and install (personal use)
 
-- Bundle id: `com.ahamed.inputmethod.BanglaPhonetic` (the id must contain `.inputmethod.`).
+- Bundle id: `com.ahamed.inputmethod.Seher` (the id must contain `.inputmethod.`).
 - `Info.plist`: `InputMethodConnectionName`, `InputMethodServerControllerClass`
-  (`BanglaPhonetic.InputController`), `LSBackgroundOnly = YES`,
-  `tsInputMethodCharacterRepertoireKey = [Beng]`, `tsInputMethodIconFileKey`, and a single input mode.
+  (`SeherInputController`, the Objective-C name of the Swift class),
+  `LSBackgroundOnly = YES`, `tsInputMethodCharacterRepertoireKey = [Beng]`,
+  `tsInputMethodIconFileKey`, and no input modes.
 - `make install`: build the XCFramework → `xcodegen` → `xcodebuild` → `codesign --force -s -` →
-  copy to `~/Library/Input Methods/` → `killall BanglaPhonetic` (macOS relaunches it on demand).
+  copy to `~/Library/Input Methods/` → register with `TISRegisterInputSource` →
+  `killall Seher` (macOS relaunches it on demand).
 - First time only: System Settings → Keyboard → Text Input → Input Sources → Edit → **+** → Bengali
-  → *Bangla Phonetic*. A log-out/log-in may be needed before it appears.
+  → *Seher*. A log-out/log-in may be needed before it appears.
 - Keep **ABC** enabled as a second input source: if the input method crashes during development,
   you can still type.
 
@@ -219,12 +230,10 @@ so the engine never builds a cluster on text that isn't there.
 4. Composer-only behaviour (commit/pending split, grapheme backspace, `-` holding, config toggles)
    has its own hand-written fixtures in `fixtures/composer/`.
 
-**Known parity risk: grapheme boundaries.** `vowel-attach-context.ts` uses `Intl.Segmenter`, whose
-rules depend on the ICU version bundled with Node or the browser. Unicode 15.1 added the Indic
-conjunct rule (GB9c), which makes ক্ষ one grapheme cluster; older ICU splits it at the hasant.
-`unicode-segmentation` follows whichever Unicode version the pinned crate implements. Pin the crate,
-pin the Node version in CI, and keep conjunct cases in the fixtures so any difference shows up as a
-test failure rather than a typing bug.
+**Grapheme boundaries (resolved).** This was the main parity risk: `vowel-attach-context.ts` used
+`Intl.Segmenter`, whose rules depend on the ICU version. Since the engine rework (#1) the engine only
+looks at the last code point before the caret, so the engines no longer segment graphemes. Only the
+composer's Backspace does, and that is Rust-only behaviour with its own fixtures.
 
 ## Milestones
 
@@ -241,7 +250,7 @@ test failure rather than a typing bug.
 
 ## Defaults chosen (not asked; easy to change)
 
-- Input source name **Bangla Phonetic**, bundle id `com.ahamed.inputmethod.BanglaPhonetic`.
+- Input source name **Seher**, bundle id `com.ahamed.inputmethod.Seher`.
 - Keys are read from `event.characters`, which assumes a US QWERTY base layout, the same as the web engine.
 - Esc commits the pending cluster (it doesn't cancel it), because what you see is already the final text.
 - UniFFI instead of a hand-written C ABI (cbindgen). Revisit if a Windows or Linux input method is

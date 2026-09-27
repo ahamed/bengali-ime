@@ -17,7 +17,7 @@
 - [x] 2.5 Port the Akkhar rules in TS order (`Kkhiyo`, `Ho`, `KhandaTo`, `JaFala`, `AspiratedConsonant`, nasal connectors, `RassawRI`, `Oi`, `Ou`) and verify all of `fixtures/engine/unit.json` and `words.json` pass
 - [x] 2.6 Port `transpileRomanDocument` to `transpile_roman_document` and verify its fixture cases, including the multi-line document from `transpile-roman-document.test.ts`
 - [x] 2.7 Verify `fixtures/engine/random.json` passes in full. If grapheme segmentation disagrees on conjuncts, apply design D3's fallback and add a comment and a fixture naming the case (not needed: the engine no longer segments graphemes)
-- [ ] 2.8 Add a `rust` job to `.github/workflows/ci.yml` (`cargo fmt --check`, `cargo clippy -D warnings`, `cargo test`) and verify it passes on the branch
+- [x] 2.8 Add a `rust` job to `.github/workflows/ci.yml` (`cargo fmt --check`, `cargo clippy -D warnings`, `cargo test`) and verify it passes on the branch
 
 ## 3. M2 — Composer and config (Linux)
 
@@ -32,23 +32,23 @@
 ## 4. M3 — UniFFI bindings and XCFramework (Linux for bindings, Mac for the framework)
 
 - [x] 4.1 Create `crates/bengali-ime-ffi` exporting `Composer` (UniFFI object with an interior `Mutex`), `Update`, `Config` and `transpile_roman_document`, and verify `cargo test -p bengali-ime-ffi` and Swift binding generation (`uniffi-bindgen generate --language swift`) succeed on Linux
-- [ ] 4.2 Add `scripts/build-xcframework.sh` (arm64 macOS static lib, generated Swift bindings, `xcodebuild -create-xcframework`), and verify on the Mac that it produces `build/BengaliIMECore.xcframework` containing an `arm64` slice (`lipo -info`)
-- [ ] 4.3 Add a small Swift package test target that calls `Composer.key` for `k`, `h`, `u`, `b`, space through the bindings, and verify on the Mac that it yields the committed text `খুব `
+- [x] 4.2 Add `scripts/build-xcframework.sh` (arm64 macOS static lib, generated Swift bindings, `xcodebuild -create-xcframework`), and verify on macOS that it produces `macos/BengaliIMECore/BengaliIMEFFI.xcframework` containing an `arm64` slice (`lipo -info`)
+- [x] 4.3 Add the `macos/BengaliIMECore` Swift package (bindings plus AppKit-free key-routing and context helpers) with a test target that calls `Composer.key` for `k`, `h`, `u`, `b`, space through the bindings, and verify on macOS (`make -C macos test`) that it yields the committed text `খুব `
 
 ## 5. M4 — Input method MVP (Mac)
 
-- [ ] 5.1 Add `macos/project.yml` (XcodeGen; bundle id `com.ahamed.inputmethod.BanglaPhonetic`; macOS 14; arm64; links the XCFramework) with `Info.plist` (`InputMethodConnectionName`, `InputMethodServerControllerClass`, `LSBackgroundOnly`, `tsInputMethodCharacterRepertoireKey`, icon) and a placeholder "অ" template icon. Verify `xcodegen generate && xcodebuild build` succeeds
+- [x] 5.1 Add `macos/project.yml` (XcodeGen; bundle id `com.ahamed.inputmethod.Seher`; macOS 14; arm64; links the XCFramework) with `Info.plist` (`InputMethodConnectionName`, `InputMethodServerControllerClass`, `LSBackgroundOnly`, `tsInputMethodCharacterRepertoireKey`, icon) and a "স" template icon. Verify `xcodegen generate && xcodebuild build` succeeds
 - [ ] 5.2 Implement `main.swift` (`IMKServer` + run loop) and `InputController` with key routing (printable keys, space, Return, Backspace, navigation keys, modifier combos), applying `Update` via `insertText` and `setMarkedText` with no-underline attributes. Verify in TextEdit that typing `khub` shows `ক`, `খ`, `খু`, `খুব` and never roman letters
 - [ ] 5.3 Commit pending text in `commitComposition` and `deactivateServer`, and verify that switching to ABC with `খ` pending leaves `খ` in the document, and that Command-S mid-word commits and then saves
-- [ ] 5.4 Add `macos/Makefile` with `install` (build XCFramework → xcodegen → xcodebuild → `codesign --force -s -` → copy to `~/Library/Input Methods` → `killall BanglaPhonetic`) and `uninstall`. Verify a fresh install appears as "Bangla Phonetic" under Bengali in Input Sources, and that a reinstall takes effect without logging out
+- [ ] 5.4 Add `macos/Makefile` with `install` (build XCFramework → xcodegen → xcodebuild → `codesign --force -s -` → copy to `~/Library/Input Methods` → `killall Seher`) and `uninstall`. Verify a fresh install appears as "Seher" under Bengali in Input Sources, and that a reinstall takes effect without logging out
 - [ ] 5.5 Write `macos/README.md` (prerequisites: Xcode, `brew install xcodegen`, `rustup target add aarch64-apple-darwin`; install, enable, debug with `log stream`; keep ABC enabled) and verify that following it on a clean checkout ends with a working input source
 
 ## 6. M5 — Document context, caret moves and compatibility (Mac)
 
-- [ ] 6.1 Implement `ClientContext`: bounded text-before-caret read (≤1,024 UTF-16 units, clipped at the paragraph start) when nothing is pending and the key is a vowel, quote or `-`; `nil` when unavailable. Verify in TextEdit that clicking after an existing `ক` and typing `i` gives `কি`, and that the same steps in Terminal give `কই`
+- [ ] 6.1 Implement `ClientText`: bounded text-before-caret read (≤1,024 UTF-16 units, clipped at the paragraph start) when nothing is pending and `key_reads_document(key)` (vowels, quotes, `-`, `.`; a Rust test checks that every context-sensitive key is included); `nil` when unavailable. Verify in TextEdit that clicking after an existing `ক` and typing `i` gives `কি`, and that the same steps in Terminal give `কই`
 - [ ] 6.2 Implement caret-move detection (expected caret vs `selectedRange()`, non-empty selection, `NSNotFound` skip) with `composer.reset`. Verify that typing `k`, clicking elsewhere and typing `h` leaves `ক` in place and inserts `হ` at the new position
-- [ ] 6.3 Apply `replace_before` via `insertText(_:replacementRange:)`, and verify in TextEdit that typing `-` in ABC, switching to Bangla Phonetic and typing `-` produces `—`
-- [ ] 6.4 Verify that a password field receives plain ASCII while Bangla Phonetic is selected
+- [ ] 6.3 Apply `replace_before` via `insertText(_:replacementRange:)`, and verify in TextEdit that typing `-` in ABC, switching to Seher and typing `-` produces `—`
+- [ ] 6.4 Verify that a password field receives plain ASCII while Seher is selected
 - [ ] 6.5 Run the compatibility pass with the fixed test paragraph in `macos/COMPATIBILITY.md` (TextEdit, Notes, Pages, Safari, Chrome, VS Code, Slack, Terminal, iTerm2, Spotlight, Word). Record the result per app in that file, and fix any stray or duplicated characters before checking this off
 
 ## 7. M6 — Menu toggles and Convert selection (Mac)
@@ -59,6 +59,6 @@
 
 ## 8. Integration and documentation (Linux + Mac)
 
-- [ ] 8.1 Add a `macos` job (`macos-15` runner) to `.github/workflows/ci.yml` that builds the XCFramework and the input method app (no install), and verify it passes on the branch
-- [ ] 8.2 Update `docs/macos-input-source.md` to point at this change and correct the context-fallback description (design D5), and add a "macOS input source" section to `README.md`. Verify the links resolve
+- [x] 8.1 Add a `macos` job (`macos-15` runner) to `.github/workflows/ci.yml` that builds the XCFramework and the input method app (no install), and verify it passes on the branch
+- [x] 8.2 Update `docs/macos-input-source.md` to point at this change and correct the context-fallback description (design D5), and add a "macOS input source" section to `README.md`. Verify the links resolve
 - [ ] 8.3 Run `openspec validate add-macos-input-source --strict` and verify it passes before archiving

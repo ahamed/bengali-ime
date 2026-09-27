@@ -96,7 +96,10 @@ its own output (what it produced since the last reset), exactly as the web typin
 `bengali-ime-ffi` exposes `Composer` as a UniFFI `Object` (interior `Mutex`), plus `Update`,
 `Config` and `transpile_roman_document`. `scripts/build-xcframework.sh` builds
 `aarch64-apple-darwin` as a static lib, generates the Swift bindings with `uniffi-bindgen`, and runs
-`xcodebuild -create-xcframework`. iOS slices can be added to the same script later.
+`xcodebuild -create-xcframework`. The outputs go into the `macos/BengaliIMECore` Swift package
+(`BengaliIMEFFI.xcframework` as a binary target, the bindings under `Sources/BengaliIMECore/Generated`)
+and are git-ignored. The package also holds the AppKit-free host helpers (key routing, the context
+window), so `swift test` covers them. iOS slices can be added to the same script later.
 - *Alternatives:* cbindgen and a hand-written C ABI (manual string ownership, more unsafe code);
   swift-bridge (less mature, and doesn't give Kotlin if Android is ever added).
 
@@ -105,16 +108,21 @@ its own output (what it produced since the last reset), exactly as the web typin
 - `InputController: IMKInputController`: holds one `Composer` per controller instance (IMK creates
   one per client text session), overrides `handle(_:client:)`, `commitComposition(_:)`,
   `deactivateServer(_:)` and `menu()`.
-- `ClientContext.swift`: reads `selectedRange()`; reads up to 1,024 UTF-16 units before the caret,
-  clipped at the last paragraph break, via `attributedSubstring(from:)`; tracks the expected caret
-  for caret-move detection; applies an `Update` (`insertText` with `replacementRange` for
+- `ClientText.swift`: reads `selectedRange()`; reads up to 1,024 UTF-16 units before the caret,
+  clipped at the last paragraph break, via `attributedSubstring(from:)`, only for keys where
+  `key_reads_document(key)` is true and nothing is pending. `InputController` tracks the expected
+  caret for caret-move detection and applies each `Update` (`insertText` with `replacementRange` for
   `replace_before`, then `setMarkedText` with the no-underline attributes and the selection at the
   end of the marked text).
 - `Settings.swift`: `UserDefaults` for the three toggles, rebuilding `Config` on change.
-- Bundle id `com.ahamed.inputmethod.BanglaPhonetic`, `LSBackgroundOnly`,
+- Bundle id `com.ahamed.inputmethod.Seher`, `LSBackgroundOnly`,
   `tsInputMethodCharacterRepertoireKey = [Beng]`, deployment target macOS 14, arm64 only.
 - Project defined in `macos/project.yml` (XcodeGen). `macos/Makefile` chains
-  `build-xcframework` → `xcodegen` → `xcodebuild` → `codesign -s -` → copy → `killall`.
+  `build-xcframework` → `xcodegen` → `xcodebuild` → `codesign -s -` → copy →
+  `Seher --register` (`TISRegisterInputSource`, so a log-out is usually unnecessary) →
+  `killall`. The menu bar icon (স, dental sa, the first letter of Seher) is rendered at build
+  time by `macos/Tools/make-icon.swift` with the system Bengali font, so no binary image is
+  committed.
 
 ### D9. Caret-move detection
 After applying an update, the controller records `expected = caret after the update`. On the next
@@ -155,6 +163,5 @@ context-fallback description (D5).
 
 ## Open Questions
 
-- The icon artwork for the menu bar (a template image of "অ" is the placeholder).
 - Whether the "Convert selection" menu item also gets a global keyboard shortcut. It can be added
   later without changing the specs.

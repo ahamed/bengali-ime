@@ -1,0 +1,40 @@
+# XcodeGen spec: `xcodegen generate` writes Seher.xcodeproj (not
+# committed). Use the Makefile rather than building in Xcode directly.
+name: Seher
+options:
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    ARCHS: arm64
+    SWIFT_VERSION: "5.0"
+    MACOSX_DEPLOYMENT_TARGET: "14.0"
+packages:
+  BengaliIMECore:
+    path: BengaliIMECore
+targets:
+  Seher:
+    type: application
+    platform: macOS
+    sources:
+      - path: Seher
+    dependencies:
+      - package: BengaliIMECore
+      - sdk: InputMethodKit.framework
+      - sdk: Carbon.framework
+    settings:
+      base:
+        PRODUCT_NAME: Seher
+        PRODUCT_BUNDLE_IDENTIFIER: com.ahamed.inputmethod.Seher
+        INFOPLIST_FILE: Seher/Info.plist
+        GENERATE_INFOPLIST_FILE: NO
+        # Signed ad hoc by the Makefile after the build (no Apple account needed).
+        CODE_SIGN_IDENTITY: "-"
+        CODE_SIGN_STYLE: Manual
+        ENABLE_HARDENED_RUNTIME: NO
+schemes:
+  Seher:
+    build:
+      targets:
+        Seher: all
