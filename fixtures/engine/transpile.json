@@ -2,7 +2,7 @@
   "format": 1,
   "description": "transpileRomanDocument(input, { preserveLineBreaks }) results.",
   "cases": [
-    {"input":"a\nb","output":"আ\nব"},
+    {"input":"a\nb","output":"STALE"},
     {"input":"a\n\nb","output":"আ\n\nব"},
     {"input":"a\nb","preserveLineBreaks":false,"output":"আব"},
     {"input":"ami banglay gan gai\nami banglar gan gai","output":"আমি বাংলায় গান গাই\nআমি বাংলার গান গাই"},
