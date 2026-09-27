@@ -1,0 +1,14 @@
+{
+  "format": 1,
+  "description": "ime-composer spec: Document context with fallback; Flush and reset",
+  "cases": [
+    {"name": "host provides context", "steps": [{"reset": 1}, {"key": "i", "ctx": "ক", "expect": {"replaceBefore": 0, "commit": "ি", "pending": "", "handled": true}}]},
+    {"name": "host context is followed by the pending text", "steps": [{"key": "k"}, {"key": "a", "ctx": "এ", "expect": {"replaceBefore": 0, "commit": "কা", "pending": "", "handled": true}}], "committed": "কা"},
+    {"name": "host cannot provide context mid-typing", "steps": [{"key": "a"}, {"key": "m"}, {"key": " "}, {"key": "i", "expect": {"replaceBefore": 0, "commit": "ই", "pending": "", "handled": true}}], "committed": "আম ই"},
+    {"name": "own output is the context without the host", "steps": [{"key": "k"}, {"key": "a", "expect": {"replaceBefore": 0, "commit": "কা", "pending": "", "handled": true}}]},
+    {"name": "host cannot provide context after reset", "steps": [{"reset": 1}, {"key": "i", "expect": {"replaceBefore": 0, "commit": "ই", "pending": "", "handled": true}}]},
+    {"name": "reset seeded with the text before the caret", "steps": [{"reset": 1, "ctx": "ক"}, {"key": "i", "expect": {"replaceBefore": 0, "commit": "ি", "pending": "", "handled": true}}]},
+    {"name": "flush on focus change", "steps": [{"key": "k"}, {"key": "h"}, {"flush": 1, "expect": {"replaceBefore": 0, "commit": "খ", "pending": "", "handled": true}}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "হ", "handled": true}}]},
+    {"name": "reset after caret move", "steps": [{"key": "k"}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "খ", "handled": true}}, {"reset": 1}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "হ", "handled": true}}]}
+  ]
+}

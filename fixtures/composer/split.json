@@ -1,0 +1,15 @@
+{
+  "format": 1,
+  "description": "ime-composer spec: Commit and pending split; Keys the engine does not map",
+  "cases": [
+    {"name": "consonant stays pending", "steps": [{"key": "k", "expect": {"replaceBefore": 0, "commit": "", "pending": "ক", "handled": true}}]},
+    {"name": "aspiration rewrites only the pending text", "steps": [{"key": "k"}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "খ", "handled": true}}]},
+    {"name": "kar flushes the cluster", "steps": [{"key": "k"}, {"key": "h"}, {"key": "u", "expect": {"replaceBefore": 0, "commit": "খু", "pending": "", "handled": true}}]},
+    {"name": "space ends the word", "steps": [{"key": "k"}, {"key": "h"}, {"key": "u"}, {"key": "b", "expect": {"replaceBefore": 0, "commit": "", "pending": "ব", "handled": true}}, {"key": " ", "expect": {"replaceBefore": 0, "commit": "ব ", "pending": "", "handled": true}}], "committed": "খুব "},
+    {"name": "vowel sign change stays pending", "steps": [{"key": "k"}, {"key": "O", "expect": {"replaceBefore": 0, "commit": "", "pending": "কো", "handled": true}}, {"key": "i", "expect": {"replaceBefore": 0, "commit": "কৈ", "pending": "", "handled": true}}], "committed": "কৈ"},
+    {"name": "question mark after a word", "steps": [{"key": "k"}, {"key": "i"}, {"key": "?", "expect": {"replaceBefore": 0, "commit": "?", "pending": "", "handled": true}}], "committed": "কি?"},
+    {"name": "symbol while a cluster is pending", "steps": [{"key": "k", "expect": {"replaceBefore": 0, "commit": "", "pending": "ক", "handled": true}}, {"key": "(", "expect": {"replaceBefore": 0, "commit": "ক(", "pending": "", "handled": true}}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "হ", "handled": true}}]},
+    {"name": "Enter flushes and is not handled", "steps": [{"key": "k"}, {"key": "Enter", "expect": {"replaceBefore": 0, "commit": "ক", "pending": "", "handled": false}}], "committed": "ক"},
+    {"name": "unknown key name keeps pending text", "steps": [{"key": "k"}, {"key": "Shift", "expect": {"replaceBefore": 0, "commit": "", "pending": "ক", "handled": false}}]}
+  ]
+}
