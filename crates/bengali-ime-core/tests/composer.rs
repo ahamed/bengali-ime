@@ -243,3 +243,48 @@ fn composer_invariants_over_random_sequences() {
             .join("\n")
     );
 }
+
+/// `Composer::key_reads_document` must name every key whose result can depend
+/// on the text before the caret, or hosts would skip reading it. Checked by
+/// typing each key after a range of document endings on a fresh composer and
+/// comparing with an empty document.
+#[test]
+fn key_reads_document_covers_every_context_sensitive_key() {
+    let contexts = [
+        "\u{0995}",                 // ক
+        "\u{0995}\u{09BC}",         // ক + nukta
+        "\u{0995}\u{0981}",         // কঁ
+        "\u{0995}\u{09CD}\u{09B7}", // ক্ষ
+        "\u{0995}\u{09BF}",         // কি
+        "-",
+        "\u{0964}", // ।
+        ".",
+        "\u{09E7}", // ১
+        "1",
+        "\u{201C}\u{0995}", // “ক
+        "\u{2018}",         // ‘
+        "\"",
+        "'",
+        "a ",
+        "\u{1F600}", // emoji (surrogate pair)
+    ];
+    let mut keys: Vec<String> = (0x20u8..0x7F).map(|b| (b as char).to_string()).collect();
+    keys.push("\t".into());
+    let mut missing = Vec::new();
+    for key in &keys {
+        let baseline = Composer::default().key(key, Some(""));
+        for ctx in contexts {
+            let update = Composer::default().key(key, Some(ctx));
+            if update != baseline && !Composer::key_reads_document(key) {
+                missing.push(format!("{key:?} after {ctx:?}"));
+            }
+        }
+    }
+    assert!(
+        missing.is_empty(),
+        "context-sensitive keys not reported: {missing:?}"
+    );
+    assert!(!Composer::key_reads_document("k"));
+    assert!(Composer::key_reads_document("i"));
+    assert!(Composer::key_reads_document("A"));
+}

@@ -40,3 +40,25 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test --all
+
+  macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+      - uses: Swatinem/rust-cache@v2
+      - run: brew install xcodegen
+      - name: Swift tests (bindings and helpers)
+        run: make -C macos test
+      - name: Build and sign the input method
+        run: make -C macos app
+      - name: Check the bundle
+        run: |
+          APP=macos/build/DerivedData/Build/Products/Release/BanglaPhonetic.app
+          lipo -info macos/BengaliIMECore/BengaliIMEFFI.xcframework/macos-arm64/libbengali_ime_ffi.a
+          lipo -info "$APP/Contents/MacOS/BanglaPhonetic"
+          plutil -extract InputMethodServerControllerClass raw "$APP/Contents/Info.plist"
+          plutil -extract CFBundleIdentifier raw "$APP/Contents/Info.plist"
+          test -f "$APP/Contents/Resources/MenuIcon.tiff"

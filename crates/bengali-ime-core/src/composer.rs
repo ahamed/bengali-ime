@@ -9,7 +9,7 @@
 
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::data::{DARI, DASH, ENTER_KEY};
+use crate::data::{lookup, DARI, DASH, ENTER_KEY, ROMAN_TO_PHONETIC_VOWELS};
 use crate::engine::{utf16, Action, Config, Engine};
 
 /// What the host applies after a key, in this order:
@@ -118,6 +118,16 @@ impl Composer {
             pending: self.pending(),
             handled: true,
         }
+    }
+
+    /// Whether the result of `key` can depend on the document text before the
+    /// caret: vowels (kar or independent vowel), `-` (em dash), `.` (decimal
+    /// point, ellipsis) and quotes (balancing). Hosts read the document only
+    /// for these keys, and only while nothing is pending.
+    pub fn key_reads_document(key: &str) -> bool {
+        matches!(key, "-" | "." | "\"" | "'")
+            || lookup(ROMAN_TO_PHONETIC_VOWELS, key).is_some()
+            || lookup(ROMAN_TO_PHONETIC_VOWELS, &key.to_lowercase()).is_some()
     }
 
     /// How much of the end of the new text stays pending.

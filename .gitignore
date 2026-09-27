@@ -4,3 +4,12 @@ examples/playground/dist
 *.log
 .DS_Store
 /target
+
+# macOS input method build products (make -C macos ...)
+/macos/build
+/macos/BanglaPhonetic.xcodeproj
+/macos/BanglaPhonetic/Generated
+/macos/BengaliIMECore/.build
+/macos/BengaliIMECore/.swiftpm
+/macos/BengaliIMECore/BengaliIMEFFI.xcframework
+/macos/BengaliIMECore/Sources/BengaliIMECore/Generated
