@@ -39,15 +39,17 @@ const actions = ime.process("k", { textBeforeCaret: peekDocTextBeforeCaret() });
 ```
 
 - **First argument** — The character or logical key the IME should consume: consonants and vowels as single-character strings, space as `" "`, Enter as `"Enter"` (the IME maps this from its internal symbol table; see tests and `transpileRomanDocument` for line breaks).
-- **`textBeforeCaret`** — Full **document text before the caret** in the editor (including Bengali already in the field). When the trailing cluster has an empty buffer, the IME uses this so vowel keys can attach a **kar** to the previous Bengali consonant. It also affects punctuation like smart quotes and doubled hyphen. If you omit it, the IME falls back to its internal `output`, which is correct when your field is only ever driven by the IME at the end of the string.
+- **`textBeforeCaret`** — Full **document text before the caret** in the editor (including Bengali already in the field). A vowel key attaches a **kar** only when the character **immediately** before the caret is a consonant that can carry one; after whitespace, punctuation, a vowel, a kar, `ং`, `ঃ` or `ৎ` it is written as an independent vowel. It also affects punctuation like smart quotes, `.` and doubled hyphen. If you omit it, the IME falls back to its internal `output`, which is correct when your field is only ever driven by the IME at the end of the string.
 
 ### `processBackspace`
 
-Returns actions (usually a `delete`) that undo the IME’s last composed step relative to its internal `output`. Wire it to the Backspace key when the caret is in the “IME-owned” region; if the prefix and `ime.output` have diverged, resync first or handle Backspace in your own layer.
+Backspace **undoes the last keystroke**: output, buffer and flags return to exactly what they were before that key, so the result is always the same as typing the remaining keys from scratch (`kh` ⌫ → `ক`, `kt` ⌫ `a` → `কা`). It returns a `delete`, `replace` or `insert` action (or none, when undoing Enter, since the block split is the editor’s job). Wire it to the Backspace key when the caret is in the “IME-owned” region.
+
+Assigning `ime.output` (a resync) clears the undo history. With no history left, Backspace deletes one code point, plus a hasant it would otherwise leave dangling (`ক্ত` → `ক`).
 
 ### English mode
 
-`toggleEnglishMode()` flips `isEnglishMode`. While on, keystrokes pass through as Latin (and space/Enter still map through the same paths you use in Bengali mode). Use this for mixed Bangla/English typing in one field.
+`toggleEnglishMode()` flips `isEnglishMode` and ends the current Bangla cluster, so a conjunct never forms across English text. While on, keystrokes pass through as Latin (and space/Enter still map through the same paths you use in Bengali mode). Use this for mixed Bangla/English typing in one field.
 
 ### `transpileRomanDocument`
 
@@ -61,7 +63,17 @@ const bengali = transpileRomanDocument("ami banglay gan gai\nami banglar gan gai
 
 Options:
 
-- `preserveLineBreaks` (default `true`): map `\n` to the same logical key as Enter in the IME and insert newlines in the output at paragraph breaks. If `false`, raw `\n` characters are passed through; the core engine does not treat U+000A as Enter, so line breaks will not match editor semantics.
+- `preserveLineBreaks` (default `true`): map `\n` to the same logical key as Enter in the IME and insert newlines in the output at paragraph breaks. If `false`, `\n` is passed through as a plain character (like any other unmapped key), not as Enter.
+
+### Determinism rules
+
+The same keys always produce the same text. A few rules make sure the output is always well-formed Bangla:
+
+- **Kars** attach only to a consonant directly before the caret (`Oa` → `ওআ`, `tHa` → `ৎআ`, `k  a` → `ক  আ`).
+- **Hasant** is only placed between two consonants that can carry it: `kng` → `কং`, `ktH` → `কৎ`, `tHy` → `ৎয়`.
+- **Unmapped keys** (`? ! ; ( ) @ /`, tab, emoji, …) are written as-is and end the cluster: `k?k` → `ক?ক`.
+- **`.`** is `।`, except right after a digit (`1.5` → `১.৫`) or another dot; `...` → `...`.
+- **`^`** (chandrabindu) may be typed before or after the vowel: `k^a` and `ka^` both give `কাঁ`.
 
 ## Examples in this repo
 

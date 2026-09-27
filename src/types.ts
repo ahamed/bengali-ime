@@ -21,6 +21,7 @@ export interface BengaliIMEInterface {
   isVowel(char: string): boolean;
   appendAndFlushBuffer(text: string): void;
   isPhoneticConsonant(char: string): boolean;
+  isKarTakingConsonant(char: string): boolean;
   isNumber(char: string): boolean;
   isSpecialCharacter(char: string): boolean;
 }
