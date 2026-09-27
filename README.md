@@ -75,6 +75,14 @@ The same keys always produce the same text. A few rules make sure the output is 
 - **`.`** is `।`, except right after a digit (`1.5` → `১.৫`) or another dot; `...` → `...`.
 - **`^`** (chandrabindu) may be typed before or after the vowel: `k^a` and `ka^` both give `কাঁ`.
 
+## macOS input source
+
+`macos/` is **Bangla Phonetic**, a macOS input source that types with this algorithm in any app. It
+uses a Rust port of the engine (`crates/`), which CI checks against the TypeScript engine keystroke by
+keystroke using fixtures generated from this package (`yarn fixtures`). To build and install it on an
+Apple Silicon Mac, see [macos/README.md](macos/README.md). The design and specs are in
+[openspec/changes/add-macos-input-source](openspec/changes/add-macos-input-source/).
+
 ## Examples in this repo
 
 - **`yarn example`** — Vite app demonstrating live `BengaliIME` and bulk transliteration (`examples/playground/`).
