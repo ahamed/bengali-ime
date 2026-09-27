@@ -1,4 +1,4 @@
-// Renders the menu bar icon, "অ" in the system Bengali font, as a 16×16 pt
+// Renders the menu bar icon, "স" (dental sa, দন্ত্য স) in the system Bengali font, as a 16×16 pt
 // template TIFF (1x and 2x). Run by the Makefile: swift Tools/make-icon.swift <out.tiff>
 import AppKit
 
@@ -9,7 +9,7 @@ guard arguments.count == 2 else {
 }
 
 let points: CGFloat = 16
-let glyph = "\u{0985}" as NSString // অ
+let glyph = "\u{09B8}" as NSString // স, the first letter of Seher
 
 func representation(scale: CGFloat) -> NSBitmapImageRep {
     let pixels = Int(points * scale)

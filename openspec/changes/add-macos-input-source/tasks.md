@@ -37,18 +37,18 @@
 
 ## 5. M4 — Input method MVP (Mac)
 
-- [x] 5.1 Add `macos/project.yml` (XcodeGen; bundle id `com.ahamed.inputmethod.BanglaPhonetic`; macOS 14; arm64; links the XCFramework) with `Info.plist` (`InputMethodConnectionName`, `InputMethodServerControllerClass`, `LSBackgroundOnly`, `tsInputMethodCharacterRepertoireKey`, icon) and a placeholder "অ" template icon. Verify `xcodegen generate && xcodebuild build` succeeds
+- [x] 5.1 Add `macos/project.yml` (XcodeGen; bundle id `com.ahamed.inputmethod.Seher`; macOS 14; arm64; links the XCFramework) with `Info.plist` (`InputMethodConnectionName`, `InputMethodServerControllerClass`, `LSBackgroundOnly`, `tsInputMethodCharacterRepertoireKey`, icon) and a "স" template icon. Verify `xcodegen generate && xcodebuild build` succeeds
 - [ ] 5.2 Implement `main.swift` (`IMKServer` + run loop) and `InputController` with key routing (printable keys, space, Return, Backspace, navigation keys, modifier combos), applying `Update` via `insertText` and `setMarkedText` with no-underline attributes. Verify in TextEdit that typing `khub` shows `ক`, `খ`, `খু`, `খুব` and never roman letters
 - [ ] 5.3 Commit pending text in `commitComposition` and `deactivateServer`, and verify that switching to ABC with `খ` pending leaves `খ` in the document, and that Command-S mid-word commits and then saves
-- [ ] 5.4 Add `macos/Makefile` with `install` (build XCFramework → xcodegen → xcodebuild → `codesign --force -s -` → copy to `~/Library/Input Methods` → `killall BanglaPhonetic`) and `uninstall`. Verify a fresh install appears as "Bangla Phonetic" under Bengali in Input Sources, and that a reinstall takes effect without logging out
+- [ ] 5.4 Add `macos/Makefile` with `install` (build XCFramework → xcodegen → xcodebuild → `codesign --force -s -` → copy to `~/Library/Input Methods` → `killall Seher`) and `uninstall`. Verify a fresh install appears as "Seher" under Bengali in Input Sources, and that a reinstall takes effect without logging out
 - [ ] 5.5 Write `macos/README.md` (prerequisites: Xcode, `brew install xcodegen`, `rustup target add aarch64-apple-darwin`; install, enable, debug with `log stream`; keep ABC enabled) and verify that following it on a clean checkout ends with a working input source
 
 ## 6. M5 — Document context, caret moves and compatibility (Mac)
 
 - [ ] 6.1 Implement `ClientText`: bounded text-before-caret read (≤1,024 UTF-16 units, clipped at the paragraph start) when nothing is pending and `key_reads_document(key)` (vowels, quotes, `-`, `.`; a Rust test checks that every context-sensitive key is included); `nil` when unavailable. Verify in TextEdit that clicking after an existing `ক` and typing `i` gives `কি`, and that the same steps in Terminal give `কই`
 - [ ] 6.2 Implement caret-move detection (expected caret vs `selectedRange()`, non-empty selection, `NSNotFound` skip) with `composer.reset`. Verify that typing `k`, clicking elsewhere and typing `h` leaves `ক` in place and inserts `হ` at the new position
-- [ ] 6.3 Apply `replace_before` via `insertText(_:replacementRange:)`, and verify in TextEdit that typing `-` in ABC, switching to Bangla Phonetic and typing `-` produces `—`
-- [ ] 6.4 Verify that a password field receives plain ASCII while Bangla Phonetic is selected
+- [ ] 6.3 Apply `replace_before` via `insertText(_:replacementRange:)`, and verify in TextEdit that typing `-` in ABC, switching to Seher and typing `-` produces `—`
+- [ ] 6.4 Verify that a password field receives plain ASCII while Seher is selected
 - [ ] 6.5 Run the compatibility pass with the fixed test paragraph in `macos/COMPATIBILITY.md` (TextEdit, Notes, Pages, Safari, Chrome, VS Code, Slack, Terminal, iTerm2, Spotlight, Word). Record the result per app in that file, and fix any stray or duplicated characters before checking this off
 
 ## 7. M6 — Menu toggles and Convert selection (Mac)

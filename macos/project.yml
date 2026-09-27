@@ -1,6 +1,6 @@
-# XcodeGen spec: `xcodegen generate` writes BanglaPhonetic.xcodeproj (not
+# XcodeGen spec: `xcodegen generate` writes Seher.xcodeproj (not
 # committed). Use the Makefile rather than building in Xcode directly.
-name: BanglaPhonetic
+name: Seher
 options:
   deploymentTarget:
     macOS: "14.0"
@@ -14,27 +14,27 @@ packages:
   BengaliIMECore:
     path: BengaliIMECore
 targets:
-  BanglaPhonetic:
+  Seher:
     type: application
     platform: macOS
     sources:
-      - path: BanglaPhonetic
+      - path: Seher
     dependencies:
       - package: BengaliIMECore
       - sdk: InputMethodKit.framework
       - sdk: Carbon.framework
     settings:
       base:
-        PRODUCT_NAME: BanglaPhonetic
-        PRODUCT_BUNDLE_IDENTIFIER: com.ahamed.inputmethod.BanglaPhonetic
-        INFOPLIST_FILE: BanglaPhonetic/Info.plist
+        PRODUCT_NAME: Seher
+        PRODUCT_BUNDLE_IDENTIFIER: com.ahamed.inputmethod.Seher
+        INFOPLIST_FILE: Seher/Info.plist
         GENERATE_INFOPLIST_FILE: NO
         # Signed ad hoc by the Makefile after the build (no Apple account needed).
         CODE_SIGN_IDENTITY: "-"
         CODE_SIGN_STYLE: Manual
         ENABLE_HARDENED_RUNTIME: NO
 schemes:
-  BanglaPhonetic:
+  Seher:
     build:
       targets:
-        BanglaPhonetic: all
+        Seher: all

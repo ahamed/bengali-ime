@@ -44,7 +44,7 @@ flowchart LR
   subgraph App["Any macOS app (TextEdit, Chrome, Slack, Terminal…)"]
     Field["Text field (IMK client)"]
   end
-  subgraph IM["BanglaPhonetic.app (~/Library/Input Methods)"]
+  subgraph IM["Seher.app (~/Library/Input Methods)"]
     Server["IMKServer"]
     Ctrl["InputController (Swift)<br/>key routing, marked text,<br/>context read, menu"]
     Bind["Generated Swift binding (UniFFI)"]
@@ -78,7 +78,7 @@ bengali-ime/
 ├── macos/
 │   ├── project.yml             # XcodeGen
 │   ├── BengaliIMECore/         # Swift package: generated bindings + key routing/context helpers, XCTest
-│   ├── BanglaPhonetic/         # main.swift, InputController.swift, ClientText.swift, Settings.swift, Info.plist
+│   ├── Seher/                  # main.swift, InputController.swift, ClientText.swift, Settings.swift, Info.plist
 │   ├── Tools/make-icon.swift   # renders the menu bar icon at build time
 │   └── Makefile
 └── docs/macos-input-source.md  # this file
@@ -205,16 +205,16 @@ directly.
 
 ### 6. Bundle and install (personal use)
 
-- Bundle id: `com.ahamed.inputmethod.BanglaPhonetic` (the id must contain `.inputmethod.`).
+- Bundle id: `com.ahamed.inputmethod.Seher` (the id must contain `.inputmethod.`).
 - `Info.plist`: `InputMethodConnectionName`, `InputMethodServerControllerClass`
-  (`BanglaPhoneticInputController`, the Objective-C name of the Swift class),
+  (`SeherInputController`, the Objective-C name of the Swift class),
   `LSBackgroundOnly = YES`, `tsInputMethodCharacterRepertoireKey = [Beng]`,
   `tsInputMethodIconFileKey`, and no input modes.
 - `make install`: build the XCFramework → `xcodegen` → `xcodebuild` → `codesign --force -s -` →
   copy to `~/Library/Input Methods/` → register with `TISRegisterInputSource` →
-  `killall BanglaPhonetic` (macOS relaunches it on demand).
+  `killall Seher` (macOS relaunches it on demand).
 - First time only: System Settings → Keyboard → Text Input → Input Sources → Edit → **+** → Bengali
-  → *Bangla Phonetic*. A log-out/log-in may be needed before it appears.
+  → *Seher*. A log-out/log-in may be needed before it appears.
 - Keep **ABC** enabled as a second input source: if the input method crashes during development,
   you can still type.
 
@@ -250,7 +250,7 @@ composer's Backspace does, and that is Rust-only behaviour with its own fixtures
 
 ## Defaults chosen (not asked; easy to change)
 
-- Input source name **Bangla Phonetic**, bundle id `com.ahamed.inputmethod.BanglaPhonetic`.
+- Input source name **Seher**, bundle id `com.ahamed.inputmethod.Seher`.
 - Keys are read from `event.characters`, which assumes a US QWERTY base layout, the same as the web engine.
 - Esc commits the pending cluster (it doesn't cancel it), because what you see is already the final text.
 - UniFFI instead of a hand-written C ABI (cbindgen). Revisit if a Windows or Linux input method is

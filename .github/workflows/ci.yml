@@ -56,9 +56,9 @@ jobs:
         run: make -C macos app
       - name: Check the bundle
         run: |
-          APP=macos/build/DerivedData/Build/Products/Release/BanglaPhonetic.app
+          APP=macos/build/DerivedData/Build/Products/Release/Seher.app
           lipo -info macos/BengaliIMECore/BengaliIMEFFI.xcframework/macos-arm64/libbengali_ime_ffi.a
-          lipo -info "$APP/Contents/MacOS/BanglaPhonetic"
+          lipo -info "$APP/Contents/MacOS/Seher"
           plutil -extract InputMethodServerControllerClass raw "$APP/Contents/Info.plist"
           plutil -extract CFBundleIdentifier raw "$APP/Contents/Info.plist"
           test -f "$APP/Contents/Resources/MenuIcon.tiff"

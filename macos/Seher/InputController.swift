@@ -3,13 +3,13 @@ import BengaliIMECore
 import InputMethodKit
 
 /// IMK creates one controller per text-input session (roughly, per text field
-/// that uses Bangla Phonetic). All Bengali logic lives in the Rust `Composer`;
+/// that uses Seher). All Bengali logic lives in the Rust `Composer`;
 /// this class routes keys to it and applies its updates to the app:
 /// committed text becomes normal text, and pending text (the cluster that the
 /// next key may still change, e.g. ক before h) is shown as marked text.
 ///
 /// The Objective-C name must match InputMethodServerControllerClass in Info.plist.
-@objc(BanglaPhoneticInputController)
+@objc(SeherInputController)
 final class InputController: IMKInputController {
     private let composer = Composer(config: Settings.shared.config)
     private var settingsGeneration = Settings.shared.generation
@@ -172,10 +172,10 @@ final class InputController: IMKInputController {
         settingsGeneration = settings.generation
     }
 
-    /// The input menu (the Bangla Phonetic icon in the menu bar).
+    /// The input menu (the Seher icon in the menu bar).
     override func menu() -> NSMenu! {
         let settings = Settings.shared
-        let menu = NSMenu(title: "Bangla Phonetic")
+        let menu = NSMenu(title: "Seher")
 
         func addToggle(_ title: String, _ option: Settings.Option, _ action: Selector) {
             let item = NSMenuItem(title: title, action: action, keyEquivalent: "")

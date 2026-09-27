@@ -115,13 +115,14 @@ window), so `swift test` covers them. iOS slices can be added to the same script
   `replace_before`, then `setMarkedText` with the no-underline attributes and the selection at the
   end of the marked text).
 - `Settings.swift`: `UserDefaults` for the three toggles, rebuilding `Config` on change.
-- Bundle id `com.ahamed.inputmethod.BanglaPhonetic`, `LSBackgroundOnly`,
+- Bundle id `com.ahamed.inputmethod.Seher`, `LSBackgroundOnly`,
   `tsInputMethodCharacterRepertoireKey = [Beng]`, deployment target macOS 14, arm64 only.
 - Project defined in `macos/project.yml` (XcodeGen). `macos/Makefile` chains
   `build-xcframework` → `xcodegen` → `xcodebuild` → `codesign -s -` → copy →
-  `BanglaPhonetic --register` (`TISRegisterInputSource`, so a log-out is usually unnecessary) →
-  `killall`. The menu bar icon (অ) is rendered at build time by `macos/Tools/make-icon.swift` with
-  the system Bengali font, so no binary image is committed.
+  `Seher --register` (`TISRegisterInputSource`, so a log-out is usually unnecessary) →
+  `killall`. The menu bar icon (স, dental sa, the first letter of Seher) is rendered at build
+  time by `macos/Tools/make-icon.swift` with the system Bengali font, so no binary image is
+  committed.
 
 ### D9. Caret-move detection
 After applying an update, the controller records `expected = caret after the update`. On the next
@@ -162,6 +163,5 @@ context-fallback description (D5).
 
 ## Open Questions
 
-- The icon artwork for the menu bar (a template image of "অ" is the placeholder).
 - Whether the "Convert selection" menu item also gets a global keyboard shortcut. It can be added
   later without changing the specs.

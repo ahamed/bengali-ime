@@ -7,7 +7,7 @@ if let status = Installer.run(CommandLine.arguments) {
     exit(status)
 }
 
-// The server that connects Bangla Phonetic to every app's text fields. It
+// The server that connects Seher to every app's text fields. It
 // creates one InputController per text-input session.
 guard let connectionName = Bundle.main.object(forInfoDictionaryKey: "InputMethodConnectionName") as? String,
       let server = IMKServer(name: connectionName, bundleIdentifier: Bundle.main.bundleIdentifier)
@@ -16,7 +16,7 @@ else {
     exit(1)
 }
 
-Log.input.info("Bangla Phonetic started")
+Log.input.info("Seher started")
 withExtendedLifetime(server) {
     NSApplication.shared.run()
 }

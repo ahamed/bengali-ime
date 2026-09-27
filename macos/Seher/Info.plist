@@ -11,9 +11,9 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>Bangla Phonetic</string>
+	<string>Seher</string>
 	<key>CFBundleDisplayName</key>
-	<string>Bangla Phonetic</string>
+	<string>Seher</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -27,11 +27,11 @@
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
 	<key>InputMethodConnectionName</key>
-	<string>com.ahamed.inputmethod.BanglaPhonetic_Connection</string>
+	<string>com.ahamed.inputmethod.Seher_Connection</string>
 	<key>InputMethodServerControllerClass</key>
-	<string>BanglaPhoneticInputController</string>
+	<string>SeherInputController</string>
 	<key>InputMethodServerDelegateClass</key>
-	<string>BanglaPhoneticInputController</string>
+	<string>SeherInputController</string>
 	<key>TISInputSourceID</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>TISIntendedLanguage</key>

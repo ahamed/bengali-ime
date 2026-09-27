@@ -1,4 +1,4 @@
-# Bangla Phonetic input method: build, test, install and uninstall.
+# Seher input method: build, test, install and uninstall.
 #
 #   make install     build, sign ad hoc, copy to ~/Library/Input Methods, restart it
 #   make uninstall   disable and remove it
@@ -8,12 +8,12 @@
 #
 # Needs Xcode, rustup (aarch64-apple-darwin) and XcodeGen; see README.md.
 
-APP_NAME    := BanglaPhonetic
+APP_NAME    := Seher
 DERIVED     := build/DerivedData
 APP         := $(DERIVED)/Build/Products/Release/$(APP_NAME).app
 INSTALL_DIR := $(HOME)/Library/Input Methods
 INSTALLED   := $(INSTALL_DIR)/$(APP_NAME).app
-ICON        := BanglaPhonetic/Generated/MenuIcon.tiff
+ICON        := Seher/Generated/MenuIcon.tiff
 
 .PHONY: all core project app test install uninstall clean
 
@@ -49,7 +49,7 @@ install: app
 	-killall $(APP_NAME) 2>/dev/null
 	@echo
 	@echo "Installed to $(INSTALLED)."
-	@echo "First install: System Settings > Keyboard > Input Sources > Edit > + > Bengali > Bangla Phonetic."
+	@echo "First install: System Settings > Keyboard > Input Sources > Edit > + > Bengali > Seher."
 	@echo "If it isn't listed yet, log out and back in once."
 
 uninstall:
@@ -59,6 +59,6 @@ uninstall:
 	@echo "Removed $(INSTALLED). It may stay listed in Input Sources until you log out."
 
 clean:
-	rm -rf build $(APP_NAME).xcodeproj BanglaPhonetic/Generated \
+	rm -rf build $(APP_NAME).xcodeproj Seher/Generated \
 		BengaliIMECore/.build BengaliIMECore/BengaliIMEFFI.xcframework \
 		BengaliIMECore/Sources/BengaliIMECore/Generated
