@@ -14,12 +14,6 @@ export class RassawRI implements Akkhar {
     }
 
     const { buffer } = ime;
-    const length = buffer.length;
-
-    if (length < 3) {
-      return false;
-    }
-
     const rrTail = RO + ime.hasant + RO;
     if (!buffer.endsWith(rrTail)) {
       return false;
@@ -30,14 +24,17 @@ export class RassawRI implements Akkhar {
       return false;
     }
 
-    if (length === 3) {
-      ime.pop(3);
-      ime.append(phoneticVowels.RASSAW_RI);
+    // A consonant stacked before র্র takes ঋ-kar (ক্র্র → কৃ); anything else
+    // (nothing, or a vowel such as ও) gets the independent ঋ.
+    const before = buffer.slice(0, -rrTail.length);
+    if (before.endsWith(ime.hasant)) {
+      ime.pop(rrTail.length + 1);
+      ime.appendAndFlushBuffer(phoneticKar.RASSAW_RI_KAR);
       return true;
     }
 
-    ime.pop(4);
-    ime.appendAndFlushBuffer(phoneticKar.RASSAW_RI_KAR);
+    ime.pop(rrTail.length);
+    ime.appendAndFlushBuffer(phoneticVowels.RASSAW_RI);
     return true;
   }
 }

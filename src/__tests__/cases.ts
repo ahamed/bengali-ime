@@ -111,17 +111,18 @@ export const digitCases: [string, string][] = [
   ["9", "৯"],
 ];
 
-/** [test name, text before caret, expected shouldAttachKarWhenBufferEmpty] */
-export const vowelAttachCases: [string, string, boolean][] = [
-  ["returns true when last grapheme is a bare consonant (একট scenario)", "একট", true],
-  ["returns false when text is empty", "", false],
-  ["returns false for trailing whitespace only", "   ", false],
-  ["returns false when last grapheme is an independent vowel", "এ", false],
-  ["returns false when last grapheme already has a matra", "কা", false],
-  ["returns false when last grapheme ends with anusvara", "কং", false],
-  ["returns true for juktakkhor ending in consonant", "ক্ট", true],
-  ["returns false for Latin text", "hello", false],
-  ["ignores trailing spaces before caret", "ত   ", true],
+/** [test name, texts before caret, expected endsWithKarTakingConsonant for each] */
+export const vowelAttachCases: [string, string[], boolean][] = [
+  ["returns true when last grapheme is a bare consonant (একট scenario)", ["একট"], true],
+  ["returns false when text is empty", [""], false],
+  ["returns false for trailing whitespace only", ["   "], false],
+  ["returns false when last grapheme is an independent vowel", ["এ"], false],
+  ["returns false when last grapheme already has a matra", ["কা"], false],
+  ["returns false when last grapheme ends with anusvara", ["কং"], false],
+  ["returns true for juktakkhor ending in consonant", ["ক্ট"], true],
+  ["returns false for Latin text", ["hello"], false],
+  ["does not look past trailing spaces before caret", ["ত ", "ত   "], false],
+  ["returns false after khanda ta", ["ৎ"], false],
 ];
 
 /** [test name, roman document, options, expected Bengali] */
@@ -139,10 +140,10 @@ export const transpileCases: [
   ],
   ["honors double newline at same output length", "a\n\nb", undefined, "আ\n\nব"],
   [
-    "with preserveLineBreaks false passes raw newlines through the keystroke path",
+    "with preserveLineBreaks false passes raw newlines through as plain characters",
     "a\nb",
     { preserveLineBreaks: false },
-    "আব",
+    "আ\nব",
   ],
 ];
 
@@ -215,5 +216,5 @@ export const engineScenarios: EngineScenario[] = [
   },
   { name: "apostrophe after kar", steps: keys("ka'") },
   { name: "apostrophe after digit", steps: keys("1'") },
-  { name: "unmapped keys are dropped", steps: keys("k?a!(") },
+  { name: "unmapped keys pass through", steps: keys("k?a!(") },
 ];

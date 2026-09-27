@@ -3,21 +3,17 @@ import type { Akkhar, BengaliIMEInterface } from '../types';
 
 export class Kkhiyo implements Akkhar {
   proceed(ime: BengaliIMEInterface, char: string) {
-    if (char === 'h') {
-      if (ime.buffer.length < 3) {
-        return false;
-      }
-
-      if (
-        ime.buffer ===
-        phoneticConsonants.KONTHYO_KO + ime.hasant + phoneticConsonants.KONTHYO_KO
-      ) {
-        ime.pop(3);
-        ime.append(phoneticConsonants.KONTHYO_KO + ime.hasant + phoneticConsonants.MURDHONNO_SHO);
-        return true;
-      }
+    if (char !== 'h') {
+      return false;
     }
 
-    return false;
+    const kk = phoneticConsonants.KONTHYO_KO + ime.hasant + phoneticConsonants.KONTHYO_KO;
+    if (!ime.buffer.endsWith(kk)) {
+      return false;
+    }
+
+    ime.pop(kk.length);
+    ime.append(phoneticConsonants.KONTHYO_KO + ime.hasant + phoneticConsonants.MURDHONNO_SHO);
+    return true;
   }
 }

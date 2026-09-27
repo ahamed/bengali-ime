@@ -31,7 +31,7 @@ export const transpileRomanDocument = (
 
   for (const char of document) {
     const key = preserveLineBreaks && char === '\n' ? enterKey : char;
-    const actions = ime.process(key, { textBeforeCaret: ime.output });
+    const actions = ime.process(key);
     for (const action of actions) {
       if (action.type === 'splitBlock') {
         breakPositions.push(ime.output.length);
