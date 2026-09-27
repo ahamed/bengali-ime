@@ -13,7 +13,10 @@ import { fileURLToPath } from "node:url";
 import { BengaliIME } from "../src/bengali-ime";
 import * as data from "../src/bengali-ime-data";
 import type { IMEAction } from "../src/types";
-import { shouldAttachKarWhenBufferEmpty } from "../src/vowel-attach-context";
+import {
+  endsWithConsonantAndChandrabindu,
+  endsWithKarTakingConsonant,
+} from "../src/vowel-attach-context";
 import { transpileRomanDocument } from "../src/transpile-roman-document";
 import {
   aspirationSequenceCases,
@@ -152,6 +155,11 @@ const words: Record<string, string[]> = {
   quotes: ["\"ami\" bollam", "'ek' 'dui'", "rahim's boi", "\"'a'\"", "1'", "''\"\""],
   "silent-o": ["koi", "moa", "koO", "ko o", "boi", "noy", "kooa"],
   "word-boundaries": ["ek dui", "ek\ndui", "ek\n\ndui", "  a  ", "k ", "k\n"],
+  // Examples of the determinism rules in README.md (#1).
+  determinism: [
+    "Oa", "tHa", "k  a", "rrii", "kng", "ktH", "tHy", "Orri", "kkkh", "k?k", "k\tk", "k\u{1F600}a",
+    "1.5", "...", "a.", "a..", "1..", "k^a", "ka^", "kO^i", "kO^u", "O^i", "n^g", "kt^a",
+  ],
   sentences: [
     "ami banglay gan gai",
     "amar sOnar bangla, ami tomay bhalobasi.",
@@ -177,8 +185,10 @@ const randomKeys = [
   ...".^:,-\"'",
   " ",
   "Enter",
-  // Keys the engine does not map; it must drop them in both implementations.
-  ..."?!(/",
+  // Keys the engine does not map: single code points pass through, others are ignored.
+  ..."?!(/;\t",
+  "\u{1F600}",
+  "Shift",
 ];
 // Weight the most rule-heavy keys so clusters form often.
 const hotKeys = [..."kghrnoOiuaSTtdpbsjcyH"];
@@ -226,8 +236,12 @@ for (let n = 0; n < RANDOM_CASES; n++) {
   for (let i = 0; i < length; i++) {
     const roll = rand();
     let step: EngineStep;
-    if (roll < 0.06) {
+    if (roll < 0.1) {
       step = { backspace: true };
+    } else if (roll < 0.12) {
+      step = { toggleEnglish: true };
+    } else if (roll < 0.13) {
+      step = { setOutput: pick(contextPool) };
     } else {
       const key = roll < 0.5 ? pick(hotKeys) : pick(randomKeys);
       if (mode === "output") {
@@ -245,29 +259,30 @@ for (let n = 0; n < RANDOM_CASES; n++) {
 
 // -------------------------------------------------------- vowel-attach.json
 const attachTexts = new Set<string>([
-  ...vowelAttachCases.map(([, text]) => text),
+  ...vowelAttachCases.flatMap(([, texts]) => texts),
   ...contextPool,
-  // Conjunct-ending contexts: grapheme segmentation must agree between engines.
   "ক্ষ",
   "ন্ত",
   "ক্ষ্ম",
-  "ন্ত্র",
   "র্",
-  "ক্‌",
-  "ক্‍",
-  "á",
+  "\u09A1\u09BC", // decomposed nukta letter ড + ়
+  "\u09AF\u09BC",
+  "\u09BC",
+  "a\u09BC",
+  "কঁ",
+  "ক্কঁ",
+  "কাঁ",
+  "ৎঁ",
+  "\u09A1\u09BC\u0981",
   "ক ",
-  "ক  ",
-  "ক\t\t",
-  "ক  ",
-  "ক　 ",
-  "ক﻿﻿",
-  "ক\u0085\u0085",
+  "ক\u{1F600}",
+  "\u{1F600}",
   ...randomCases.map((c) => c.steps.at(-1)!.o).filter((o) => o.length > 0).slice(0, 600),
 ]);
 const vowelAttach = [...attachTexts].map((text) => ({
   text,
-  attach: shouldAttachKarWhenBufferEmpty(text),
+  karTaking: endsWithKarTakingConsonant(text),
+  consonantChandrabindu: endsWithConsonantAndChandrabindu(text),
 }));
 
 // ----------------------------------------------------------- transpile.json
@@ -303,6 +318,7 @@ const tables = {
   phoneticConsonantGraphemes: [...data.phoneticConsonantGraphemes],
   modifierGraphemeChars: [...data.modifierGraphemeChars],
   bengaliConsonantLetterGraphemes: [...data.bengaliConsonantLetterGraphemes],
+  karTakingConsonantGraphemes: [...data.karTakingConsonantGraphemes],
   independentVowelGraphemes: [...data.independentVowelGraphemes],
   dependentVowelGraphemes: [...data.dependentVowelGraphemes],
 };
@@ -311,7 +327,7 @@ mkdirSync(outDir, { recursive: true });
 writeCases("unit.json", "Inputs of the vitest suites (src/__tests__/cases.ts), replayed per step.", unitCases);
 writeCases("words.json", "Curated roman words and sentences by category, without and with output as context.", wordCases);
 writeCases("random.json", "Seeded random key sequences (mulberry32, seed 20260927) with no, output or pooled context.", randomCases);
-writeCases("vowel-attach.json", "shouldAttachKarWhenBufferEmpty(text) results, including conjunct-ending text.", vowelAttach);
+writeCases("vowel-attach.json", "endsWithKarTakingConsonant(text) and endsWithConsonantAndChandrabindu(text) results.", vowelAttach);
 writeCases("transpile.json", "transpileRomanDocument(input, { preserveLineBreaks }) results.", transpile);
 writeFileSync(join(outDir, "data.json"), `${JSON.stringify(tables, null, 2)}\n`);
 

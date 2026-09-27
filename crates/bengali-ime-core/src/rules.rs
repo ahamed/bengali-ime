@@ -2,87 +2,87 @@
 //! returns `true` when it consumed the key (the TypeScript `proceed`).
 
 use crate::data::{
-    lookup, ASPIRATED_CONSONANT_BY_BASE, BORGIYO_JO, DONTO_NO, DONTO_TO, HASANT, KHONDO_TO,
-    KONTHYO_GO, KONTHYO_KO, KONTHYO_UNGO, MURDHONNO_NO, MURDHONNO_SHO, OI_KAR, ONTOSTHO_JO,
-    ONTOSTHO_RO, ONUSHWAR, OU_KAR, O_KAR, RASSAW_RI, RASSAW_RI_KAR, TALOBBO_CHO, TALOBBO_NYO,
-    USHMO_HO, VOWEL_O, VOWEL_OI, VOWEL_OU,
+    is_kar_taking_consonant, lookup, ASPIRATED_CONSONANT_BY_BASE, BORGIYO_JO, CHONDROBINDU,
+    DONTO_NO, DONTO_TO, HASANT, KHONDO_TO, KONTHYO_GO, KONTHYO_KO, KONTHYO_UNGO, MURDHONNO_NO,
+    MURDHONNO_SHO, OI_KAR, ONTOSTHO_JO, ONTOSTHO_RO, ONUSHWAR, OU_KAR, O_KAR, RASSAW_RI,
+    RASSAW_RI_KAR, TALOBBO_CHO, TALOBBO_NYO, USHMO_HO, VOWEL_O, VOWEL_OI, VOWEL_OU,
 };
 use crate::engine::{utf16, Engine};
 
-/// `rassaw-ri.ts`: `rri` → ঋ, or ঋ-kar after a consonant.
+/// `rassaw-ri.ts`: র্র + i → ঋ, or ঋ-kar when a consonant is stacked before it.
 pub(crate) fn rassaw_ri(ime: &mut Engine, key: &str) -> bool {
     if key != "i" {
-        return false;
-    }
-    let length = ime.buffer.len();
-    if length < 3 {
         return false;
     }
     let rr_tail = utf16(&format!("{ONTOSTHO_RO}{HASANT}{ONTOSTHO_RO}"));
     if !ime.buffer.ends_with(&rr_tail) {
         return false;
     }
-    let triple_r_tail = utf16(&format!("{ONTOSTHO_RO}{HASANT}{ONTOSTHO_RO}{HASANT}{ONTOSTHO_RO}"));
+    let triple_r_tail = utf16(&format!(
+        "{ONTOSTHO_RO}{HASANT}{ONTOSTHO_RO}{HASANT}{ONTOSTHO_RO}"
+    ));
     if ime.buffer.ends_with(&triple_r_tail) {
         return false;
     }
-    if length == 3 {
-        ime.pop(3);
-        ime.append(RASSAW_RI, true);
+    // A consonant stacked before র্র takes ঋ-kar (ক্র্র → কৃ); anything else
+    // (nothing, or a vowel such as ও) gets the independent ঋ.
+    let before = &ime.buffer[..ime.buffer.len() - rr_tail.len()];
+    if before.ends_with(&utf16(HASANT)) {
+        ime.pop(rr_tail.len() + 1);
+        ime.append_and_flush_buffer(RASSAW_RI_KAR);
         return true;
     }
-    ime.pop(4);
-    ime.append_and_flush_buffer(RASSAW_RI_KAR);
+    ime.pop(rr_tail.len());
+    ime.append_and_flush_buffer(RASSAW_RI);
     true
 }
 
-/// `oi.ts`: ও + i → ঐ, ো + i → ৈ.
+/// `oi.ts`: ও/ো (optionally + ঁ) + i → ঐ/ৈ.
 pub(crate) fn oi(ime: &mut Engine, key: &str) -> bool {
-    if key != "i" {
-        return false;
-    }
-    match ime.last_in_buffer().as_deref() {
-        Some(VOWEL_O) => {
-            ime.replace_last(VOWEL_OI, true, 1);
-            true
-        }
-        Some(O_KAR) => {
-            ime.replace_last(OI_KAR, true, 1);
-            true
-        }
-        _ => false,
-    }
+    key == "i" && replace_o_diphthong(ime, VOWEL_OI, OI_KAR)
 }
 
-/// `ou.ts`: ও + u → ঔ, ো + u → ৌ.
-pub(crate) fn ou(ime: &mut Engine, key: &str) -> bool {
-    if key != "u" {
-        return false;
-    }
-    match ime.last_in_buffer().as_deref() {
-        Some(VOWEL_O) => {
-            ime.replace_last(VOWEL_OU, true, 1);
-            true
+/// `replaceODiphthong`: turns a trailing ও / ো (optionally followed by ঁ) into
+/// the given diphthong, keeping the chandrabindu after it: কোঁ + i → কৈঁ.
+fn replace_o_diphthong(ime: &mut Engine, independent: &str, kar: &str) -> bool {
+    let pairs = [
+        (VOWEL_O.to_owned(), independent.to_owned()),
+        (O_KAR.to_owned(), kar.to_owned()),
+        (
+            format!("{VOWEL_O}{CHONDROBINDU}"),
+            format!("{independent}{CHONDROBINDU}"),
+        ),
+        (
+            format!("{O_KAR}{CHONDROBINDU}"),
+            format!("{kar}{CHONDROBINDU}"),
+        ),
+    ];
+    for (from, to) in pairs {
+        if ime.buffer_ends_with(&from) {
+            ime.replace_last(&to, true, from.encode_utf16().count());
+            return true;
         }
-        Some(O_KAR) => {
-            ime.replace_last(OU_KAR, true, 1);
-            true
-        }
-        _ => false,
-    }
-}
-
-/// `kkhiyo.ts`: ক্ক + h → ক্ষ.
-pub(crate) fn kkhiyo(ime: &mut Engine, key: &str) -> bool {
-    if key != "h" || ime.buffer.len() < 3 {
-        return false;
-    }
-    if ime.buffer == utf16(&format!("{KONTHYO_KO}{HASANT}{KONTHYO_KO}")) {
-        ime.pop(3);
-        ime.append(&format!("{KONTHYO_KO}{HASANT}{MURDHONNO_SHO}"), true);
-        return true;
     }
     false
+}
+
+/// `ou.ts`: ও/ো (optionally + ঁ) + u → ঔ/ৌ.
+pub(crate) fn ou(ime: &mut Engine, key: &str) -> bool {
+    key == "u" && replace_o_diphthong(ime, VOWEL_OU, OU_KAR)
+}
+
+/// `kkhiyo.ts`: a cluster ending in ক্ক + h → ক্ষ.
+pub(crate) fn kkhiyo(ime: &mut Engine, key: &str) -> bool {
+    if key != "h" {
+        return false;
+    }
+    let kk = utf16(&format!("{KONTHYO_KO}{HASANT}{KONTHYO_KO}"));
+    if !ime.buffer.ends_with(&kk) {
+        return false;
+    }
+    ime.pop(kk.len());
+    ime.append(&format!("{KONTHYO_KO}{HASANT}{MURDHONNO_SHO}"), true);
+    true
 }
 
 /// `ho.ts`: h starts হ on an empty buffer (or after a roman vowel key).
@@ -98,24 +98,30 @@ pub(crate) fn ho(ime: &mut Engine, key: &str) -> bool {
     false
 }
 
-/// `khanda-to.ts`: ত + H → ৎ.
+/// `khanda-to.ts`: ত + H → ৎ (ৎ never takes a hasant, so ক্ত + H → কৎ).
 pub(crate) fn khanda_to(ime: &mut Engine, key: &str) -> bool {
-    if key != "H" {
+    if key != "H" || !ime.buffer_ends_with(DONTO_TO) {
         return false;
     }
-    if ime.last_in_buffer().as_deref() == Some(DONTO_TO) {
-        ime.replace_last(KHONDO_TO, false, 1);
-        return true;
-    }
-    false
+    let count = if ime.buffer_ends_with(&format!("{HASANT}{DONTO_TO}")) {
+        2
+    } else {
+        1
+    };
+    ime.replace_last(KHONDO_TO, false, count);
+    true
 }
 
-/// `ja-fala.ts`: consonant + y → ্য.
+/// `ja-fala.ts`: kar-taking consonant + y → ্য.
 pub(crate) fn ja_fala(ime: &mut Engine, key: &str) -> bool {
     if key != "y" {
         return false;
     }
-    if ime.last_in_buffer().as_deref().is_some_and(|l| ime.is_phonetic_consonant(l)) {
+    if ime
+        .last_in_buffer()
+        .as_deref()
+        .is_some_and(is_kar_taking_consonant)
+    {
         ime.append(&format!("{HASANT}{ONTOSTHO_JO}"), true);
         return true;
     }
@@ -146,13 +152,18 @@ pub(crate) fn nyo_plus_cha(ime: &mut Engine, key: &str) -> bool {
     false
 }
 
-/// `onushwar.ts`: ন + g → ং.
+/// `onushwar.ts`: ন + g → ং (ং never takes a hasant, so ক্ন + g → কং).
 pub(crate) fn onushwar(ime: &mut Engine, key: &str) -> bool {
-    if key == "g" && ime.last_in_buffer().as_deref() == Some(DONTO_NO) {
-        ime.replace_last(ONUSHWAR, true, 1);
-        return true;
+    if key != "g" || !ime.buffer_ends_with(DONTO_NO) {
+        return false;
     }
-    false
+    let count = if ime.buffer_ends_with(&format!("{HASANT}{DONTO_NO}")) {
+        2
+    } else {
+        1
+    };
+    ime.replace_last(ONUSHWAR, true, count);
+    true
 }
 
 /// `ungo.ts`: ণ + g → ঙ.

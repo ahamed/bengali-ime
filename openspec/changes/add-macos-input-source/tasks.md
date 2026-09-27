@@ -2,7 +2,7 @@
 
 ## 1. M0 — Parity fixtures from the TS engine (Linux)
 
-- [x] 1.1 Move the key/expected inputs used by `src/__tests__/*.test.ts` into a shared case list (`src/__tests__/cases.ts`) that the vitest files import, and verify `yarn test` still passes with the same test count (148)
+- [x] 1.1 Move the key/expected inputs used by `src/__tests__/*.test.ts` into a shared case list (`src/__tests__/cases.ts`) that the vitest files import, and verify `yarn test` still passes with the same test count (148; 247 after merging the engine rework from main, matching main's own count). `deterministic-rules.test.ts` (added on main) stays self-contained; its rule examples are covered by the `determinism` category in `words.json`
 - [x] 1.2 Add `tsx` as a dev dependency and `scripts/gen-fixtures.ts`, which writes `fixtures/engine/unit.json` from the shared cases (per-key actions, output and buffer, with optional `textBeforeCaret`). Verify by running `yarn fixtures` twice and seeing no diff the second time
 - [x] 1.3 Add `fixtures/engine/words.json` from a curated roman word/sentence list (conjuncts, `rri`, `Oi`/`OU`, nasals, ya-phala, digits, punctuation, `--`, quotes) and verify it contains an entry for each of those categories
 - [x] 1.4 Add `fixtures/engine/random.json` (fixed seed, full key alphabet, with and without `textBeforeCaret`, including conjunct-ending contexts such as `ক্ষ` and `ন্ত`), capped at a few thousand compact one-line cases. Verify the file stays under 2 MB and regenerates identically
@@ -12,11 +12,11 @@
 
 - [x] 2.1 Create the Cargo workspace (`Cargo.toml`, `crates/bengali-ime-core`) with a fixture-replay test harness that loads `fixtures/engine/*.json` and reports the first mismatching key per case. Verify `cargo test` runs and reports every fixture as failing, since there is no engine yet
 - [x] 2.2 Port `bengali-ime-data.ts` to `data.rs` (tables, symbol maps, grapheme sets) and verify with a unit test that the table sizes and a sample of entries match the TS exports
-- [ ] 2.3 Port `vowel-attach-context.ts` using a pinned `unicode-segmentation`, and verify the Rust equivalents of all 9 cases in `vowel-attach-context.test.ts` pass, plus the conjunct-context entries in `fixtures/engine/random.json`
-- [ ] 2.4 Port `Engine` (state, `process`, `process_backspace`, append/replace/pop helpers, UTF-16 back counts) with consonant, vowel, number, punctuation and word-boundary paths, and verify the non-rule cases of `fixtures/engine/unit.json` pass
-- [ ] 2.5 Port the Akkhar rules in TS order (`Kkhiyo`, `Ho`, `KhandaTo`, `JaFala`, `AspiratedConsonant`, nasal connectors, `RassawRI`, `Oi`, `Ou`) and verify all of `fixtures/engine/unit.json` and `words.json` pass
-- [ ] 2.6 Port `transpileRomanDocument` to `transpile_roman_document` and verify its fixture cases, including the multi-line document from `transpile-roman-document.test.ts`
-- [ ] 2.7 Verify `fixtures/engine/random.json` passes in full. If grapheme segmentation disagrees on conjuncts, apply design D3's fallback and add a comment and a fixture naming the case
+- [x] 2.3 Port `vowel-attach-context.ts` (`endsWithKarTakingConsonant`, `endsWithConsonantAndChandrabindu` since the engine rework on main; it no longer uses grapheme segmentation) and verify every case of `fixtures/engine/vowel-attach.json` passes, including the 10 `vowel-attach-context.test.ts` cases, decomposed nukta letters and surrogate pairs
+- [x] 2.4 Port `Engine` (state, `process`, `process_backspace`, append/replace/pop helpers, UTF-16 back counts) with consonant, vowel, number, punctuation and word-boundary paths, and verify the non-rule cases of `fixtures/engine/unit.json` pass
+- [x] 2.5 Port the Akkhar rules in TS order (`Kkhiyo`, `Ho`, `KhandaTo`, `JaFala`, `AspiratedConsonant`, nasal connectors, `RassawRI`, `Oi`, `Ou`) and verify all of `fixtures/engine/unit.json` and `words.json` pass
+- [x] 2.6 Port `transpileRomanDocument` to `transpile_roman_document` and verify its fixture cases, including the multi-line document from `transpile-roman-document.test.ts`
+- [x] 2.7 Verify `fixtures/engine/random.json` passes in full. If grapheme segmentation disagrees on conjuncts, apply design D3's fallback and add a comment and a fixture naming the case (not needed: the engine no longer segments graphemes)
 - [ ] 2.8 Add a `rust` job to `.github/workflows/ci.yml` (`cargo fmt --check`, `cargo clippy -D warnings`, `cargo test`) and verify it passes on the branch
 
 ## 3. M2 — Composer and config (Linux)

@@ -10,7 +10,7 @@ engine or `src/__tests__/cases.ts` and regenerate. CI fails if the committed fil
 | `unit.json` | Inputs of the vitest suites (`src/__tests__/cases.ts`) |
 | `words.json` | Curated roman words and sentences by category, each without context and with the engine output as context |
 | `random.json` | Seeded random sequences (keys, Backspace, no/output/pooled context) |
-| `vowel-attach.json` | `{ text, attach }`: `shouldAttachKarWhenBufferEmpty(text)` |
+| `vowel-attach.json` | `{ text, karTaking, consonantChandrabindu }`: `endsWithKarTakingConsonant` and `endsWithConsonantAndChandrabindu` |
 | `transpile.json` | `{ input, preserveLineBreaks?, output }`: `transpileRomanDocument` |
 | `data.json` | Every lookup table of `src/bengali-ime-data.ts`, in insertion order |
 
@@ -23,9 +23,9 @@ A step is one operation plus the engine state after it:
 |---|---|
 | `k` | Key passed to `process` (a character, or `"Enter"`) |
 | `c` | `textBeforeCaret` passed with the key (absent = not passed) |
-| `bs` | `1` = `processBackspace()` |
+| `bs` | `1` = `processBackspace()` (undoes the last keystroke) |
 | `en` | `1` = `toggleEnglishMode()` |
-| `set` | Assign `output` directly (as the tests do to simulate a resync) |
+| `set` | Assign `output` directly (a host resync; clears the undo history) |
 | `a` | Returned actions: `["i", text]` insert, `["r", n, text]` replace, `["d", n]` delete, `["s"]` splitBlock |
 | `o`, `b` | `output` and `buffer` after the step |
 

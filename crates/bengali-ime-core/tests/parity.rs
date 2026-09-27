@@ -10,7 +10,9 @@ use serde::Deserialize;
 use serde_json::Value;
 
 fn fixture_path(name: &str) -> PathBuf {
-    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/engine").join(name)
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("../../fixtures/engine")
+        .join(name)
 }
 
 fn load<T: for<'de> Deserialize<'de>>(name: &str) -> T {
@@ -49,8 +51,13 @@ fn decode_action(value: &Value) -> Action {
     let count = |i: usize| parts[i].as_u64().expect("count") as usize;
     match parts[0].as_str().expect("action tag") {
         "i" => Action::Insert { text: text(1) },
-        "r" => Action::Replace { chars_back: count(1), text: text(2) },
-        "d" => Action::Delete { chars_back: count(1) },
+        "r" => Action::Replace {
+            chars_back: count(1),
+            text: text(2),
+        },
+        "d" => Action::Delete {
+            chars_back: count(1),
+        },
         "s" => Action::SplitBlock,
         other => panic!("unknown action tag {other}"),
     }
@@ -144,13 +151,19 @@ fn string_pairs(value: &Value) -> Vec<(String, String)> {
         .iter()
         .map(|pair| {
             let pair = pair.as_array().expect("pair");
-            (pair[0].as_str().unwrap().to_owned(), pair[1].as_str().unwrap().to_owned())
+            (
+                pair[0].as_str().unwrap().to_owned(),
+                pair[1].as_str().unwrap().to_owned(),
+            )
         })
         .collect()
 }
 
 fn owned_pairs(table: &[(&str, &str)]) -> Vec<(String, String)> {
-    table.iter().map(|(k, v)| ((*k).to_owned(), (*v).to_owned())).collect()
+    table
+        .iter()
+        .map(|(k, v)| ((*k).to_owned(), (*v).to_owned()))
+        .collect()
 }
 
 fn strings(value: &Value) -> Vec<String> {
@@ -171,8 +184,16 @@ fn data_tables_match_typescript() {
     use bengali_ime_core::data::*;
     let ts: Value = load("data.json");
     assert_eq!(ts["hasant"].as_str().unwrap(), HASANT);
-    assert_eq!(string_pairs(&ts["symbols"]), owned_pairs(SYMBOLS), "symbols");
-    assert_eq!(string_pairs(&ts["numberMap"]), owned_pairs(NUMBER_MAP), "numberMap");
+    assert_eq!(
+        string_pairs(&ts["symbols"]),
+        owned_pairs(SYMBOLS),
+        "symbols"
+    );
+    assert_eq!(
+        string_pairs(&ts["numberMap"]),
+        owned_pairs(NUMBER_MAP),
+        "numberMap"
+    );
     assert_eq!(
         string_pairs(&ts["specialCharactersMap"]),
         owned_pairs(SPECIAL_CHARACTERS_MAP),
@@ -230,6 +251,11 @@ fn data_tables_match_typescript() {
         "bengaliConsonantLetterGraphemes"
     );
     assert_eq!(
+        strings(&ts["karTakingConsonantGraphemes"]),
+        owned(&kar_taking_consonant_graphemes()),
+        "karTakingConsonantGraphemes"
+    );
+    assert_eq!(
         strings(&ts["independentVowelGraphemes"]),
         owned(INDEPENDENT_VOWEL_GRAPHEMES),
         "independentVowelGraphemes"
@@ -244,17 +270,74 @@ fn data_tables_match_typescript() {
 #[derive(Deserialize)]
 struct AttachCase {
     text: String,
-    attach: bool,
+    #[serde(rename = "karTaking")]
+    kar_taking: bool,
+    #[serde(rename = "consonantChandrabindu")]
+    consonant_chandrabindu: bool,
 }
 
 #[test]
 fn vowel_attach_fixtures() {
+    use bengali_ime_core::{ends_with_consonant_and_chandrabindu, ends_with_kar_taking_consonant};
     let file: CaseFile<AttachCase> = load("vowel-attach.json");
     let failures: Vec<String> = file
         .cases
         .iter()
-        .filter(|case| bengali_ime_core::should_attach_kar_when_buffer_empty(&case.text) != case.attach)
-        .map(|case| format!("  {:?} ({:?}): expected {}", case.text, case.text.chars().map(|c| format!("U+{:04X}", c as u32)).collect::<Vec<_>>(), case.attach))
+        .filter(|case| {
+            ends_with_kar_taking_consonant(&case.text) != case.kar_taking
+                || ends_with_consonant_and_chandrabindu(&case.text) != case.consonant_chandrabindu
+        })
+        .map(|case| {
+            let points: Vec<String> = case
+                .text
+                .chars()
+                .map(|c| format!("U+{:04X}", c as u32))
+                .collect();
+            format!(
+                "  {:?} {points:?}: expected karTaking {} consonantChandrabindu {}",
+                case.text, case.kar_taking, case.consonant_chandrabindu
+            )
+        })
         .collect();
-    assert!(failures.is_empty(), "vowel-attach.json: {} of {} failed\n{}", failures.len(), file.cases.len(), failures.join("\n"));
+    assert!(
+        failures.is_empty(),
+        "vowel-attach.json: {} of {} failed\n{}",
+        failures.len(),
+        file.cases.len(),
+        failures.join("\n")
+    );
+}
+
+#[derive(Deserialize)]
+struct TranspileCase {
+    input: String,
+    #[serde(rename = "preserveLineBreaks")]
+    preserve_line_breaks: Option<bool>,
+    output: String,
+}
+
+#[test]
+fn transpile_fixtures() {
+    let file: CaseFile<TranspileCase> = load("transpile.json");
+    let failures: Vec<String> = file
+        .cases
+        .iter()
+        .filter_map(|case| {
+            let preserve = case.preserve_line_breaks.unwrap_or(true);
+            let actual = bengali_ime_core::transpile_roman_document(&case.input, preserve);
+            (actual != case.output).then(|| {
+                format!(
+                    "  {:?} (preserve {preserve}): expected {:?} actual {actual:?}",
+                    case.input, case.output
+                )
+            })
+        })
+        .collect();
+    assert!(
+        failures.is_empty(),
+        "transpile.json: {} of {} failed\n{}",
+        failures.len(),
+        file.cases.len(),
+        failures.join("\n")
+    );
 }

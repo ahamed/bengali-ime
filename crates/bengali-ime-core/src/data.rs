@@ -26,10 +26,22 @@ pub const SYMBOLS: &[(&str, &str)] = &[
     ("DOUBLE_DASH", DOUBLE_DASH),
     ("CAP", "^"),
     ("COLON", ":"),
-    ("TYPOGRAPHIC_DOUBLE_QUOTE_OPEN", TYPOGRAPHIC_DOUBLE_QUOTE_OPEN),
-    ("TYPOGRAPHIC_DOUBLE_QUOTE_CLOSE", TYPOGRAPHIC_DOUBLE_QUOTE_CLOSE),
-    ("TYPOGRAPHIC_SINGLE_QUOTE_OPEN", TYPOGRAPHIC_SINGLE_QUOTE_OPEN),
-    ("TYPOGRAPHIC_SINGLE_QUOTE_CLOSE", TYPOGRAPHIC_SINGLE_QUOTE_CLOSE),
+    (
+        "TYPOGRAPHIC_DOUBLE_QUOTE_OPEN",
+        TYPOGRAPHIC_DOUBLE_QUOTE_OPEN,
+    ),
+    (
+        "TYPOGRAPHIC_DOUBLE_QUOTE_CLOSE",
+        TYPOGRAPHIC_DOUBLE_QUOTE_CLOSE,
+    ),
+    (
+        "TYPOGRAPHIC_SINGLE_QUOTE_OPEN",
+        TYPOGRAPHIC_SINGLE_QUOTE_OPEN,
+    ),
+    (
+        "TYPOGRAPHIC_SINGLE_QUOTE_CLOSE",
+        TYPOGRAPHIC_SINGLE_QUOTE_CLOSE,
+    ),
 ];
 
 // phoneticVowels
@@ -176,8 +188,12 @@ pub const NUMBER_MAP: &[(&str, &str)] = &[
     ("0", "\u{09E6}"),
 ];
 
-pub const SPECIAL_CHARACTERS_MAP: &[(&str, &str)] =
-    &[(".", DARI), ("^", CHONDROBINDU), (":", BISHORGO), (",", ",")];
+pub const SPECIAL_CHARACTERS_MAP: &[(&str, &str)] = &[
+    (".", DARI),
+    ("^", CHONDROBINDU),
+    (":", BISHORGO),
+    (",", ","),
+];
 
 pub const SPECIAL_CHARACTER_INPUTS: &[&str] = &[".", "^", ":", ",", "-", "\"", "'"];
 
@@ -282,4 +298,28 @@ pub fn bengali_consonant_letter_graphemes() -> Vec<&'static str> {
         .copied()
         .filter(|s| !is_modifier(s))
         .collect()
+}
+
+/// Combining nukta, as in a decomposed ড + ়.
+pub const NUKTA: &str = "\u{09BC}";
+
+/// `karTakingConsonantGraphemes`: consonants that can carry a kar or a hasant
+/// (every consonant letter except khanda ta ৎ).
+pub fn is_kar_taking_consonant(s: &str) -> bool {
+    is_bengali_consonant_letter(s) && s != KHONDO_TO
+}
+
+/// The `karTakingConsonantGraphemes` set, in insertion order.
+pub fn kar_taking_consonant_graphemes() -> Vec<&'static str> {
+    bengali_consonant_letter_graphemes()
+        .into_iter()
+        .filter(|s| *s != KHONDO_TO)
+        .collect()
+}
+
+/// `numberMap.has(c) || bengaliDigits.has(c)`.
+pub fn is_ascii_or_bengali_digit(s: &str) -> bool {
+    NUMBER_MAP
+        .iter()
+        .any(|(ascii, bengali)| *ascii == s || *bengali == s)
 }
