@@ -9,7 +9,7 @@ export class JaFala implements Akkhar {
 
     const lastInBuffer = ime.buffer.at(-1);
 
-    if (lastInBuffer && ime.isPhoneticConsonant(lastInBuffer)) {
+    if (lastInBuffer && ime.isKarTakingConsonant(lastInBuffer)) {
       ime.append(ime.hasant + phoneticConsonants.ONTOSTHO_JO);
       return true;
     }

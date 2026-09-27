@@ -10,7 +10,7 @@ describe("transpileRomanDocument", () => {
     expect(transpileRomanDocument("a\n\nb")).toBe("আ\n\nব");
   });
 
-  it("with preserveLineBreaks false passes raw newlines through the keystroke path", () => {
-    expect(transpileRomanDocument("a\nb", { preserveLineBreaks: false })).toBe("আব");
+  it("with preserveLineBreaks false passes raw newlines through as plain characters", () => {
+    expect(transpileRomanDocument("a\nb", { preserveLineBreaks: false })).toBe("আ\nব");
   });
 });

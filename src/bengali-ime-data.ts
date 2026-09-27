@@ -102,6 +102,11 @@ export const bengaliConsonantLetterGraphemes = new Set<string>(
   [...phoneticConsonantGraphemes].filter((ch) => !modifierGraphemeChars.has(ch)),
 );
 
+/** Consonants that can carry a kar or a hasant (every letter except khanda ta ৎ). */
+export const karTakingConsonantGraphemes = new Set<string>(
+  [...bengaliConsonantLetterGraphemes].filter((ch) => ch !== phoneticConsonants.KHONDO_TO),
+);
+
 export const independentVowelGraphemes = new Set<string>(Object.values(phoneticVowels) as string[]);
 
 export const dependentVowelGraphemes = new Set<string>(Object.values(phoneticKar));

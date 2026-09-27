@@ -1,27 +1,27 @@
 import { describe, it, expect } from 'vitest';
 import { phoneticConsonants, phoneticKar, phoneticVowels } from '../bengali-ime-data';
-import { shouldAttachKarWhenBufferEmpty } from '../vowel-attach-context';
+import { endsWithKarTakingConsonant } from '../vowel-attach-context';
 
-describe('shouldAttachKarWhenBufferEmpty', () => {
+describe('endsWithKarTakingConsonant', () => {
   it('returns true when last grapheme is a bare consonant (একট scenario)', () => {
-    expect(shouldAttachKarWhenBufferEmpty(`এক${phoneticConsonants.MURDHONNO_TO}`)).toBe(true);
+    expect(endsWithKarTakingConsonant(`এক${phoneticConsonants.MURDHONNO_TO}`)).toBe(true);
   });
 
   it('returns false when text is empty', () => {
-    expect(shouldAttachKarWhenBufferEmpty('')).toBe(false);
+    expect(endsWithKarTakingConsonant('')).toBe(false);
   });
 
   it('returns false for trailing whitespace only', () => {
-    expect(shouldAttachKarWhenBufferEmpty('   ')).toBe(false);
+    expect(endsWithKarTakingConsonant('   ')).toBe(false);
   });
 
   it('returns false when last grapheme is an independent vowel', () => {
-    expect(shouldAttachKarWhenBufferEmpty(phoneticVowels.A)).toBe(false);
+    expect(endsWithKarTakingConsonant(phoneticVowels.A)).toBe(false);
   });
 
   it('returns false when last grapheme already has a matra', () => {
     expect(
-      shouldAttachKarWhenBufferEmpty(
+      endsWithKarTakingConsonant(
         `${phoneticConsonants.KONTHYO_KO}${phoneticKar.A_KAR}`,
       ),
     ).toBe(false);
@@ -29,7 +29,7 @@ describe('shouldAttachKarWhenBufferEmpty', () => {
 
   it('returns false when last grapheme ends with anusvara', () => {
     expect(
-      shouldAttachKarWhenBufferEmpty(
+      endsWithKarTakingConsonant(
         `${phoneticConsonants.KONTHYO_KO}${phoneticConsonants.ONUSHWAR}`,
       ),
     ).toBe(false);
@@ -37,17 +37,22 @@ describe('shouldAttachKarWhenBufferEmpty', () => {
 
   it('returns true for juktakkhor ending in consonant', () => {
     expect(
-      shouldAttachKarWhenBufferEmpty(
+      endsWithKarTakingConsonant(
         `${phoneticConsonants.KONTHYO_KO}${'\u09CD'}${phoneticConsonants.MURDHONNO_TO}`,
       ),
     ).toBe(true);
   });
 
   it('returns false for Latin text', () => {
-    expect(shouldAttachKarWhenBufferEmpty('hello')).toBe(false);
+    expect(endsWithKarTakingConsonant('hello')).toBe(false);
   });
 
-  it('ignores trailing spaces before caret', () => {
-    expect(shouldAttachKarWhenBufferEmpty(`${phoneticConsonants.DONTO_TO}   `)).toBe(true);
+  it('does not look past trailing spaces before caret', () => {
+    expect(endsWithKarTakingConsonant(`${phoneticConsonants.DONTO_TO} `)).toBe(false);
+    expect(endsWithKarTakingConsonant(`${phoneticConsonants.DONTO_TO}   `)).toBe(false);
+  });
+
+  it('returns false after khanda ta', () => {
+    expect(endsWithKarTakingConsonant(phoneticConsonants.KHONDO_TO)).toBe(false);
   });
 });

@@ -436,7 +436,7 @@ describe("BengaliIME", () => {
       ).toEqual([{ type: "insert", text: "আ" }]);
     });
 
-    it("processBackspace removes one code unit and clears buffer", () => {
+    it("processBackspace undoes the last keystroke", () => {
       ime.process("k");
       ime.process("a");
       expect(ime.processBackspace()).toEqual([{ type: "delete", charsBack: 1 }]);

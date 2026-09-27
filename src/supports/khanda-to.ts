@@ -7,13 +7,13 @@ export class KhandaTo implements Akkhar {
       return false;
     }
 
-    const lastInBuffer = ime.buffer.at(-1);
-
-    if (lastInBuffer && lastInBuffer === phoneticConsonants.DONTO_TO) {
-      ime.replaceLast(phoneticConsonants.KHONDO_TO);
-      return true;
+    if (!ime.buffer.endsWith(phoneticConsonants.DONTO_TO)) {
+      return false;
     }
 
-    return false;
+    // ৎ never takes a hasant, so ক্ত + H becomes কৎ rather than ক্ৎ.
+    const count = ime.buffer.endsWith(ime.hasant + phoneticConsonants.DONTO_TO) ? 2 : 1;
+    ime.replaceLast(phoneticConsonants.KHONDO_TO, false, count);
+    return true;
   }
 }
