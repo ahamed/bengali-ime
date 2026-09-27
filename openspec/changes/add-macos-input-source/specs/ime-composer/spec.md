@@ -34,6 +34,20 @@ text SHALL be exactly the engine's buffer, except for the held dash (see "Dash h
 - **WHEN** `k`, `O` are pressed and then `i`
 - **THEN** after `O` the pending text is `কো`, and after `i`, `কৈ` is committed with nothing pending
 
+### Requirement: Keys the engine does not map are typed literally
+When a key produces no engine actions (for example `?`, `!`, `/`, `(`, `)`, `@`, `;`), the composer
+SHALL commit any pending text and then commit the key's own character unchanged. The engine SHALL
+treat that character as flushed text, so later keys never rewrite across it. The TypeScript engine,
+which drops such keys, is unchanged.
+
+#### Scenario: Question mark after a word
+- **WHEN** `k`, `i`, `?` are pressed
+- **THEN** the total committed text is `কি?` and nothing is pending
+
+#### Scenario: Symbol while a cluster is pending
+- **WHEN** `k` is pressed (pending `ক`) and then `(`
+- **THEN** `ক(` is committed and nothing is pending, and a following `h` produces `হ`, not `খ`
+
 ### Requirement: Committed text is never rewritten during normal typing
 Except for the one case in "Rewriting text outside the composer", the composer SHALL NOT ask the
 host to change text it has already committed. This SHALL be verified by replaying the random key

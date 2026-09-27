@@ -2,10 +2,10 @@
 
 ## 1. M0 — Parity fixtures from the TS engine (Linux)
 
-- [ ] 1.1 Move the key/expected inputs used by `src/__tests__/*.test.ts` into a shared case list (`src/__tests__/cases.ts`) that the vitest files import, and verify `yarn test` still passes with the same test count (148)
-- [ ] 1.2 Add `tsx` as a dev dependency and `scripts/gen-fixtures.ts`, which writes `fixtures/engine/unit.json` from the shared cases (per-key actions, output and buffer, with optional `textBeforeCaret`). Verify by running `yarn fixtures` twice and seeing no diff the second time
-- [ ] 1.3 Add `fixtures/engine/words.json` from a curated roman word/sentence list (conjuncts, `rri`, `Oi`/`OU`, nasals, ya-phala, digits, punctuation, `--`, quotes) and verify it contains an entry for each of those categories
-- [ ] 1.4 Add `fixtures/engine/random.json` (fixed seed, full key alphabet, with and without `textBeforeCaret`, including conjunct-ending contexts such as `ক্ষ` and `ন্ত`), capped at a few thousand compact one-line cases. Verify the file stays under 2 MB and regenerates identically
+- [x] 1.1 Move the key/expected inputs used by `src/__tests__/*.test.ts` into a shared case list (`src/__tests__/cases.ts`) that the vitest files import, and verify `yarn test` still passes with the same test count (148)
+- [x] 1.2 Add `tsx` as a dev dependency and `scripts/gen-fixtures.ts`, which writes `fixtures/engine/unit.json` from the shared cases (per-key actions, output and buffer, with optional `textBeforeCaret`). Verify by running `yarn fixtures` twice and seeing no diff the second time
+- [x] 1.3 Add `fixtures/engine/words.json` from a curated roman word/sentence list (conjuncts, `rri`, `Oi`/`OU`, nasals, ya-phala, digits, punctuation, `--`, quotes) and verify it contains an entry for each of those categories
+- [x] 1.4 Add `fixtures/engine/random.json` (fixed seed, full key alphabet, with and without `textBeforeCaret`, including conjunct-ending contexts such as `ক্ষ` and `ন্ত`), capped at a few thousand compact one-line cases. Verify the file stays under 2 MB and regenerates identically
 - [ ] 1.5 Add a `fixtures` job step to `.github/workflows/ci.yml` that regenerates the fixtures and runs `git diff --exit-code fixtures/`. Verify it by pushing a branch with a deliberately stale fixture and seeing it fail, then reverting
 
 ## 2. M1 — Rust engine port (Linux)

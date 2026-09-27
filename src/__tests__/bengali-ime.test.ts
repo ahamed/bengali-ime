@@ -6,6 +6,15 @@ import {
   phoneticKar,
   phoneticVowels,
 } from "../bengali-ime-data";
+import {
+  aspirationSequenceCases,
+  capitalConsonantCases,
+  digitCases,
+  independentVowelCases,
+  karOnKoCases,
+  lowercaseConsonantCases,
+  nasalClusterCases,
+} from "./cases";
 
 const applyRomanSequence = (ime: BengaliIME, roman: string) => {
   for (const ch of roman) {
@@ -21,42 +30,11 @@ describe("BengaliIME", () => {
   });
 
   describe("consonant keys and aspiration", () => {
-    it.each([
-      ["k", "ক"],
-      ["q", "ক"],
-      ["g", "গ"],
-      ["c", "চ"],
-      ["j", "জ"],
-      ["t", "ত"],
-      ["d", "দ"],
-      ["n", "ন"],
-      ["p", "প"],
-      ["b", "ব"],
-      ["m", "ম"],
-      ["r", "র"],
-      ["l", "ল"],
-      ["s", "স"],
-      ["z", "য"],
-      ["y", "য়"],
-      ["v", "ভ"],
-      ["w", "ব"],
-      ["h", "হ"],
-      ["f", "ফ"],
-      [
-        "x",
-        phoneticConsonants.KONTHYO_KO + hasant + phoneticConsonants.DONTO_SHO,
-      ],
-    ])("lowercase %s maps to %s", (key, expected) => {
+    it.each(lowercaseConsonantCases)("lowercase %s maps to %s", (key, expected) => {
       expect(ime.process(key)).toEqual([{ type: "insert", text: expected }]);
     });
 
-    it.each([
-      ["T", "ট"],
-      ["D", "ড"],
-      ["N", "ণ"],
-      ["R", "ড়"],
-      ["S", "শ"],
-    ])("capital %s maps to retroflex or alternate consonant", (key, expected) => {
+    it.each(capitalConsonantCases)("capital %s maps to retroflex or alternate consonant", (key, expected) => {
       expect(ime.process(key)).toEqual([{ type: "insert", text: expected }]);
     });
 
@@ -80,20 +58,7 @@ describe("BengaliIME", () => {
       expect(ime.process("M")).toEqual([{ type: "insert", text: "ম" }]);
     });
 
-    it.each([
-      ["kh", "খ"],
-      ["gh", "ঘ"],
-      ["ch", "ছ"],
-      ["jh", "ঝ"],
-      ["th", "থ"],
-      ["Th", "ঠ"],
-      ["dh", "ধ"],
-      ["Dh", "ঢ"],
-      ["ph", "ফ"],
-      ["bh", "ভ"],
-      ["sh", "শ"],
-      ["Sh", "ষ"],
-    ])("%s replaces base with aspirated or sibilant form", (seq, expected) => {
+    it.each(aspirationSequenceCases)("%s replaces base with aspirated or sibilant form", (seq, expected) => {
       applyRomanSequence(ime, seq);
       expect(ime.output).toBe(expected);
     });
@@ -118,15 +83,7 @@ describe("BengaliIME", () => {
   });
 
   describe("juktakkhar, nasals, and exceptional clusters", () => {
-    it.each([
-      ["gg", "জ্ঞ"],
-      ["nc", "ঞ্চ"],
-      ["nj", "ঞ্জ"],
-      ["nch", "ঞ্ছ"],
-      ["njh", "ঞ্ঝ"],
-      ["ng", "ং"],
-      ["Ng", "ঙ"],
-    ])("%s forms nasal or palatal cluster", (seq, expected) => {
+    it.each(nasalClusterCases)("%s forms nasal or palatal cluster", (seq, expected) => {
       applyRomanSequence(ime, seq);
       expect(ime.output).toBe(expected);
     });
@@ -213,17 +170,7 @@ describe("BengaliIME", () => {
   });
 
   describe("vowels, kars, oi, ou, and silent o", () => {
-    it.each([
-      ["a", phoneticVowels.SWAR_E_A],
-      ["i", phoneticVowels.RASSAW_E],
-      ["I", phoneticVowels.DIRGHA_E],
-      ["u", phoneticVowels.RASSAW_U],
-      ["U", phoneticVowels.DIRGHA_U],
-      ["e", phoneticVowels.A],
-      ["E", phoneticVowels.A],
-      ["o", phoneticVowels.SWAR_E_O],
-      ["O", phoneticVowels.O],
-    ])("independent vowel %s", (key, expected) => {
+    it.each(independentVowelCases)("independent vowel %s", (key, expected) => {
       expect(ime.process(key)).toEqual([{ type: "insert", text: expected }]);
     });
 
@@ -290,33 +237,14 @@ describe("BengaliIME", () => {
       expect(ime.process("i")).toEqual([{ type: "insert", text: "ই" }]);
     });
 
-    it.each([
-      ["ka", `ক${phoneticKar.A_KAR}`],
-      ["ki", `ক${phoneticKar.RASSAW_E_KAR}`],
-      ["kI", `ক${phoneticKar.DIRGHA_E_KAR}`],
-      ["ku", `ক${phoneticKar.RASSAW_U_KAR}`],
-      ["kU", `ক${phoneticKar.DIRGHA_U_KAR}`],
-      ["ke", `ক${phoneticKar.E_KAR}`],
-      ["kO", `ক${phoneticKar.O_KAR}`],
-    ])("%s applies expected kar to ক", (seq, expected) => {
+    it.each(karOnKoCases)("%s applies expected kar to ক", (seq, expected) => {
       applyRomanSequence(ime, seq);
       expect(ime.output).toBe(expected);
     });
   });
 
   describe("numbers and Bengali punctuation", () => {
-    it.each([
-      ["0", "০"],
-      ["1", "১"],
-      ["2", "২"],
-      ["3", "৩"],
-      ["4", "৪"],
-      ["5", "৫"],
-      ["6", "৬"],
-      ["7", "৭"],
-      ["8", "৮"],
-      ["9", "৯"],
-    ])("digit %s maps to Bengali numeral", (digit, expected) => {
+    it.each(digitCases)("digit %s maps to Bengali numeral", (digit, expected) => {
       expect(ime.process(digit)).toEqual([{ type: "insert", text: expected }]);
     });
 

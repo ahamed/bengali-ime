@@ -89,6 +89,7 @@ apps without text access.
 | Enter | `splitBlock` action | host commits pending text and passes Return to the app; the engine never sees Enter |
 | Output toggles | none | `Config { bengali_digits, dari_for_period, smart_quotes }`, applied as a post-mapping in `Engine` key classification. `Config::default()` reproduces TS exactly, and all fixtures run with the default. |
 | Lone `-` | committed immediately | held as pending by the composer (output text is identical) |
+| Keys with no mapping (`?`, `!`, `(`, …) | dropped (no actions) | the composer commits pending text, then the literal character, and flushes the engine buffer (`Engine::insert_literal`) |
 
 ### D7. UniFFI proc-macro bindings + XCFramework
 `bengali-ime-ffi` exposes `Composer` as a UniFFI `Object` (interior `Mutex`), plus `Update`,

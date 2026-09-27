@@ -20,16 +20,21 @@
       "default": "./src/index.ts"
     }
   },
-  "files": ["dist", "src"],
+  "files": [
+    "dist",
+    "src"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "test": "vitest run --config vitest.config.ts",
     "example": "vite",
-    "example:build": "vite build"
+    "example:build": "vite build",
+    "fixtures": "tsx scripts/gen-fixtures.ts"
   },
   "license": "MIT",
   "devDependencies": {
     "@types/node": "^22",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vite": "^6",
     "vitest": "^4.1.0"
