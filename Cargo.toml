@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/bengali-ime-core"]
+members = ["crates/bengali-ime-core", "crates/bengali-ime-ffi"]
 
 [workspace.package]
 version = "0.1.0"

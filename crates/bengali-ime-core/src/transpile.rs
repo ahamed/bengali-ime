@@ -1,13 +1,23 @@
 //! Port of `src/transpile-roman-document.ts`.
 
 use crate::data::ENTER_KEY;
-use crate::engine::{Action, Engine};
+use crate::engine::{Action, Config, Engine};
 
 /// Converts a whole roman document. With `preserve_line_breaks`, `\n` is typed
 /// as the Enter key and a newline is inserted at each paragraph break;
 /// otherwise `\n` passes through as a plain character.
 pub fn transpile_roman_document(document: &str, preserve_line_breaks: bool) -> String {
-    let mut engine = Engine::new();
+    transpile_roman_document_with_config(document, preserve_line_breaks, Config::default())
+}
+
+/// [`transpile_roman_document`] with output toggles (the macOS "Convert
+/// selection" command applies the current input menu settings).
+pub fn transpile_roman_document_with_config(
+    document: &str,
+    preserve_line_breaks: bool,
+    config: Config,
+) -> String {
+    let mut engine = Engine::with_config(config);
     let mut break_positions: Vec<usize> = Vec::new();
     let mut key_buffer = [0u8; 4];
 

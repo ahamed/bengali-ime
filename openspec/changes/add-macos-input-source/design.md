@@ -134,8 +134,10 @@ IMK's `commitComposition` (sent on clicks and focus changes) is relied on instea
   move, and `replace_before` can't be applied. → Documented degraded behaviour. `replace_before` only
   occurs for `-` or `.` typed right after an existing `-` or `।` in the document, so the worst case
   is `-—` instead of `—` or `।..` instead of `..`.
-- **Input method crash while typing.** → Keep ABC enabled; log with `os.Logger`; no `panic!` crosses
-  the FFI (UniFFI turns panics into Swift errors, which the controller treats as "not handled").
+- **Input method crash while typing.** → Keep ABC enabled; log with `os.Logger`; no panic crosses
+  the FFI: `bengali-ime-ffi` wraps every call in `catch_unwind`, resets the composer and reports the
+  key as not handled, so the app still receives it (a panic in a non-throwing UniFFI function would
+  otherwise abort the input method).
 - **Ad-hoc signing on newer macOS.** Future macOS versions may refuse ad-hoc signed input
   methods. → Fall back to Xcode's free "Sign to Run Locally" with a personal team, which needs no
   paid account.

@@ -6,7 +6,7 @@
 - [x] 1.2 Add `tsx` as a dev dependency and `scripts/gen-fixtures.ts`, which writes `fixtures/engine/unit.json` from the shared cases (per-key actions, output and buffer, with optional `textBeforeCaret`). Verify by running `yarn fixtures` twice and seeing no diff the second time
 - [x] 1.3 Add `fixtures/engine/words.json` from a curated roman word/sentence list (conjuncts, `rri`, `Oi`/`OU`, nasals, ya-phala, digits, punctuation, `--`, quotes) and verify it contains an entry for each of those categories
 - [x] 1.4 Add `fixtures/engine/random.json` (fixed seed, full key alphabet, with and without `textBeforeCaret`, including conjunct-ending contexts such as `ক্ষ` and `ন্ত`), capped at a few thousand compact one-line cases. Verify the file stays under 2 MB and regenerates identically
-- [ ] 1.5 Add a `fixtures` job step to `.github/workflows/ci.yml` that regenerates the fixtures and runs `git diff --exit-code fixtures/`. Verify it by pushing a branch with a deliberately stale fixture and seeing it fail, then reverting
+- [x] 1.5 Add a `fixtures` job step to `.github/workflows/ci.yml` that regenerates the fixtures and runs `git diff --exit-code fixtures/`. Verify it by pushing a branch with a deliberately stale fixture and seeing it fail, then reverting
 
 ## 2. M1 — Rust engine port (Linux)
 
@@ -31,7 +31,7 @@
 
 ## 4. M3 — UniFFI bindings and XCFramework (Linux for bindings, Mac for the framework)
 
-- [ ] 4.1 Create `crates/bengali-ime-ffi` exporting `Composer` (UniFFI object with an interior `Mutex`), `Update`, `Config` and `transpile_roman_document`, and verify `cargo test -p bengali-ime-ffi` and Swift binding generation (`uniffi-bindgen generate --language swift`) succeed on Linux
+- [x] 4.1 Create `crates/bengali-ime-ffi` exporting `Composer` (UniFFI object with an interior `Mutex`), `Update`, `Config` and `transpile_roman_document`, and verify `cargo test -p bengali-ime-ffi` and Swift binding generation (`uniffi-bindgen generate --language swift`) succeed on Linux
 - [ ] 4.2 Add `scripts/build-xcframework.sh` (arm64 macOS static lib, generated Swift bindings, `xcodebuild -create-xcframework`), and verify on the Mac that it produces `build/BengaliIMECore.xcframework` containing an `arm64` slice (`lipo -info`)
 - [ ] 4.3 Add a small Swift package test target that calls `Composer.key` for `k`, `h`, `u`, `b`, space through the bindings, and verify on the Mac that it yields the committed text `খুব `
 

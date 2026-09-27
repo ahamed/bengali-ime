@@ -16,5 +16,5 @@ mod vowel_attach;
 
 pub use composer::{Composer, Update};
 pub use engine::{Action, Config, Engine};
-pub use transpile::transpile_roman_document;
+pub use transpile::{transpile_roman_document, transpile_roman_document_with_config};
 pub use vowel_attach::{ends_with_consonant_and_chandrabindu, ends_with_kar_taking_consonant};
