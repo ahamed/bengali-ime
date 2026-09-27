@@ -36,7 +36,7 @@ func representation(scale: CGFloat) -> NSBitmapImageRep {
 }
 
 let reps = [representation(scale: 1), representation(scale: 2)]
-guard let data = NSBitmapImageRep.tiffRepresentationOfImageReps(reps, using: .lzw, factor: 0) else {
+guard let data = NSBitmapImageRep.tiffRepresentationOfImageReps(in: reps, using: .lzw, factor: 0) else {
     FileHandle.standardError.write(Data("could not encode the icon\n".utf8))
     exit(1)
 }
