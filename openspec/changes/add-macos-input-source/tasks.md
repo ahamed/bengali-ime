@@ -32,12 +32,12 @@
 ## 4. M3 — UniFFI bindings and XCFramework (Linux for bindings, Mac for the framework)
 
 - [x] 4.1 Create `crates/bengali-ime-ffi` exporting `Composer` (UniFFI object with an interior `Mutex`), `Update`, `Config` and `transpile_roman_document`, and verify `cargo test -p bengali-ime-ffi` and Swift binding generation (`uniffi-bindgen generate --language swift`) succeed on Linux
-- [ ] 4.2 Add `scripts/build-xcframework.sh` (arm64 macOS static lib, generated Swift bindings, `xcodebuild -create-xcframework`), and verify on macOS that it produces `macos/BengaliIMECore/BengaliIMEFFI.xcframework` containing an `arm64` slice (`lipo -info`)
-- [ ] 4.3 Add the `macos/BengaliIMECore` Swift package (bindings plus AppKit-free key-routing and context helpers) with a test target that calls `Composer.key` for `k`, `h`, `u`, `b`, space through the bindings, and verify on macOS (`make -C macos test`) that it yields the committed text `খুব `
+- [x] 4.2 Add `scripts/build-xcframework.sh` (arm64 macOS static lib, generated Swift bindings, `xcodebuild -create-xcframework`), and verify on macOS that it produces `macos/BengaliIMECore/BengaliIMEFFI.xcframework` containing an `arm64` slice (`lipo -info`)
+- [x] 4.3 Add the `macos/BengaliIMECore` Swift package (bindings plus AppKit-free key-routing and context helpers) with a test target that calls `Composer.key` for `k`, `h`, `u`, `b`, space through the bindings, and verify on macOS (`make -C macos test`) that it yields the committed text `খুব `
 
 ## 5. M4 — Input method MVP (Mac)
 
-- [ ] 5.1 Add `macos/project.yml` (XcodeGen; bundle id `com.ahamed.inputmethod.BanglaPhonetic`; macOS 14; arm64; links the XCFramework) with `Info.plist` (`InputMethodConnectionName`, `InputMethodServerControllerClass`, `LSBackgroundOnly`, `tsInputMethodCharacterRepertoireKey`, icon) and a placeholder "অ" template icon. Verify `xcodegen generate && xcodebuild build` succeeds
+- [x] 5.1 Add `macos/project.yml` (XcodeGen; bundle id `com.ahamed.inputmethod.BanglaPhonetic`; macOS 14; arm64; links the XCFramework) with `Info.plist` (`InputMethodConnectionName`, `InputMethodServerControllerClass`, `LSBackgroundOnly`, `tsInputMethodCharacterRepertoireKey`, icon) and a placeholder "অ" template icon. Verify `xcodegen generate && xcodebuild build` succeeds
 - [ ] 5.2 Implement `main.swift` (`IMKServer` + run loop) and `InputController` with key routing (printable keys, space, Return, Backspace, navigation keys, modifier combos), applying `Update` via `insertText` and `setMarkedText` with no-underline attributes. Verify in TextEdit that typing `khub` shows `ক`, `খ`, `খু`, `খুব` and never roman letters
 - [ ] 5.3 Commit pending text in `commitComposition` and `deactivateServer`, and verify that switching to ABC with `খ` pending leaves `খ` in the document, and that Command-S mid-word commits and then saves
 - [ ] 5.4 Add `macos/Makefile` with `install` (build XCFramework → xcodegen → xcodebuild → `codesign --force -s -` → copy to `~/Library/Input Methods` → `killall BanglaPhonetic`) and `uninstall`. Verify a fresh install appears as "Bangla Phonetic" under Bengali in Input Sources, and that a reinstall takes effect without logging out
@@ -59,6 +59,6 @@
 
 ## 8. Integration and documentation (Linux + Mac)
 
-- [ ] 8.1 Add a `macos` job (`macos-15` runner) to `.github/workflows/ci.yml` that builds the XCFramework and the input method app (no install), and verify it passes on the branch
+- [x] 8.1 Add a `macos` job (`macos-15` runner) to `.github/workflows/ci.yml` that builds the XCFramework and the input method app (no install), and verify it passes on the branch
 - [x] 8.2 Update `docs/macos-input-source.md` to point at this change and correct the context-fallback description (design D5), and add a "macOS input source" section to `README.md`. Verify the links resolve
 - [ ] 8.3 Run `openspec validate add-macos-input-source --strict` and verify it passes before archiving
