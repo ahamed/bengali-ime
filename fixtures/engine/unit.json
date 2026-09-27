@@ -107,6 +107,7 @@
     {"name":"vowel after independent vowel context","category":"scenario","steps":[{"k":"a","c":"এ","a":[["i","আ"]],"o":"আ","b":""}]},
     {"name":"m-o-i silent o with context","category":"scenario","steps":[{"k":"m","a":[["i","ম"]],"o":"ম","b":"ম"},{"k":"o","a":[["i",""]],"o":"ম","b":""},{"k":"i","c":"ম","a":[["i","ই"]],"o":"মই","b":""}]},
     {"name":"m-o-a silent o with context","category":"scenario","steps":[{"k":"m","a":[["i","ম"]],"o":"ম","b":"ম"},{"k":"o","a":[["i",""]],"o":"ম","b":""},{"k":"a","c":"ম","a":[["i","আ"]],"o":"মআ","b":""}]},
+    {"name":"independent o does not arm the silent-o break","category":"scenario","steps":[{"k":"o","a":[["i","অ"]],"o":"অ","b":""},{"k":"a","c":"ক","a":[["i","া"]],"o":"অা","b":""}]},
     {"name":"backspace after kar","category":"scenario","steps":[{"k":"k","a":[["i","ক"]],"o":"ক","b":"ক"},{"k":"a","a":[["i","া"]],"o":"কা","b":""},{"bs":1,"a":[["d",1]],"o":"ক","b":""}]},
     {"name":"backspace on empty","category":"scenario","steps":[{"bs":1,"a":[],"o":"","b":""}]},
     {"name":"hyphen","category":"scenario","steps":[{"k":"-","a":[["i","-"]],"o":"-","b":""}]},

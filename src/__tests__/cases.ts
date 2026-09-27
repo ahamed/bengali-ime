@@ -194,6 +194,10 @@ export const engineScenarios: EngineScenario[] = [
     name: "m-o-a silent o with context",
     steps: [...keys("mo"), { key: "a", textBeforeCaret: "ম" }],
   },
+  {
+    name: "independent o does not arm the silent-o break",
+    steps: [{ key: "o" }, { key: "a", textBeforeCaret: "\u0995" }],
+  },
   { name: "backspace after kar", steps: [...keys("ka"), { backspace: true }] },
   { name: "backspace on empty", steps: [{ backspace: true }] },
   { name: "hyphen", steps: keys("-") },

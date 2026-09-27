@@ -10,8 +10,8 @@
 
 ## 2. M1 — Rust engine port (Linux)
 
-- [ ] 2.1 Create the Cargo workspace (`Cargo.toml`, `crates/bengali-ime-core`) with a fixture-replay test harness that loads `fixtures/engine/*.json` and reports the first mismatching key per case. Verify `cargo test` runs and reports every fixture as failing, since there is no engine yet
-- [ ] 2.2 Port `bengali-ime-data.ts` to `data.rs` (tables, symbol maps, grapheme sets) and verify with a unit test that the table sizes and a sample of entries match the TS exports
+- [x] 2.1 Create the Cargo workspace (`Cargo.toml`, `crates/bengali-ime-core`) with a fixture-replay test harness that loads `fixtures/engine/*.json` and reports the first mismatching key per case. Verify `cargo test` runs and reports every fixture as failing, since there is no engine yet
+- [x] 2.2 Port `bengali-ime-data.ts` to `data.rs` (tables, symbol maps, grapheme sets) and verify with a unit test that the table sizes and a sample of entries match the TS exports
 - [ ] 2.3 Port `vowel-attach-context.ts` using a pinned `unicode-segmentation`, and verify the Rust equivalents of all 9 cases in `vowel-attach-context.test.ts` pass, plus the conjunct-context entries in `fixtures/engine/random.json`
 - [ ] 2.4 Port `Engine` (state, `process`, `process_backspace`, append/replace/pop helpers, UTF-16 back counts) with consonant, vowel, number, punctuation and word-boundary paths, and verify the non-rule cases of `fixtures/engine/unit.json` pass
 - [ ] 2.5 Port the Akkhar rules in TS order (`Kkhiyo`, `Ho`, `KhandaTo`, `JaFala`, `AspiratedConsonant`, nasal connectors, `RassawRI`, `Oi`, `Ou`) and verify all of `fixtures/engine/unit.json` and `words.json` pass
