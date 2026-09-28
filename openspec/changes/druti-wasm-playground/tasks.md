@@ -13,9 +13,9 @@
 
 ## 3. M3: `druti-wasm` crate (Linux)
 
-- [ ] 3.1 Add `crates/druti-wasm` (`cdylib` + `rlib`, `wasm-bindgen` pinned with `=`) to the workspace, exporting `Config`, `Update`, `Composer` and `transpileRomanDocument` with camelCase JavaScript names (design D3)
-- [ ] 3.2 Add host-side Rust unit tests in `druti-wasm` for the spec scenarios "Aspiration in the browser", "Commit on a word break", "Default settings" and "Multi-line document", asserting that the wrapper returns the same values as `druti_core::Composer` and `transpile_roman_document_with_config`
-- [ ] 3.3 Run `rustup target add wasm32-unknown-unknown` and install wasm-pack locally. Verify that `wasm-pack build crates/druti-wasm --target web` succeeds and that the generated `.d.ts` exposes the API from 3.1
+- [x] 3.1 Add `crates/druti-wasm` (`cdylib` + `rlib`, `wasm-bindgen` pinned with `=`) to the workspace, exporting `Config`, `Update`, `Composer` and `transpileRomanDocument` with camelCase JavaScript names (design D3)
+- [x] 3.2 Add host-side Rust unit tests in `druti-wasm` for the spec scenarios "Aspiration in the browser", "Commit on a word break", "Default settings" and "Multi-line document", asserting that the wrapper returns the same values as `druti_core::Composer` and `transpile_roman_document_with_config`
+- [x] 3.3 Run `rustup target add wasm32-unknown-unknown` and install wasm-pack locally. Verify that `wasm-pack build crates/druti-wasm --target web` succeeds and that the generated `.d.ts` exposes the API from 3.1
 
 ## 4. M4: Playground (Linux build, browser check on the Mac)
 

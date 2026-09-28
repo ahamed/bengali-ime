@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["crates/druti-core", "crates/druti-ffi"]
+members = ["crates/druti-core", "crates/druti-ffi", "crates/druti-wasm"]
 
 [workspace.package]
 version = "0.1.0"

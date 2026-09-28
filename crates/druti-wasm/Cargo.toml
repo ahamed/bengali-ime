@@ -1,0 +1,16 @@
+[package]
+name = "druti-wasm"
+description = "wasm-bindgen bindings for druti-core, used by the web playground"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[lib]
+# cdylib for wasm-pack; rlib so the host-side unit tests can link it.
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+druti-core = { version = "0.1.0", path = "../druti-core" }
+wasm-bindgen = "=0.2.129"
