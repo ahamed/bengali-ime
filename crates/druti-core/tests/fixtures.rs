@@ -1,4 +1,4 @@
-//! Replays the TypeScript-generated fixtures in `fixtures/engine/` through the
+//! Replays the golden fixtures in `tests/fixtures/engine/` through the
 //! Rust engine. Each case runs on a fresh `Engine`; the first mismatching step
 //! of every failing case is reported.
 
@@ -11,14 +11,14 @@ use serde_json::Value;
 
 fn fixture_path(name: &str) -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../fixtures/engine")
+        .join("tests/fixtures/engine")
         .join(name)
 }
 
 fn load<T: for<'de> Deserialize<'de>>(name: &str) -> T {
     let path = fixture_path(name);
     let text = std::fs::read_to_string(&path)
-        .unwrap_or_else(|e| panic!("cannot read {}: {e} (run `yarn fixtures`)", path.display()));
+        .unwrap_or_else(|e| panic!("cannot read {}: {e}", path.display()));
     serde_json::from_str(&text).unwrap_or_else(|e| panic!("cannot parse {}: {e}", path.display()))
 }
 
@@ -180,7 +180,7 @@ fn owned(list: &[&str]) -> Vec<String> {
 }
 
 #[test]
-fn data_tables_match_typescript() {
+fn data_tables_match_golden() {
     use druti_core::data::*;
     let ts: Value = load("data.json");
     assert_eq!(ts["hasant"].as_str().unwrap(), HASANT);

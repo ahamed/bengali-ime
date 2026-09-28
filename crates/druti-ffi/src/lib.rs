@@ -1,4 +1,4 @@
-//! UniFFI surface of `bengali-ime-core` for Swift (the macOS input method, and
+//! UniFFI surface of `druti-core` for Swift (the macOS input method, and
 //! later an iOS keyboard extension). Nothing platform-specific lives here.
 //!
 //! Every call is guarded: if the engine ever panics, the composer is reset
@@ -38,7 +38,7 @@ impl From<druti_core::Config> for Config {
     }
 }
 
-/// The defaults, identical to the TypeScript engine.
+/// The defaults: every option on.
 #[uniffi::export]
 pub fn default_config() -> Config {
     druti_core::Config::default().into()
@@ -78,10 +78,7 @@ impl Composer {
             .unwrap_or_else(|poisoned| poisoned.into_inner())
     }
 
-    fn guarded(
-        &self,
-        f: impl FnOnce(&mut druti_core::Composer) -> druti_core::Update,
-    ) -> Update {
+    fn guarded(&self, f: impl FnOnce(&mut druti_core::Composer) -> druti_core::Update) -> Update {
         let mut composer = self.lock();
         match catch_unwind(AssertUnwindSafe(|| f(&mut composer))) {
             Ok(update) => update.into(),

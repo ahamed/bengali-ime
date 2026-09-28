@@ -6,10 +6,10 @@
 
 ## 2. M2: Remove the TypeScript engine and freeze the fixtures (Linux)
 
-- [ ] 2.1 `git mv fixtures crates/druti-core/tests/fixtures` (design D2). Point `tests/composer.rs` and `tests/parity.rs` at `CARGO_MANIFEST_DIR/tests/fixtures`, rename `parity.rs` to `fixtures.rs`, and drop the `yarn fixtures` hint. Verify that `cargo test -p druti-core` passes with the same number of tests as before the move
-- [ ] 2.2 Rewrite `tests/fixtures/README.md` to say the files are golden, and that they're edited in the same commit as an intended engine change and never regenerated. Update the doc comments that say "generated from the TypeScript engine" or "port of … .ts" in `lib.rs`, `data.rs`, `transpile.rs` and the other `druti-core` sources, and in `druti-ffi/src/lib.rs`
-- [ ] 2.3 Delete `src/`, `scripts/gen-fixtures.ts`, the root `package.json`, `tsconfig.json`, `tsconfig.build.json`, `vite.config.ts`, `vitest.config.ts`, `yarn.lock` and `.npmignore`, plus `node_modules/` locally. Update `.gitignore`
-- [ ] 2.4 Update `crates/druti-core/README.md`, `docs/macos-input-source.md` (repo layout, "TS oracle" wording) and `openspec/config.yaml` context so Rust is the only engine and fixtures are golden
+- [x] 2.1 `git mv fixtures crates/druti-core/tests/fixtures` (design D2). Point `tests/composer.rs` and `tests/parity.rs` at `CARGO_MANIFEST_DIR/tests/fixtures`, rename `parity.rs` to `fixtures.rs`, and drop the `yarn fixtures` hint. Verify that `cargo test -p druti-core` passes with the same number of tests as before the move
+- [x] 2.2 Rewrite `tests/fixtures/README.md` to say the files are golden, and that they're edited in the same commit as an intended engine change and never regenerated. Update the doc comments that say "generated from the TypeScript engine" or "port of … .ts" in `lib.rs`, `data.rs`, `transpile.rs` and the other `druti-core` sources, and in `druti-ffi/src/lib.rs`
+- [x] 2.3 Delete `src/`, `scripts/gen-fixtures.ts`, the root `package.json`, `tsconfig.json`, `tsconfig.build.json`, `vite.config.ts`, `vitest.config.ts`, `yarn.lock` and `.npmignore`, plus `node_modules/` locally. Update `.gitignore`
+- [x] 2.4 Update `crates/druti-core/README.md`, `docs/macos-input-source.md` (repo layout, "TS oracle" wording) and `openspec/config.yaml` context so Rust is the only engine and fixtures are golden
 
 ## 3. M3: `druti-wasm` crate (Linux)
 

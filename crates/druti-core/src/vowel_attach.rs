@@ -1,4 +1,4 @@
-//! Port of `src/vowel-attach-context.ts`: what the text right before the caret
+//! What the text right before the caret
 //! allows a vowel to do. Only the last code point or two are inspected.
 
 use crate::data::{is_kar_taking_consonant, CHONDROBINDU, NUKTA};

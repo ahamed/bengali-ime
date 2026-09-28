@@ -1,7 +1,7 @@
-//! Lookup tables: a port of `src/bengali-ime-data.ts`.
+//! Lookup tables.
 //!
-//! Every table keeps the TypeScript insertion order, and `tests/parity.rs`
-//! compares each one entry by entry with `fixtures/engine/data.json`.
+//! Table order matters (earlier entries win), and `tests/fixtures.rs`
+//! compares each one entry by entry with `tests/fixtures/engine/data.json`.
 //! The nukta letters are written as escapes (U+09DC, U+09DD, U+09DF) because
 //! Unicode normalization would otherwise decompose them.
 

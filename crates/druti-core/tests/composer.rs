@@ -1,4 +1,4 @@
-//! Replays the hand-written composer fixtures in `fixtures/composer/`, which
+//! Replays the hand-written composer fixtures in `tests/fixtures/composer/`, which
 //! encode the ime-composer spec scenarios, through a simulated host document.
 
 use std::path::PathBuf;
@@ -126,7 +126,7 @@ fn run(case: &Case) -> Result<(), String> {
 
 fn replay(name: &str) {
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-        .join("../../fixtures/composer")
+        .join("tests/fixtures/composer")
         .join(name);
     let text = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("{}: {e}", path.display()));
     let file: CaseFile =
@@ -193,7 +193,7 @@ struct RandomStep {
 #[test]
 fn composer_invariants_over_random_sequences() {
     use druti_core::Engine;
-    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/engine/random.json");
+    let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/engine/random.json");
     let file: RandomFile = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
     let mut failures = Vec::new();
     let mut keys_checked = 0;

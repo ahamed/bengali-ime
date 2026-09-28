@@ -1,11 +1,9 @@
-//! Port of `src/bengali-ime.ts`.
+//! The keystroke engine.
 //!
-//! `output` and `buffer` are stored as UTF-16 code units so that slicing,
-//! `at(-1)` and the back counts in [`Action`] behave exactly like JavaScript
-//! strings. The TypeScript engine splits its output into `committed + recent`
-//! for speed; every rule only reads the end of `recent`, which is always a
-//! suffix of the output at least 32 units long (or the whole output), so this
-//! port reads the end of the full output instead.
+//! `output` and `buffer` are stored as UTF-16 code units so that slicing and
+//! the back counts in [`Action`] match the hosts' string ranges (NSString on
+//! Apple platforms, JavaScript strings in the browser). Every rule only reads
+//! the end of the output.
 
 use unicode_general_category::{get_general_category, GeneralCategory};
 
@@ -22,7 +20,7 @@ use crate::vowel_attach::{
 };
 
 /// One edit the host applies at the caret, in order. Back counts are UTF-16
-/// code units, the same as the TypeScript `IMEAction.charsBack`.
+/// code units.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Action {
     Insert { text: String },
@@ -99,8 +97,8 @@ fn single_quote_from_prior(prior: &str) -> &'static str {
     )
 }
 
-/// Output options. `Config::default()` reproduces the TypeScript engine
-/// exactly; the toggles are Rust-only (the macOS input menu).
+/// Output options (the macOS input menu and the playground toggles).
+/// `Config::default()` turns all of them on.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Config {
     /// `1` → `১`. Off: digits stay ASCII.
@@ -137,8 +135,8 @@ const MAX_UNDO_ENTRIES: usize = 1024;
 /// only this much of it is saved for undo.
 const UNDO_SNAPSHOT_UNITS: usize = 64;
 
-/// Port of the TypeScript `BengaliIME`. See the crate docs for how parity with
-/// the TypeScript engine is enforced.
+/// Phonetic roman-to-Bengali state machine. See the crate docs for how its
+/// behaviour is pinned.
 #[derive(Debug, Default, Clone)]
 pub struct Engine {
     pub(crate) buffer: Vec<u16>,
@@ -242,7 +240,7 @@ impl Engine {
         self.english_mode
     }
 
-    /// Assigns `output` directly, like a host resync in the TypeScript engine.
+    /// Assigns `output` directly (a host resync).
     /// The buffer is kept and the undo history is cleared.
     pub fn set_output(&mut self, output: &str) {
         self.output = utf16(output);

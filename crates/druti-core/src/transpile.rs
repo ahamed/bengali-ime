@@ -1,4 +1,4 @@
-//! Port of `src/transpile-roman-document.ts`.
+//! Whole-document conversion: every character is typed as a keystroke.
 
 use crate::data::ENTER_KEY;
 use crate::engine::{Action, Config, Engine};

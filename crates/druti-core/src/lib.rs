@@ -1,11 +1,9 @@
 //! Phonetic roman-to-Bengali transliteration engine.
 //!
-//! See `README.md` for the API overview and the places where this crate
-//! intentionally differs from the TypeScript engine.
-//!
-//! A Rust port of the TypeScript `@ahamed/bengali-ime` engine (the reference
-//! implementation). Behaviour is kept identical by replaying the fixtures in
-//! `fixtures/engine/`, which are generated from the TypeScript engine.
+//! See `README.md` for the API overview. This crate is the only
+//! implementation of Druti's algorithm: the macOS input method uses it through
+//! `druti-ffi`, and the web playground through `druti-wasm`. Its behaviour is
+//! pinned by the golden fixtures in `tests/fixtures/`.
 
 mod composer;
 pub mod data;
