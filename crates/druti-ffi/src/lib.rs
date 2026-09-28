@@ -5,16 +5,19 @@
 //! and the key is reported as not handled, so the host app still receives it
 //! and typing never stops.
 
-use std::panic::{catch_unwind, AssertUnwindSafe};
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::panic::{AssertUnwindSafe, catch_unwind};
+use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 
 uniffi::setup_scaffolding!();
 
 /// Output options; see `druti_core::Config`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
 pub struct Config {
+    /// `1` → `১`. Off: digits stay ASCII.
     pub bengali_digits: bool,
+    /// `.` → `।`. Off: `.` stays `.`.
     pub dari_for_period: bool,
+    /// `"` and `'` become typographic quotes. Off: they stay ASCII.
     pub smart_quotes: bool,
 }
 
@@ -45,12 +48,16 @@ pub fn default_config() -> Config {
 }
 
 /// What the host applies after a key; see `druti_core::Update`.
-/// `replace_before` is in UTF-16 code units (NSString / NSRange units).
+/// `replace_before` is in UTF-16 code units (`NSString` / `NSRange` units).
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
 pub struct Update {
+    /// UTF-16 units of committed text to delete before the marked text.
     pub replace_before: u32,
+    /// Text that replaces the marked text and becomes final.
     pub commit: String,
+    /// The new marked text (empty: none).
     pub pending: String,
+    /// Whether the key was consumed; if not, the app also processes it.
     pub handled: bool,
 }
 
@@ -66,38 +73,35 @@ impl From<druti_core::Update> for Update {
 }
 
 /// One composer per text-input session (IMK creates one controller per client).
-#[derive(uniffi::Object)]
+#[derive(Debug, uniffi::Object)]
 pub struct Composer {
     inner: Mutex<druti_core::Composer>,
 }
 
 impl Composer {
     fn lock(&self) -> MutexGuard<'_, druti_core::Composer> {
-        self.inner
-            .lock()
-            .unwrap_or_else(|poisoned| poisoned.into_inner())
+        self.inner.lock().unwrap_or_else(PoisonError::into_inner)
     }
 
     fn guarded(&self, f: impl FnOnce(&mut druti_core::Composer) -> druti_core::Update) -> Update {
         let mut composer = self.lock();
-        match catch_unwind(AssertUnwindSafe(|| f(&mut composer))) {
-            Ok(update) => update.into(),
-            Err(_) => {
-                let config = composer.config();
-                *composer = druti_core::Composer::new(config);
-                Update {
-                    replace_before: 0,
-                    commit: String::new(),
-                    pending: String::new(),
-                    handled: false,
-                }
-            }
+        if let Ok(update) = catch_unwind(AssertUnwindSafe(|| f(&mut composer))) {
+            return update.into();
         }
+        let config = composer.config();
+        *composer = druti_core::Composer::new(config);
+        // Nothing to apply, and `handled: false` lets the key through to the app.
+        druti_core::Update::default().into()
     }
 }
 
 #[uniffi::export]
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "UniFFI lifts arguments into owned values"
+)]
 impl Composer {
+    /// A composer with nothing pending.
     #[uniffi::constructor]
     pub fn new(config: Config) -> Arc<Self> {
         Arc::new(Self {
@@ -111,14 +115,17 @@ impl Composer {
         self.guarded(|c| c.key(&key, text_before_caret.as_deref()))
     }
 
+    /// Backspace; see `druti_core::Composer::backspace`.
     pub fn backspace(&self) -> Update {
-        self.guarded(|c| c.backspace())
+        self.guarded(druti_core::Composer::backspace)
     }
 
+    /// Commits all pending text and ends the cluster.
     pub fn flush(&self) -> Update {
-        self.guarded(|c| c.flush())
+        self.guarded(druti_core::Composer::flush)
     }
 
+    /// Forgets all state without committing (the caret moved).
     pub fn reset(&self, text_before_caret: Option<String>) -> Update {
         self.guarded(|c| c.reset(text_before_caret.as_deref()))
     }
@@ -128,10 +135,12 @@ impl Composer {
         self.lock().pending()
     }
 
+    /// The current output options.
     pub fn config(&self) -> Config {
         self.lock().config().into()
     }
 
+    /// Changes the output options; applies from the next key.
     pub fn set_config(&self, config: Config) {
         self.lock().set_config(config.into());
     }
@@ -141,6 +150,10 @@ impl Composer {
 /// document (and pass it as `text_before_caret`) only for these keys, and only
 /// while nothing is pending.
 #[uniffi::export]
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "UniFFI lifts arguments into owned values"
+)]
 pub fn key_reads_document(key: String) -> bool {
     druti_core::Composer::key_reads_document(&key)
 }
@@ -159,7 +172,7 @@ pub fn transpile_roman_document(
             config.into(),
         )
     })
-    .unwrap_or(document.clone())
+    .unwrap_or(document)
 }
 
 #[cfg(test)]

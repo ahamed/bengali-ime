@@ -11,8 +11,7 @@ import InputMethodKit
 /// The Objective-C name must match InputMethodServerControllerClass in Info.plist.
 @objc(DrutiInputController)
 final class InputController: IMKInputController {
-    private let composer = Composer(config: Settings.shared.config)
-    private var settingsGeneration = Settings.shared.generation
+    private let composer = Composer(config: Settings.config)
 
     /// The pending text currently shown as marked text in the app.
     private var shownPending = ""
@@ -85,7 +84,8 @@ final class InputController: IMKInputController {
 
         case .type(let key):
             resetIfCaretMoved(client)
-            let context = shownPending.isEmpty && keyReadsDocument(key: key)
+            let context =
+                shownPending.isEmpty && keyReadsDocument(key: key)
                 ? ClientText.beforeCaret(of: client)
                 : nil
             let update = composer.key(key: key, textBeforeCaret: context)
@@ -103,7 +103,8 @@ final class InputController: IMKInputController {
     private func apply(_ update: Update, to client: IMKTextInput) {
         var replacement = Self.noReplacement
         if update.replaceBefore > 0, shownPending.isEmpty,
-           let caret = ClientText.caret(of: client), caret >= Int(update.replaceBefore) {
+            let caret = ClientText.caret(of: client), caret >= Int(update.replaceBefore)
+        {
             let count = Int(update.replaceBefore)
             replacement = NSRange(location: caret - count, length: count)
         }
@@ -113,7 +114,9 @@ final class InputController: IMKInputController {
             client.insertText(update.commit, replacementRange: replacement)
         } else if !shownPending.isEmpty && update.pending.isEmpty {
             // Backspace removed the whole pending cluster.
-            client.setMarkedText("", selectionRange: NSRange(location: 0, length: 0), replacementRange: Self.noReplacement)
+            client.setMarkedText(
+                "", selectionRange: NSRange(location: 0, length: 0),
+                replacementRange: Self.noReplacement)
         }
 
         if !update.pending.isEmpty {
@@ -130,10 +133,12 @@ final class InputController: IMKInputController {
     /// Pending text styled to look like normal text. Apps may still draw their
     /// own marked-text underline; then only the pending cluster is underlined.
     private func markedText(_ text: String) -> NSAttributedString {
-        NSAttributedString(string: text, attributes: [
-            .underlineStyle: 0,
-            .markedClauseSegment: 0,
-        ])
+        NSAttributedString(
+            string: text,
+            attributes: [
+                .underlineStyle: 0,
+                .markedClauseSegment: 0,
+            ])
     }
 
     /// Commits the pending text and starts over: the caret is about to move or
@@ -163,35 +168,45 @@ final class InputController: IMKInputController {
 
     // MARK: - Settings and menu
 
+    /// Pushes the input menu toggles to the composer if they changed, here or
+    /// in another text field.
     private func syncSettings() {
-        let settings = Settings.shared
-        guard settingsGeneration != settings.generation else {
-            return
+        let config = Settings.config
+        if composer.config() != config {
+            composer.setConfig(config: config)
         }
-        composer.setConfig(config: settings.config)
-        settingsGeneration = settings.generation
     }
 
     /// The input menu (the Druti icon in the menu bar).
     override func menu() -> NSMenu! {
-        let settings = Settings.shared
         let menu = NSMenu(title: "Druti")
 
         func addToggle(_ title: String, _ option: Settings.Option, _ action: Selector) {
             let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
-            item.state = settings.isOn(option) ? .on : .off
+            item.state = Settings.isOn(option) ? .on : .off
             menu.addItem(item)
         }
-        addToggle("Bengali Digits (\u{09E7}\u{09E8}\u{09E9})", .bengaliDigits, #selector(toggleBengaliDigits(_:)))
+        addToggle(
+            "Bengali Digits (\u{09E7}\u{09E8}\u{09E9})", .bengaliDigits,
+            #selector(toggleBengaliDigits(_:)))
         // দাঁড়ি, written with escapes so editors can't decompose ড়.
-        addToggle("\u{09A6}\u{09BE}\u{0981}\u{09DC}\u{09BF} (\u{0964}) for Full Stop", .dariForPeriod, #selector(toggleDari(_:)))
-        addToggle("Smart Quotes (\u{201C} \u{201D})", .smartQuotes, #selector(toggleSmartQuotes(_:)))
+        addToggle(
+            "\u{09A6}\u{09BE}\u{0981}\u{09DC}\u{09BF} (\u{0964}) for Full Stop", .dariForPeriod,
+            #selector(toggleDari(_:)))
+        addToggle(
+            "Smart Quotes (\u{201C} \u{201D})", .smartQuotes, #selector(toggleSmartQuotes(_:)))
 
         menu.addItem(.separator())
-        menu.addItem(NSMenuItem(title: "Convert Selection to Bengali", action: #selector(convertSelection(_:)), keyEquivalent: ""))
+        menu.addItem(
+            NSMenuItem(
+                title: "Convert Selection to Bengali", action: #selector(convertSelection(_:)),
+                keyEquivalent: ""))
 
         menu.addItem(.separator())
-        menu.addItem(NSMenuItem(title: "Uninstall Druti\u{2026}", action: #selector(uninstall(_:)), keyEquivalent: ""))
+        menu.addItem(
+            NSMenuItem(
+                title: "Uninstall Druti\u{2026}", action: #selector(uninstall(_:)),
+                keyEquivalent: ""))
         return menu
     }
 
@@ -201,7 +216,7 @@ final class InputController: IMKInputController {
     @objc private func toggleSmartQuotes(_ sender: Any?) { toggle(.smartQuotes) }
 
     private func toggle(_ option: Settings.Option) {
-        Settings.shared.toggle(option)
+        Settings.toggle(option)
         syncSettings()
     }
 
@@ -218,7 +233,7 @@ final class InputController: IMKInputController {
             return
         }
         let converted = transpileRomanDocument(
-            document: selection.text, preserveLineBreaks: true, config: Settings.shared.config)
+            document: selection.text, preserveLineBreaks: true, config: Settings.config)
         guard converted != selection.text else {
             return
         }
@@ -228,7 +243,7 @@ final class InputController: IMKInputController {
 
     /// Asks, then disables Druti, moves it to the Trash, deletes its settings
     /// and quits (add-macos-distribution design D5).
-    @objc private func uninstall(_ sender: Any?) {
+    @MainActor @objc private func uninstall(_ sender: Any?) {
         if let client = textInput(nil) {
             commitPending(client)
         }
@@ -236,7 +251,8 @@ final class InputController: IMKInputController {
         InstallerUI.bringToFront(app)
         let alert = NSAlert()
         alert.messageText = "Uninstall Druti?"
-        alert.informativeText = "Druti will be removed from your input sources and moved to the Trash, and its settings will be deleted."
+        alert.informativeText =
+            "Druti will be removed from your input sources and moved to the Trash, and its settings will be deleted."
         alert.addButton(withTitle: "Uninstall").hasDestructiveAction = true
         alert.addButton(withTitle: "Cancel")
         guard alert.runModal() == .alertFirstButtonReturn else {

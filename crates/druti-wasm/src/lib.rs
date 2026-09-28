@@ -12,16 +12,20 @@ use wasm_bindgen::prelude::*;
 #[wasm_bindgen]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct Config {
+    /// `1` → `১`. Off: digits stay ASCII.
     #[wasm_bindgen(js_name = bengaliDigits)]
     pub bengali_digits: bool,
+    /// `.` → `।`. Off: `.` stays `.`.
     #[wasm_bindgen(js_name = dariForPeriod)]
     pub dari_for_period: bool,
+    /// `"` and `'` become typographic quotes. Off: they stay ASCII.
     #[wasm_bindgen(js_name = smartQuotes)]
     pub smart_quotes: bool,
 }
 
 #[wasm_bindgen]
 impl Config {
+    /// The defaults: every option on.
     #[wasm_bindgen(constructor)]
     pub fn new() -> Self {
         druti_core::Config::default().into()
@@ -59,10 +63,14 @@ impl From<druti_core::Config> for Config {
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Update {
+    /// UTF-16 units of committed text to delete before the pending text.
     #[wasm_bindgen(js_name = replaceBefore)]
     pub replace_before: u32,
+    /// Text that replaces the pending text and becomes final.
     pub commit: String,
+    /// The new pending text (empty: none).
     pub pending: String,
+    /// Whether the key was consumed; if not, the editor also processes it.
     pub handled: bool,
 }
 
@@ -79,12 +87,18 @@ impl From<druti_core::Update> for Update {
 
 /// One composer per editor.
 #[wasm_bindgen]
+#[derive(Debug)]
 pub struct Composer {
     inner: druti_core::Composer,
 }
 
 #[wasm_bindgen]
+#[expect(
+    clippy::needless_pass_by_value,
+    reason = "wasm-bindgen has no borrowed form of `Option<String>`"
+)]
 impl Composer {
+    /// A composer with nothing pending.
     #[wasm_bindgen(constructor)]
     pub fn new(config: &Config) -> Self {
         Self {
@@ -102,14 +116,17 @@ impl Composer {
         self.inner.key(key, text_before_caret.as_deref()).into()
     }
 
+    /// Backspace; see `druti_core::Composer::backspace`.
     pub fn backspace(&mut self) -> Update {
         self.inner.backspace().into()
     }
 
+    /// Commits all pending text and ends the cluster.
     pub fn flush(&mut self) -> Update {
         self.inner.flush().into()
     }
 
+    /// Forgets all state without committing (the caret moved).
     pub fn reset(
         &mut self,
         #[wasm_bindgen(js_name = textBeforeCaret)] text_before_caret: Option<String>,
@@ -123,6 +140,7 @@ impl Composer {
         self.inner.pending()
     }
 
+    /// The current output options.
     #[wasm_bindgen(getter)]
     pub fn config(&self) -> Config {
         self.inner.config().into()

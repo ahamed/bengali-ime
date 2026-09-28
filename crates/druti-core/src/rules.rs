@@ -2,12 +2,12 @@
 //! consumed the key.
 
 use crate::data::{
-    is_kar_taking_consonant, lookup, ASPIRATED_CONSONANT_BY_BASE, BORGIYO_JO, CHONDROBINDU,
-    DONTO_NO, DONTO_TO, HASANT, KHONDO_TO, KONTHYO_GO, KONTHYO_KO, KONTHYO_UNGO, MURDHONNO_NO,
-    MURDHONNO_SHO, OI_KAR, ONTOSTHO_JO, ONTOSTHO_RO, ONUSHWAR, OU_KAR, O_KAR, RASSAW_RI,
-    RASSAW_RI_KAR, TALOBBO_CHO, TALOBBO_NYO, USHMO_HO, VOWEL_O, VOWEL_OI, VOWEL_OU,
+    ASPIRATED_CONSONANT_BY_BASE, BORGIYO_JO, CHONDROBINDU, DONTO_NO, DONTO_TO, HASANT, KHONDO_TO,
+    KONTHYO_GO, KONTHYO_KO, KONTHYO_UNGO, MURDHONNO_NO, MURDHONNO_SHO, O_KAR, OI_KAR, ONTOSTHO_JO,
+    ONTOSTHO_RO, ONUSHWAR, OU_KAR, RASSAW_RI, RASSAW_RI_KAR, TALOBBO_CHO, TALOBBO_NYO, USHMO_HO,
+    VOWEL_O, VOWEL_OI, VOWEL_OU, is_kar_taking_consonant, lookup,
 };
-use crate::engine::{utf16, Engine};
+use crate::engine::{Engine, is_vowel, utf16};
 
 /// `rassaw-ri`: র্র + i → ঋ, or ঋ-kar when a consonant is stacked before it.
 pub(crate) fn rassaw_ri(ime: &mut Engine, key: &str) -> bool {
@@ -91,7 +91,7 @@ pub(crate) fn ho(ime: &mut Engine, key: &str) -> bool {
         return false;
     }
     let last = ime.last_in_buffer();
-    if ime.buffer.is_empty() || last.as_deref().is_some_and(|l| ime.is_vowel(l)) {
+    if ime.buffer.is_empty() || last.as_deref().is_some_and(is_vowel) {
         ime.append(USHMO_HO, true);
         return true;
     }

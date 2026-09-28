@@ -1,0 +1,2 @@
+# Names `clippy::doc_markdown` should accept without backticks ("..": keep the defaults).
+doc-valid-idents = ["UniFFI", "InputMethodKit", "WebAssembly", ".."]

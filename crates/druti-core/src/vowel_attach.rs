@@ -1,7 +1,7 @@
 //! What the text right before the caret
 //! allows a vowel to do. Only the last code point or two are inspected.
 
-use crate::data::{is_kar_taking_consonant, CHONDROBINDU, NUKTA};
+use crate::data::{CHONDROBINDU, NUKTA, is_kar_taking_consonant};
 
 /// The last `count` code points of UTF-16 `units` (a trailing surrogate pair
 /// counts as one), oldest first. Mirrors `lastCodePoints`.

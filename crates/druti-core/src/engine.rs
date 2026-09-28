@@ -1,18 +1,18 @@
 //! The keystroke engine.
 //!
 //! `output` and `buffer` are stored as UTF-16 code units so that slicing and
-//! the back counts in [`Action`] match the hosts' string ranges (NSString on
+//! the back counts in [`Action`] match the hosts' string ranges (`NSString` on
 //! Apple platforms, JavaScript strings in the browser). Most suffix-based rules
 //! inspect the end of the output; quote balancing scans the full prior text.
 
-use unicode_general_category::{get_general_category, GeneralCategory};
+use unicode_general_category::{GeneralCategory, get_general_category};
 
 use crate::data::{
-    self, is_ascii_or_bengali_digit, is_kar_taking_consonant, lookup, ASPIRATED_CONSONANT_BY_BASE,
-    CAPITAL_ROMAN_TO_CONSONANT, CHONDROBINDU, DARI, DEFAULT_CONSONANT_BY_ROMAN_KEY, DOUBLE_DASH,
-    ENTER_KEY, FULL_STOP, HASANT, NUMBER_MAP, ROMAN_TO_PHONETIC_VOWELS, SPACE,
-    SPECIAL_CHARACTERS_MAP, SPECIAL_CHARACTER_INPUTS, TYPOGRAPHIC_DOUBLE_QUOTE_CLOSE,
-    TYPOGRAPHIC_DOUBLE_QUOTE_OPEN, TYPOGRAPHIC_SINGLE_QUOTE_CLOSE, TYPOGRAPHIC_SINGLE_QUOTE_OPEN,
+    self, ASPIRATED_CONSONANT_BY_BASE, CAPITAL_ROMAN_TO_CONSONANT, CHONDROBINDU, DARI,
+    DEFAULT_CONSONANT_BY_ROMAN_KEY, DOUBLE_DASH, ENTER_KEY, FULL_STOP, HASANT, NUMBER_MAP,
+    ROMAN_TO_PHONETIC_VOWELS, SPACE, SPECIAL_CHARACTER_INPUTS, SPECIAL_CHARACTERS_MAP,
+    TYPOGRAPHIC_DOUBLE_QUOTE_CLOSE, TYPOGRAPHIC_DOUBLE_QUOTE_OPEN, TYPOGRAPHIC_SINGLE_QUOTE_CLOSE,
+    TYPOGRAPHIC_SINGLE_QUOTE_OPEN, is_ascii_or_bengali_digit, is_kar_taking_consonant, lookup,
 };
 use crate::rules;
 use crate::vowel_attach::{
@@ -23,9 +23,24 @@ use crate::vowel_attach::{
 /// code units.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Action {
-    Insert { text: String },
-    Replace { chars_back: usize, text: String },
-    Delete { chars_back: usize },
+    /// Insert `text` at the caret.
+    Insert {
+        /// The text to insert.
+        text: String,
+    },
+    /// Delete `chars_back` units before the caret, then insert `text`.
+    Replace {
+        /// UTF-16 units to delete before the caret.
+        chars_back: usize,
+        /// The text to insert in their place.
+        text: String,
+    },
+    /// Delete `chars_back` units before the caret.
+    Delete {
+        /// UTF-16 units to delete before the caret.
+        chars_back: usize,
+    },
+    /// Start a new paragraph (Enter).
     SplitBlock,
 }
 
@@ -55,16 +70,15 @@ fn balanced_typographic_quote(
 ) -> &'static str {
     let opens = prior.matches(open).count();
     let closes = prior.matches(close).count();
-    if opens > closes {
-        close
-    } else {
-        open
-    }
+    if opens > closes { close } else { open }
 }
 
 /// `/(\p{L}|\p{N})(?:\p{M})*$/u`
 fn prior_ends_with_word_char_for_apostrophe(prior: &str) -> bool {
-    use GeneralCategory::*;
+    use GeneralCategory::{
+        DecimalNumber, EnclosingMark, LetterNumber, LowercaseLetter, ModifierLetter,
+        NonspacingMark, OtherLetter, OtherNumber, SpacingMark, TitlecaseLetter, UppercaseLetter,
+    };
     let mut chars = prior.chars().rev().skip_while(|c| {
         matches!(
             get_general_category(*c),
@@ -154,10 +168,12 @@ pub struct Engine {
 }
 
 impl Engine {
+    /// An engine with the default [`Config`] and empty output.
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// An engine with the given output options and empty output.
     pub fn with_config(config: Config) -> Self {
         Self {
             config,
@@ -165,6 +181,7 @@ impl Engine {
         }
     }
 
+    /// The current output options.
     pub fn config(&self) -> Config {
         self.config
     }
@@ -236,6 +253,7 @@ impl Engine {
         self.track_state();
     }
 
+    /// Whether keys are currently passed through as English.
     pub fn is_english_mode(&self) -> bool {
         self.english_mode
     }
@@ -247,10 +265,12 @@ impl Engine {
         self.output_assigned = true;
     }
 
+    /// Everything the engine has produced (or was given by [`Engine::set_output`]).
     pub fn output(&self) -> String {
         String::from_utf16_lossy(&self.output)
     }
 
+    /// The current cluster: the end of the output that the next key may still rewrite.
     pub fn buffer(&self) -> String {
         String::from_utf16_lossy(&self.buffer)
     }
@@ -282,8 +302,8 @@ impl Engine {
         self.buffer.len()
     }
 
-    fn touch(&mut self, index: isize) {
-        self.touched_from = self.touched_from.min(index.max(0) as usize);
+    fn touch(&mut self, index: usize) {
+        self.touched_from = self.touched_from.min(index);
     }
 
     fn track_state(&mut self) {
@@ -301,7 +321,7 @@ impl Engine {
     /// the output length (only possible after a resync shortened the output).
     fn splice_tail(&mut self, count: usize, text: &[u16]) {
         let len = self.output.len();
-        self.touch(len as isize - count as isize);
+        self.touch(len.saturating_sub(count));
         let keep = if count <= len {
             len - count
         } else {
@@ -361,13 +381,13 @@ impl Engine {
             return;
         }
 
-        if self.is_number(key) {
+        if is_number(key) {
             self.skip_document_kar_for_next_vowel = false;
             self.process_number(key);
             return;
         }
 
-        if self.is_special_character(key) {
+        if is_special_character(key) {
             // Chandrabindu sits on the syllable, so a silent `o` before it still counts.
             if key != "^" {
                 self.skip_document_kar_for_next_vowel = false;
@@ -376,7 +396,7 @@ impl Engine {
             return;
         }
 
-        if self.is_vowel(key) {
+        if is_vowel(key) {
             self.process_vowel(key, text_before_caret);
             return;
         }
@@ -686,18 +706,18 @@ impl Engine {
         self.append(text, false);
         self.flush_buffer();
     }
+}
 
-    /// `isVowel`: true for roman vowel keys (and their lowercase forms).
-    pub(crate) fn is_vowel(&self, key: &str) -> bool {
-        lookup(ROMAN_TO_PHONETIC_VOWELS, key).is_some()
-            || lookup(ROMAN_TO_PHONETIC_VOWELS, &key.to_lowercase()).is_some()
-    }
+/// `isVowel`: true for roman vowel keys (and their lowercase forms).
+pub(crate) fn is_vowel(key: &str) -> bool {
+    lookup(ROMAN_TO_PHONETIC_VOWELS, key).is_some()
+        || lookup(ROMAN_TO_PHONETIC_VOWELS, &key.to_lowercase()).is_some()
+}
 
-    fn is_number(&self, key: &str) -> bool {
-        lookup(NUMBER_MAP, key).is_some()
-    }
+fn is_number(key: &str) -> bool {
+    lookup(NUMBER_MAP, key).is_some()
+}
 
-    fn is_special_character(&self, key: &str) -> bool {
-        SPECIAL_CHARACTER_INPUTS.contains(&key)
-    }
+fn is_special_character(key: &str) -> bool {
+    SPECIAL_CHARACTER_INPUTS.contains(&key)
 }

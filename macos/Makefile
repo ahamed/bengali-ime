@@ -3,6 +3,8 @@
 #   make install     build, sign ad hoc, and install with the app's own installer (Druti --install)
 #   make uninstall   disable and remove it (Druti --uninstall)
 #   make test        Swift tests for the bindings and helpers
+#   make lint        check Swift formatting and style (swift-format, config in .swift-format)
+#   make format      rewrite the Swift sources with swift-format
 #   make app         build and sign into build/ without installing (used by CI)
 #   make version     print the app's version (MARKETING_VERSION in project.yml)
 #   make licenses    write the license notices bundled in the app (needs cargo-about)
@@ -26,7 +28,12 @@ DMGBUILD    ?= dmgbuild
 CURRENT_PROJECT_VERSION ?= 1
 VERSION     := $(shell sed -n 's/^ *MARKETING_VERSION: *//p' project.yml)
 
-.PHONY: all core project app test install uninstall clean version licenses dmg dmg-background app-zip
+.PHONY: all core project app test lint format install uninstall clean version licenses dmg dmg-background app-zip
+
+# Every hand-written Swift file. The UniFFI bindings in Sources/BengaliIMECore/Generated/ are
+# generated, so they are neither formatted nor linted.
+SWIFT_SOURCES := Druti Tools BengaliIMECore/Package.swift BengaliIMECore/Tests \
+	$(wildcard BengaliIMECore/Sources/BengaliIMECore/*.swift)
 
 all: app
 
@@ -66,6 +73,12 @@ app: core project
 
 test: core
 	swift test --package-path BengaliIMECore
+
+lint:
+	swift format lint --strict --recursive --parallel $(SWIFT_SOURCES)
+
+format:
+	swift format format --in-place --recursive --parallel $(SWIFT_SOURCES)
 
 install: app
 	@# The same installer the DMG runs: copy, register, enable, restart the input menu.

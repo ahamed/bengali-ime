@@ -1,9 +1,44 @@
 [workspace]
-resolver = "2"
+resolver = "3"
 members = ["crates/druti-core", "crates/druti-ffi", "crates/druti-wasm"]
 
 [workspace.package]
 version = "0.1.0"
-edition = "2021"
+edition = "2024"
+# The oldest toolchain that builds every crate, including the uniffi-bindgen binary
+# (cargo-platform needs 1.91). CI checks it; raise it deliberately, not by accident.
+rust-version = "1.91"
 license = "MIT"
 repository = "https://github.com/ahamed/druti-ime"
+
+# Exact versions for the binding generators and the Unicode tables: their output is part of
+# the app, so upgrades are deliberate commits.
+[workspace.dependencies]
+druti-core = { version = "0.1.0", path = "crates/druti-core" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+unicode-general-category = "=1.1.0"
+unicode-segmentation = "=1.13.3"
+uniffi = "=0.32.2"
+wasm-bindgen = "=0.2.129"
+
+# Every crate opts in with `[lints] workspace = true`. CI runs clippy with `-D warnings`.
+[workspace.lints.rust]
+missing_debug_implementations = "warn"
+missing_docs = "warn"
+rust_2018_idioms = { level = "warn", priority = -1 }
+unreachable_pub = "warn"
+unsafe_op_in_unsafe_fn = "warn"
+unused_qualifications = "warn"
+
+[workspace.lints.clippy]
+pedantic = { level = "warn", priority = -1 }
+# Pedantic lints that cost more than they catch here.
+must_use_candidate = "allow"
+missing_errors_doc = "allow"
+module_name_repetitions = "allow"
+# Restriction lints: no debugging leftovers, and every `allow`/`expect` says why.
+allow_attributes_without_reason = "warn"
+dbg_macro = "warn"
+todo = "warn"
+unimplemented = "warn"

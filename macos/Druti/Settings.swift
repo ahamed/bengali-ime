@@ -3,35 +3,28 @@ import Foundation
 
 /// The input menu toggles, stored in UserDefaults (the input method's own
 /// preferences domain), so they survive restarts. All on by default.
-final class Settings {
-    static let shared = Settings()
-
-    enum Option: String, CaseIterable {
+///
+/// UserDefaults is the only copy: nothing is cached here, so a toggle made in
+/// one text field reaches every other input controller on its next key.
+enum Settings {
+    /// One toggle; the raw value is its UserDefaults key.
+    enum Option: String {
         case bengaliDigits
         case dariForPeriod
         case smartQuotes
     }
 
-    private let defaults = UserDefaults.standard
+    private static var defaults: UserDefaults { .standard }
 
-    /// Increases on every change, so each input controller knows when to push
-    /// a new `Config` to its composer.
-    private(set) var generation = 0
-
-    private init() {
-        defaults.register(defaults: Dictionary(uniqueKeysWithValues: Option.allCases.map { ($0.rawValue, true) }))
+    static func isOn(_ option: Option) -> Bool {
+        defaults.object(forKey: option.rawValue) as? Bool ?? true
     }
 
-    func isOn(_ option: Option) -> Bool {
-        defaults.bool(forKey: option.rawValue)
-    }
-
-    func toggle(_ option: Option) {
+    static func toggle(_ option: Option) {
         defaults.set(!isOn(option), forKey: option.rawValue)
-        generation += 1
     }
 
-    var config: Config {
+    static var config: Config {
         Config(
             bengaliDigits: isOn(.bengaliDigits),
             dariForPeriod: isOn(.dariForPeriod),

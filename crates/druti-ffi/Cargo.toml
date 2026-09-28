@@ -3,6 +3,7 @@ name = "druti-ffi"
 description = "UniFFI bindings (Swift) for druti-core, used by the macOS input method"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 
@@ -20,5 +21,8 @@ required-features = ["cli"]
 cli = ["uniffi/cli"]
 
 [dependencies]
-druti-core = { version = "0.1.0", path = "../druti-core" }
-uniffi = "=0.32.2"
+druti-core.workspace = true
+uniffi.workspace = true
+
+[lints]
+workspace = true

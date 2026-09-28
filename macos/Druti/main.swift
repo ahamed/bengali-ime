@@ -13,8 +13,10 @@ if !Installer.isInstalledCopy {
 
 // The server that connects Druti to every app's text fields. It
 // creates one InputController per text-input session.
-guard let connectionName = Bundle.main.object(forInfoDictionaryKey: "InputMethodConnectionName") as? String,
-      let server = IMKServer(name: connectionName, bundleIdentifier: Bundle.main.bundleIdentifier)
+guard
+    let connectionName = Bundle.main.object(forInfoDictionaryKey: "InputMethodConnectionName")
+        as? String,
+    let server = IMKServer(name: connectionName, bundleIdentifier: Bundle.main.bundleIdentifier)
 else {
     Log.input.fault("Could not start the input method server")
     exit(1)
