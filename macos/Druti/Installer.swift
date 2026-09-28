@@ -28,7 +28,7 @@ enum Installer {
         return 0
     }
 
-    /// Removes Seher from the enabled input sources before uninstalling.
+    /// Removes Druti from the enabled input sources before uninstalling.
     private static func disable() -> Int32 {
         for source in installedSources() {
             _ = TISDisableInputSource(source)

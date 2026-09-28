@@ -1,7 +1,7 @@
 # App compatibility
 
 Task 6.5 of `openspec/changes/add-macos-input-source`. Type the test paragraph below in each app with
-Seher selected, then record what happened. A pass means the output matches exactly, with
+Druti selected, then record what happened. A pass means the output matches exactly, with
 no stray roman letters and no duplicated or missing characters.
 
 ## Test paragraph

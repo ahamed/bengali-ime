@@ -2,7 +2,7 @@
 
 ## Purpose
 
-A macOS input source named "Seher" that types Bengali with the bengali-ime algorithm in any
+A macOS input source named "Druti" that types Bengali with the bengali-ime algorithm in any
 app. It shows the exact Bengali on every keystroke and installs locally without a paid Apple
 Developer account.
 
@@ -12,12 +12,12 @@ Developer account.
 The project SHALL provide a single command that builds the input source, signs it ad hoc, installs it
 into the user's `~/Library/Input Methods`, and restarts any running instance. A matching command
 SHALL uninstall it. Once installed, the input source SHALL be listed under the Bengali language in
-System Settings → Keyboard → Input Sources as "Seher", and SHALL appear in the menu bar's
+System Settings → Keyboard → Input Sources as "Druti", and SHALL appear in the menu bar's
 input menu when enabled.
 
 #### Scenario: First install
 - **WHEN** the author runs the install command on an Apple Silicon Mac with macOS 14 or later
-- **THEN** "Seher" can be added in Input Sources (after at most one log-out/log-in) and selected from the input menu
+- **THEN** "Druti" can be added in Input Sources (after at most one log-out/log-in) and selected from the input menu
 
 #### Scenario: Reinstall after a code change
 - **WHEN** the install command runs again
@@ -28,7 +28,7 @@ input menu when enabled.
 - **THEN** the input source is removed from `~/Library/Input Methods` and no longer runs
 
 ### Requirement: Immediate Bengali on every key
-While Seher is active, every printable key without Command, Control or Option SHALL be
+While Druti is active, every printable key without Command, Control or Option SHALL be
 consumed and SHALL immediately show its Bengali result in the focused text field, following the
 composer's commit/pending split. Committed text SHALL be inserted as normal text. Pending text SHALL
 be shown as marked text that asks the app to draw no underline.
@@ -119,7 +119,7 @@ input methods. A failure in the input source SHALL NOT stop the author from swit
 input source.
 
 #### Scenario: Password field
-- **WHEN** the author types into a password field while Seher is selected
+- **WHEN** the author types into a password field while Druti is selected
 - **THEN** the typed characters are the plain ASCII characters
 
 ### Requirement: App compatibility baseline

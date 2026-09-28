@@ -115,12 +115,12 @@ window), so `swift test` covers them. iOS slices can be added to the same script
   `replace_before`, then `setMarkedText` with the no-underline attributes and the selection at the
   end of the marked text).
 - `Settings.swift`: `UserDefaults` for the three toggles, rebuilding `Config` on change.
-- Bundle id `com.ahamed.inputmethod.Seher`, `LSBackgroundOnly`,
+- Bundle id `com.ahamed.inputmethod.Druti`, `LSBackgroundOnly`,
   `tsInputMethodCharacterRepertoireKey = [Beng]`, deployment target macOS 14, arm64 only.
 - Project defined in `macos/project.yml` (XcodeGen). `macos/Makefile` chains
   `build-xcframework` → `xcodegen` → `xcodebuild` → `codesign -s -` → copy →
-  `Seher --register` (`TISRegisterInputSource`, so a log-out is usually unnecessary) →
-  `killall`. The menu bar icon (স, dental sa, the first letter of Seher) is rendered at build
+  `Druti --register` (`TISRegisterInputSource`, so a log-out is usually unnecessary) →
+  `killall`. The menu bar icon (দ্রু, the first syllable of Druti, cut out of a filled badge) is rendered at build
   time by `macos/Tools/make-icon.swift` with the system Bengali font, so no binary image is
   committed.
 

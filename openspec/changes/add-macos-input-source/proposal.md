@@ -22,7 +22,7 @@ with no suggestion list and no guessing.
   XCFramework for arm64 macOS. Nothing macOS-specific goes into the core or the FFI crate, so an
   iOS keyboard extension can reuse them later.
 - Add a **macOS input source** (`macos/`, Swift + AppKit + InputMethodKit, XcodeGen project) named
-  *Seher*. It includes key routing, marked text with the underline hidden, reading the
+  *Druti*. It includes key routing, marked text with the underline hidden, reading the
   text before the caret, reset when the caret moves, an input menu with toggles and
   "Convert selection", and `make install` / `make uninstall` for local ad-hoc-signed installs.
 - Extend **CI** with a Rust job (fixtures, tests) on Linux and a macOS job that builds the

@@ -1,6 +1,6 @@
-# XcodeGen spec: `xcodegen generate` writes Seher.xcodeproj (not
+# XcodeGen spec: `xcodegen generate` writes Druti.xcodeproj (not
 # committed). Use the Makefile rather than building in Xcode directly.
-name: Seher
+name: Druti
 options:
   deploymentTarget:
     macOS: "14.0"
@@ -14,27 +14,27 @@ packages:
   BengaliIMECore:
     path: BengaliIMECore
 targets:
-  Seher:
+  Druti:
     type: application
     platform: macOS
     sources:
-      - path: Seher
+      - path: Druti
     dependencies:
       - package: BengaliIMECore
       - sdk: InputMethodKit.framework
       - sdk: Carbon.framework
     settings:
       base:
-        PRODUCT_NAME: Seher
-        PRODUCT_BUNDLE_IDENTIFIER: com.ahamed.inputmethod.Seher
-        INFOPLIST_FILE: Seher/Info.plist
+        PRODUCT_NAME: Druti
+        PRODUCT_BUNDLE_IDENTIFIER: com.ahamed.inputmethod.Druti
+        INFOPLIST_FILE: Druti/Info.plist
         GENERATE_INFOPLIST_FILE: NO
         # Signed ad hoc by the Makefile after the build (no Apple account needed).
         CODE_SIGN_IDENTITY: "-"
         CODE_SIGN_STYLE: Manual
         ENABLE_HARDENED_RUNTIME: NO
 schemes:
-  Seher:
+  Druti:
     build:
       targets:
-        Seher: all
+        Druti: all
