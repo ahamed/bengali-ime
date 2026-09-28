@@ -2,8 +2,8 @@
 //!
 //! `output` and `buffer` are stored as UTF-16 code units so that slicing and
 //! the back counts in [`Action`] match the hosts' string ranges (NSString on
-//! Apple platforms, JavaScript strings in the browser). Every rule only reads
-//! the end of the output.
+//! Apple platforms, JavaScript strings in the browser). Most suffix-based rules
+//! inspect the end of the output; quote balancing scans the full prior text.
 
 use unicode_general_category::{get_general_category, GeneralCategory};
 
