@@ -19,10 +19,10 @@
 
 ## 4. M4: Playground (Linux build, browser check on the Mac)
 
-- [ ] 4.1 Scaffold `examples/playground/` as in design D7: a private `package.json` (yarn 1, `vite`, `typescript`), `wasm`/`dev`/`build` scripts that run wasm-pack first, `tsconfig.json`, `vite.config.ts` (`base: './'`) and a gitignored `wasm/`. Delete the old `main.ts` and move the styles to `src/`
-- [ ] 4.2 Implement `src/editor.ts`: a model-backed `contenteditable` with an underlined pending span, key routing, applying updates, and resets on caret moves, paste, cut, drop and blur (design D5). Wrap WASM calls and recreate the composer on an exception
-- [ ] 4.3 Implement `src/main.ts` and `index.html`: the Druti header with a "Download for macOS" link to `releases/latest`, the editor, the three settings toggles (applied to the composer and the bulk conversion), the English-mode toggle with a mode label (design D6), and the bulk transliteration panel with the line-break option
-- [ ] 4.4 Verify that `yarn build` in `examples/playground` type-checks and produces `dist/` that works when served from a subpath (`npx vite preview --base /druti-ime/`)
+- [x] 4.1 Scaffold `examples/playground/` as in design D7: a private `package.json` (yarn 1, `vite`, `typescript`), `wasm`/`dev`/`build` scripts that run wasm-pack first, `tsconfig.json`, `vite.config.ts` (`base: './'`) and a gitignored `wasm/`. Delete the old `main.ts` and move the styles to `src/`
+- [x] 4.2 Implement `src/editor.ts`: a model-backed `contenteditable` with an underlined pending span, key routing, applying updates, and resets on caret moves, paste, cut, drop and blur (design D5). Wrap WASM calls and recreate the composer on an exception
+- [x] 4.3 Implement `src/main.ts` and `index.html`: the Druti header with a "Download for macOS" link to `releases/latest`, the editor, the three settings toggles (applied to the composer and the bulk conversion), the English-mode toggle with a mode label (design D6), and the bulk transliteration panel with the line-break option
+- [x] 4.4 Verify that `yarn build` in `examples/playground` type-checks and produces `dist/` that works when served from a subpath (`npx vite preview --base /druti-ime/`)
 - [ ] 4.5 (Mac) Check every `web-playground` spec scenario by hand in Safari, Chrome and Firefox: underlined `ক`, then `আমি ` committed, arrow key commits, click mid-cluster, `কি` after clicking, ASCII digits, English mode on and off, bulk sample and download link
 
 ## 5. M5: CI, Pages and release assets (Linux, dry run on GitHub)

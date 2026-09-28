@@ -1,0 +1,263 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f6f3ee;
+  --bg-glow: #e9e2d6;
+  --surface: #fffdf9;
+  --field: #ffffff;
+  --field-out: #f7f5f0;
+  --border: #ddd5c8;
+  --text: #1d2126;
+  --muted: #5f6873;
+  --accent: #1d6fa5;
+  --accent-soft: rgba(29, 111, 165, 0.1);
+  --good: #1f7a45;
+  --shadow: 0 10px 30px rgba(60, 45, 20, 0.08);
+  --font-ui: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-bn: 'Kohinoor Bangla', 'Noto Sans Bengali', 'Nirmala UI', 'Bangla Sangam MN', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-family: var(--font-ui);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f1419;
+    --bg-glow: #1c3a52;
+    --surface: #1a222c;
+    --field: #0f1419;
+    --field-out: #121820;
+    --border: #2d3a4a;
+    --text: #e7edf4;
+    --muted: #9fb0c3;
+    --accent: #5dbefb;
+    --accent-soft: rgba(93, 190, 251, 0.1);
+    --good: #7dde9a;
+    --shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(ellipse 120% 80% at 50% -20%, var(--bg-glow) 0%, var(--bg) 55%);
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+}
+
+a {
+  color: var(--accent);
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 0.1em 0.35em;
+  border-radius: 4px;
+}
+
+.page {
+  max-width: 46rem;
+  margin: 0 auto;
+  padding: 2.5rem 1rem 3rem;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.mark {
+  font-family: var(--font-bn);
+  font-size: 1.9rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.hero h1 {
+  font-size: 2rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  margin: 0 0 0.5rem;
+}
+
+.lede {
+  margin: 0;
+  color: var(--muted);
+  font-size: 1.05rem;
+  max-width: 38rem;
+}
+
+.links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+}
+
+.panel {
+  margin-top: 2rem;
+  padding: 1.35rem 1.25rem 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+.panel h2 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0 0 0.4rem;
+}
+
+.hint {
+  margin: 0 0 1rem;
+  font-size: 0.92rem;
+  color: var(--muted);
+}
+
+.field {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.75rem 0.85rem;
+  font-family: var(--font-bn);
+  font-size: 1.2rem;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--field);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  resize: vertical;
+}
+
+.field:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.field.out {
+  background: var(--field-out);
+  color: var(--good);
+}
+
+.editor {
+  min-height: 8.5rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  cursor: text;
+}
+
+.editor.is-empty::before {
+  content: attr(data-placeholder);
+  color: var(--muted);
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  pointer-events: none;
+}
+
+/* The composer's pending text, like macOS marked text. */
+.editor .pending {
+  text-decoration: underline;
+  text-decoration-color: var(--accent);
+  text-decoration-thickness: 2px;
+  text-underline-offset: 0.3em;
+}
+
+.field-label {
+  display: block;
+  margin: 0.9rem 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  margin-top: 0.85rem;
+}
+
+.settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin: 1rem 0 0;
+  padding: 0.75rem 0.9rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.settings legend {
+  padding: 0 0.35rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.btn {
+  display: inline-block;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: var(--field);
+  color: var(--text);
+  padding: 0.45rem 0.95rem;
+  border-radius: 8px;
+  font: inherit;
+  font-size: 0.92rem;
+  text-decoration: none;
+}
+
+.btn:hover {
+  border-color: var(--accent);
+}
+
+.btn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.btn-primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+@media (prefers-color-scheme: dark) {
+  .btn-primary {
+    color: #0f1419;
+  }
+}
+
+.btn[aria-pressed='true'] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.9rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.badge {
+  font-size: 0.88rem;
+  color: var(--good);
+}
+
+.footer {
+  margin-top: 2rem;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
