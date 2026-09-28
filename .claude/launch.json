@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "playground-preview",
+      "runtimeExecutable": "yarn",
+      "runtimeArgs": ["--cwd", "examples/playground", "vite", "preview", "--base", "/druti-ime/", "--port", "4173", "--strictPort"],
+      "port": 4173
+    }
+  ]
+}
