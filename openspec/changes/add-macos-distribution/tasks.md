@@ -14,7 +14,7 @@ they are.
 - [x] 2.1 Extend `scripts/build-xcframework.sh` to build `x86_64-apple-darwin` as well, merge the two libraries with `lipo -create`, and package one `macos-arm64_x86_64` slice (design D7). Verify `lipo -archs` on the static library prints `x86_64 arm64`, and update the prerequisites in `macos/README.md` (`rustup target add x86_64-apple-darwin`)
 - [x] 2.2 Set `ARCHS: "arm64 x86_64"`, `ONLY_ACTIVE_ARCH: NO`, `MARKETING_VERSION: 1.0.0` and `CURRENT_PROJECT_VERSION: 1` in `macos/project.yml`. Point `CFBundleShortVersionString`/`CFBundleVersion` in `Info.plist` at those settings, and make the Makefile build with `-destination 'generic/platform=macOS'` and pass `CURRENT_PROJECT_VERSION` through. Verify `lipo -archs` on the app executable prints both architectures, and that Finder → Get Info shows 1.0.0
 - [x] 2.3 Add `make version` (prints `MARKETING_VERSION` from `project.yml`). Verify `make -s -C macos version` prints `1.0.0`
-- [ ] 2.4 Update the `macos` job in `.github/workflows/ci.yml` to use the new slice path and check both architectures on the library and the app. Add `cargo test --target x86_64-apple-darwin -p bengali-ime-core` and `swift test --arch x86_64` under Rosetta (install Rosetta if missing). Verify the job passes on the branch
+- [x] 2.4 Update the `macos` job in `.github/workflows/ci.yml` to use the new slice path and check both architectures on the library and the app. Add `cargo test --target x86_64-apple-darwin -p bengali-ime-core` and `swift test --arch x86_64` under Rosetta (install Rosetta if missing). Verify the job passes on the branch
 
 ## 3. M2 — Installer, upgrade and uninstall in Swift (Mac)
 
@@ -37,7 +37,7 @@ they are.
 
 - [x] 5.1 (Linux) Add `macos/Packaging/release-notes.md` (install steps, Open Anyway, Intel-untested caveat, SHA-256 check, space for the changes)
 - [x] 5.2 (Linux) Add `.github/workflows/release-macos.yml` (design D10): tag trigger `macos-v*`, check the tag against the version, run the tests for both architectures, `make dmg CURRENT_PROJECT_VERSION=$GITHUB_RUN_NUMBER`, create the `.sha256`, and `gh release create --draft`. Verify with `actionlint`, if available
-- [ ] 5.3 (Mac) Dry run: push a throwaway tag `macos-v0.0.0-test` against a branch where `MARKETING_VERSION` doesn't match, and verify the workflow fails before building. Then use a matching test version, and verify a draft release appears with the DMG and `.sha256` and that `shasum -a 256` matches. Delete the test release and tag afterwards
+- [x] 5.3 (Mac) Dry run: push a throwaway tag `macos-v0.0.0-test` against a branch where `MARKETING_VERSION` doesn't match, and verify the workflow fails before building. Then use a matching test version, and verify a draft release appears with the DMG and `.sha256` and that `shasum -a 256` matches. Delete the test release and tag afterwards
 
 ## 6. M5 — Documentation (Linux)
 
