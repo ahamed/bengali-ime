@@ -233,8 +233,8 @@ directly.
 4. Composer-only behaviour (commit/pending split, grapheme backspace, `-` holding, config toggles)
    has its own hand-written fixtures in `tests/fixtures/composer/`.
 
-**Grapheme boundaries.** The engine only looks at the last code point before the caret, so it
-doesn't segment graphemes. Only the composer's Backspace does, with its own fixtures.
+**Grapheme boundaries.** The engine does not segment graphemes; the composer's Backspace is the only operation that does.
+It has its own fixtures.
 
 ## Milestones
 
