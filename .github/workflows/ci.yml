@@ -55,7 +55,7 @@ jobs:
       - name: Swift tests (bindings and helpers)
         run: make -C macos test
       - name: Rust engine tests on x86_64 (Rosetta)
-        run: cargo test --target x86_64-apple-darwin -p bengali-ime-core
+        run: cargo test --target x86_64-apple-darwin -p druti-core
       - name: Swift tests on x86_64 (Rosetta)
         # The whole toolchain runs as x86_64, so the test bundle loads.
         run: arch -x86_64 swift test --package-path macos/BengaliIMECore

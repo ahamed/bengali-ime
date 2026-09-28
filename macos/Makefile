@@ -44,7 +44,7 @@ $(LICENSES): ../LICENSE Packaging/about.toml Packaging/about.hbs ../Cargo.lock
 	@mkdir -p $(dir $(LICENSES))
 	@if command -v cargo-about >/dev/null 2>&1; then \
 		{ echo "Druti"; echo; cat ../LICENSE; echo; echo "Third-party components"; echo; \
-		  cargo about generate --fail -c Packaging/about.toml -m ../crates/bengali-ime-ffi/Cargo.toml Packaging/about.hbs; \
+		  cargo about generate --fail -c Packaging/about.toml -m ../crates/druti-ffi/Cargo.toml Packaging/about.hbs; \
 		} > $@.tmp && mv $@.tmp $@; \
 	else \
 		echo "warning: cargo-about not found; $@ lists only Druti's own license"; \

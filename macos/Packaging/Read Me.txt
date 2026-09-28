@@ -1,6 +1,6 @@
 Druti @VERSION@
 Type Bengali phonetically in any app on your Mac.
-https://github.com/ahamed/bengali-ime
+https://github.com/ahamed/druti-ime
 
 INSTALL
 

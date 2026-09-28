@@ -1,6 +1,6 @@
 [package]
-name = "bengali-ime-core"
-description = "Phonetic roman-to-Bengali engine; Rust port of @ahamed/bengali-ime kept in parity by fixtures"
+name = "druti-core"
+description = "Druti's phonetic roman-to-Bengali engine and marked-text composer"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

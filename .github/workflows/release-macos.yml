@@ -43,8 +43,8 @@ jobs:
 
       - name: Tests on arm64 and x86_64
         run: |
-          cargo test -p bengali-ime-core
-          cargo test --target x86_64-apple-darwin -p bengali-ime-core
+          cargo test -p druti-core
+          cargo test --target x86_64-apple-darwin -p druti-core
           make -C macos test
           arch -x86_64 swift test --package-path macos/BengaliIMECore
 

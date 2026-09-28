@@ -10,7 +10,7 @@ use std::sync::{Arc, Mutex, MutexGuard};
 
 uniffi::setup_scaffolding!();
 
-/// Output options; see `bengali_ime_core::Config`.
+/// Output options; see `druti_core::Config`.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, uniffi::Record)]
 pub struct Config {
     pub bengali_digits: bool,
@@ -18,7 +18,7 @@ pub struct Config {
     pub smart_quotes: bool,
 }
 
-impl From<Config> for bengali_ime_core::Config {
+impl From<Config> for druti_core::Config {
     fn from(c: Config) -> Self {
         Self {
             bengali_digits: c.bengali_digits,
@@ -28,8 +28,8 @@ impl From<Config> for bengali_ime_core::Config {
     }
 }
 
-impl From<bengali_ime_core::Config> for Config {
-    fn from(c: bengali_ime_core::Config) -> Self {
+impl From<druti_core::Config> for Config {
+    fn from(c: druti_core::Config) -> Self {
         Self {
             bengali_digits: c.bengali_digits,
             dari_for_period: c.dari_for_period,
@@ -41,10 +41,10 @@ impl From<bengali_ime_core::Config> for Config {
 /// The defaults, identical to the TypeScript engine.
 #[uniffi::export]
 pub fn default_config() -> Config {
-    bengali_ime_core::Config::default().into()
+    druti_core::Config::default().into()
 }
 
-/// What the host applies after a key; see `bengali_ime_core::Update`.
+/// What the host applies after a key; see `druti_core::Update`.
 /// `replace_before` is in UTF-16 code units (NSString / NSRange units).
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
 pub struct Update {
@@ -54,8 +54,8 @@ pub struct Update {
     pub handled: bool,
 }
 
-impl From<bengali_ime_core::Update> for Update {
-    fn from(u: bengali_ime_core::Update) -> Self {
+impl From<druti_core::Update> for Update {
+    fn from(u: druti_core::Update) -> Self {
         Self {
             replace_before: u.replace_before,
             commit: u.commit,
@@ -68,11 +68,11 @@ impl From<bengali_ime_core::Update> for Update {
 /// One composer per text-input session (IMK creates one controller per client).
 #[derive(uniffi::Object)]
 pub struct Composer {
-    inner: Mutex<bengali_ime_core::Composer>,
+    inner: Mutex<druti_core::Composer>,
 }
 
 impl Composer {
-    fn lock(&self) -> MutexGuard<'_, bengali_ime_core::Composer> {
+    fn lock(&self) -> MutexGuard<'_, druti_core::Composer> {
         self.inner
             .lock()
             .unwrap_or_else(|poisoned| poisoned.into_inner())
@@ -80,14 +80,14 @@ impl Composer {
 
     fn guarded(
         &self,
-        f: impl FnOnce(&mut bengali_ime_core::Composer) -> bengali_ime_core::Update,
+        f: impl FnOnce(&mut druti_core::Composer) -> druti_core::Update,
     ) -> Update {
         let mut composer = self.lock();
         match catch_unwind(AssertUnwindSafe(|| f(&mut composer))) {
             Ok(update) => update.into(),
             Err(_) => {
                 let config = composer.config();
-                *composer = bengali_ime_core::Composer::new(config);
+                *composer = druti_core::Composer::new(config);
                 Update {
                     replace_before: 0,
                     commit: String::new(),
@@ -104,7 +104,7 @@ impl Composer {
     #[uniffi::constructor]
     pub fn new(config: Config) -> Arc<Self> {
         Arc::new(Self {
-            inner: Mutex::new(bengali_ime_core::Composer::new(config.into())),
+            inner: Mutex::new(druti_core::Composer::new(config.into())),
         })
     }
 
@@ -145,7 +145,7 @@ impl Composer {
 /// while nothing is pending.
 #[uniffi::export]
 pub fn key_reads_document(key: String) -> bool {
-    bengali_ime_core::Composer::key_reads_document(&key)
+    druti_core::Composer::key_reads_document(&key)
 }
 
 /// Bulk conversion of a roman document (the "Convert selection" command).
@@ -156,7 +156,7 @@ pub fn transpile_roman_document(
     config: Config,
 ) -> String {
     catch_unwind(|| {
-        bengali_ime_core::transpile_roman_document_with_config(
+        druti_core::transpile_roman_document_with_config(
             &document,
             preserve_line_breaks,
             config.into(),

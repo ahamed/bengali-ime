@@ -2,14 +2,12 @@
 
 Phonetic **roman-to-Bengali** transliteration: this is not English-to-Bengali machine translation. You type roman letters (e.g. Avro-style) and get Bengali Unicode text.
 
-Canonical source and releases: [github.com/ahamed/bengali-ime](https://github.com/ahamed/bengali-ime). This directory may also appear inside the [deterministic-bengali-typewriter](https://github.com/ahamed/deterministic-bengali-typewriter) app monorepo as a workspace copy; npm installs should use the package name below, not the app repo.
-
 ## Download for macOS
 
 **Druti** is a Mac input source that types with this algorithm in any app. It needs macOS 14 or
 later, on Apple Silicon or Intel.
 
-1. Download the latest **Druti-X.Y.Z.dmg** from [Releases](https://github.com/ahamed/bengali-ime/releases/latest)
+1. Download the latest **Druti-X.Y.Z.dmg** from [Releases](https://github.com/ahamed/druti-ime/releases/latest)
    and open it.
 2. Double-click **Druti**. It installs itself into `~/Library/Input Methods` and turns itself on.
 3. If macOS says it can't verify Druti, open **System Settings → Privacy & Security**, scroll down,

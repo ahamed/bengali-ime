@@ -1,8 +1,8 @@
 ## 1. M1: Rename to Druti (Linux)
 
-- [ ] 1.1 `git mv crates/bengali-ime-core crates/druti-core` and `crates/bengali-ime-ffi crates/druti-ffi`. Rename the packages to `druti-core` and `druti-ffi`, keeping `[lib] name = "bengali_ime_ffi"` in `druti-ffi` (design D1). Update the workspace members, the `repository` URL, the crate descriptions and every `bengali_ime_core` import. Verify with `cargo test --all` (same tests, all pass)
-- [ ] 1.2 Update `scripts/build-xcframework.sh` (`--package druti-ffi`) and `macos/Makefile` (cargo-about `-m ../crates/druti-ffi/Cargo.toml`). Verify that `grep -rn "bengali-ime-" --exclude-dir={target,.git,node_modules,build,openspec}` finds nothing outside the archived changes
-- [ ] 1.3 Change every `github.com/ahamed/bengali-ime` URL to `druti-ime`: README, `macos/README.md`, `macos/Packaging/release-notes.md`, `macos/Packaging/Read Me.txt` and `docs/macos-input-source.md`. Remove the `deterministic-bengali-typewriter` monorepo paragraph from the README
+- [x] 1.1 `git mv crates/bengali-ime-core crates/druti-core` and `crates/bengali-ime-ffi crates/druti-ffi`. Rename the packages to `druti-core` and `druti-ffi`, keeping `[lib] name = "bengali_ime_ffi"` in `druti-ffi` (design D1). Update the workspace members, the `repository` URL, the crate descriptions and every `bengali_ime_core` import. Verify with `cargo test --all` (same tests, all pass)
+- [x] 1.2 Update `scripts/build-xcframework.sh` (`--package druti-ffi`) and `macos/Makefile` (cargo-about `-m ../crates/druti-ffi/Cargo.toml`). Verify that `grep -rn "bengali-ime-" --exclude-dir={target,.git,node_modules,build,openspec}` finds nothing outside the archived changes
+- [x] 1.3 Change every `github.com/ahamed/bengali-ime` URL to `druti-ime`: README, `macos/README.md`, `macos/Packaging/release-notes.md`, `macos/Packaging/Read Me.txt` and `docs/macos-input-source.md`. Remove the `deterministic-bengali-typewriter` monorepo paragraph from the README
 
 ## 2. M2: Remove the TypeScript engine and freeze the fixtures (Linux)
 

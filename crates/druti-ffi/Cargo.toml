@@ -1,6 +1,6 @@
 [package]
-name = "bengali-ime-ffi"
-description = "UniFFI bindings (Swift) for bengali-ime-core, used by the macOS input method"
+name = "druti-ffi"
+description = "UniFFI bindings (Swift) for druti-core, used by the macOS input method"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -20,5 +20,5 @@ required-features = ["cli"]
 cli = ["uniffi/cli"]
 
 [dependencies]
-bengali-ime-core = { version = "0.1.0", path = "../bengali-ime-core" }
+druti-core = { version = "0.1.0", path = "../druti-core" }
 uniffi = "=0.32.2"

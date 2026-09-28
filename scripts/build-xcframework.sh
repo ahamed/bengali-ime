@@ -26,8 +26,8 @@ export MACOSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET:-14.0}"
 cd "$ROOT"
 
 for TARGET in "${TARGETS[@]}"; do
-  echo "==> Building bengali-ime-ffi for $TARGET"
-  cargo build --release --package bengali-ime-ffi --target "$TARGET"
+  echo "==> Building druti-ffi for $TARGET"
+  cargo build --release --package druti-ffi --target "$TARGET"
 done
 
 WORK="$(mktemp -d)"
@@ -42,7 +42,7 @@ lipo -create \
 
 echo "==> Generating Swift bindings"
 # Library mode reads the interface from the compiled library's metadata.
-cargo run --quiet --release --package bengali-ime-ffi --features cli --bin uniffi-bindgen -- \
+cargo run --quiet --release --package druti-ffi --features cli --bin uniffi-bindgen -- \
   generate "$ROOT/target/$HOST_TARGET/release/libbengali_ime_ffi.dylib" --language swift --no-format --out-dir "$WORK/bindings"
 
 mkdir -p "$WORK/headers"

@@ -5,7 +5,7 @@
 use std::fmt::Write as _;
 use std::path::PathBuf;
 
-use bengali_ime_core::{Action, Engine};
+use druti_core::{Action, Engine};
 use serde::Deserialize;
 use serde_json::Value;
 
@@ -181,7 +181,7 @@ fn owned(list: &[&str]) -> Vec<String> {
 
 #[test]
 fn data_tables_match_typescript() {
-    use bengali_ime_core::data::*;
+    use druti_core::data::*;
     let ts: Value = load("data.json");
     assert_eq!(ts["hasant"].as_str().unwrap(), HASANT);
     assert_eq!(
@@ -278,7 +278,7 @@ struct AttachCase {
 
 #[test]
 fn vowel_attach_fixtures() {
-    use bengali_ime_core::{ends_with_consonant_and_chandrabindu, ends_with_kar_taking_consonant};
+    use druti_core::{ends_with_consonant_and_chandrabindu, ends_with_kar_taking_consonant};
     let file: CaseFile<AttachCase> = load("vowel-attach.json");
     let failures: Vec<String> = file
         .cases
@@ -324,7 +324,7 @@ fn transpile_fixtures() {
         .iter()
         .filter_map(|case| {
             let preserve = case.preserve_line_breaks.unwrap_or(true);
-            let actual = bengali_ime_core::transpile_roman_document(&case.input, preserve);
+            let actual = druti_core::transpile_roman_document(&case.input, preserve);
             (actual != case.output).then(|| {
                 format!(
                     "  {:?} (preserve {preserve}): expected {:?} actual {actual:?}",

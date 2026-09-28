@@ -3,7 +3,7 @@
 
 use std::path::PathBuf;
 
-use bengali_ime_core::{Composer, Config, Update};
+use druti_core::{Composer, Config, Update};
 use serde::Deserialize;
 
 #[derive(Deserialize)]
@@ -192,7 +192,7 @@ struct RandomStep {
 /// asks the host to rewrite committed text.
 #[test]
 fn composer_invariants_over_random_sequences() {
-    use bengali_ime_core::Engine;
+    use druti_core::Engine;
     let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/engine/random.json");
     let file: RandomFile = serde_json::from_str(&std::fs::read_to_string(path).unwrap()).unwrap();
     let mut failures = Vec::new();

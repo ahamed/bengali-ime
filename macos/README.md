@@ -12,7 +12,7 @@ Macs with macOS 14 or later.
 ## Install
 
 1. Download the latest **Druti-X.Y.Z.dmg** from
-   [Releases](https://github.com/ahamed/bengali-ime/releases/latest) and open it.
+   [Releases](https://github.com/ahamed/druti-ime/releases/latest) and open it.
 2. Double-click **Druti**. It copies itself into `~/Library/Input Methods`, turns itself on, and
    tells you when it's done. You can eject the disk image afterwards.
 3. If macOS says it can't verify Druti: open **System Settings → Privacy & Security**, scroll down,
@@ -36,7 +36,7 @@ new version, and your settings are kept.
 input sources, moves it to the Trash and deletes its settings.
 
 Intel Macs haven't been tested on real hardware yet. If you use one, please report whether Druti
-works in [Issues](https://github.com/ahamed/bengali-ime/issues).
+works in [Issues](https://github.com/ahamed/druti-ime/issues).
 
 ## Typing
 
@@ -135,7 +135,7 @@ Layout:
   the cargo-about config. `Tools/` renders the menu icon and the DMG background.
 - `project.yml` is the XcodeGen spec. The `.xcodeproj` is generated and not committed.
 
-Bengali logic belongs in Rust (`crates/bengali-ime-core`), where it's tested on any OS. The Swift
+Bengali logic belongs in Rust (`crates/druti-core`), where it's tested on any OS. The Swift
 side only routes keys and talks to InputMethodKit.
 
 ### Debugging
