@@ -7,8 +7,8 @@ examples/playground/dist
 
 # macOS input method build products (make -C macos ...)
 /macos/build
-/macos/Seher.xcodeproj
-/macos/Seher/Generated
+/macos/Druti.xcodeproj
+/macos/Druti/Generated
 /macos/BengaliIMECore/.build
 /macos/BengaliIMECore/.swiftpm
 /macos/BengaliIMECore/BengaliIMEFFI.xcframework

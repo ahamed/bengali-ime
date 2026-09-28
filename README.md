@@ -4,6 +4,25 @@ Phonetic **roman-to-Bengali** transliteration: this is not English-to-Bengali ma
 
 Canonical source and releases: [github.com/ahamed/bengali-ime](https://github.com/ahamed/bengali-ime). This directory may also appear inside the [deterministic-bengali-typewriter](https://github.com/ahamed/deterministic-bengali-typewriter) app monorepo as a workspace copy; npm installs should use the package name below, not the app repo.
 
+## Download for macOS
+
+**Druti** is a Mac input source that types with this algorithm in any app. It needs macOS 14 or
+later, on Apple Silicon or Intel.
+
+1. Download the latest **Druti-X.Y.Z.dmg** from [Releases](https://github.com/ahamed/bengali-ime/releases/latest)
+   and open it.
+2. Double-click **Druti**. It installs itself into `~/Library/Input Methods` and turns itself on.
+3. If macOS says it can't verify Druti, open **System Settings → Privacy & Security**, scroll down,
+   click **Open Anyway** next to Druti, and open Druti again. macOS asks once, because Druti is free
+   and isn't notarized by Apple.
+4. Choose Druti in the input menu in the menu bar, or press Control-Space (or 🌐) to switch to it.
+   Keep ABC or U.S. enabled as well, for passwords.
+
+**Update:** open a newer DMG and double-click Druti again. It keeps your settings.
+**Uninstall:** choose **Uninstall Druti…** from Druti's input menu.
+
+More in [macos/README.md](macos/README.md).
+
 ## Developer guide
 
 ### How integration works
@@ -77,11 +96,13 @@ The same keys always produce the same text. A few rules make sure the output is 
 
 ## macOS input source
 
-`macos/` is **Seher**, a macOS input source that types with this algorithm in any app. It
+`macos/` is **Druti**, a macOS input source that types with this algorithm in any app. It
 uses a Rust port of the engine (`crates/`), which CI checks against the TypeScript engine keystroke by
-keystroke using fixtures generated from this package (`yarn fixtures`). To build and install it on an
-Apple Silicon Mac, see [macos/README.md](macos/README.md). The design and specs are in
-[openspec/changes/add-macos-input-source](openspec/changes/add-macos-input-source/).
+keystroke using fixtures generated from this package (`yarn fixtures`). To download it, see
+[Download for macOS](#download-for-macos). To build it from source, see
+[macos/README.md](macos/README.md). The specs are in
+[openspec/specs](openspec/specs/), and the design in
+[openspec/changes/archive/2026-09-28-add-macos-input-source](openspec/changes/archive/2026-09-28-add-macos-input-source/).
 
 ## Examples in this repo
 

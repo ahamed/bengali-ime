@@ -47,18 +47,30 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: aarch64-apple-darwin
+          targets: aarch64-apple-darwin, x86_64-apple-darwin
       - uses: Swatinem/rust-cache@v2
       - run: brew install xcodegen
+      - name: Install Rosetta if missing (for the x86_64 tests)
+        run: arch -x86_64 /usr/bin/true 2>/dev/null || softwareupdate --install-rosetta --agree-to-license
       - name: Swift tests (bindings and helpers)
         run: make -C macos test
+      - name: Rust engine tests on x86_64 (Rosetta)
+        run: cargo test --target x86_64-apple-darwin -p bengali-ime-core
+      - name: Swift tests on x86_64 (Rosetta)
+        # The whole toolchain runs as x86_64, so the test bundle loads.
+        run: arch -x86_64 swift test --package-path macos/BengaliIMECore
       - name: Build and sign the input method
         run: make -C macos app
       - name: Check the bundle
         run: |
-          APP=macos/build/DerivedData/Build/Products/Release/Seher.app
-          lipo -info macos/BengaliIMECore/BengaliIMEFFI.xcframework/macos-arm64/libbengali_ime_ffi.a
-          lipo -info "$APP/Contents/MacOS/Seher"
+          APP=macos/build/DerivedData/Build/Products/Release/Druti.app
+          for BIN in macos/BengaliIMECore/BengaliIMEFFI.xcframework/macos-arm64_x86_64/libbengali_ime_ffi.a "$APP/Contents/MacOS/Druti"; do
+            ARCHS="$(lipo -archs "$BIN")"
+            echo "$BIN: $ARCHS"
+            for A in arm64 x86_64; do
+              [[ " $ARCHS " == *" $A "* ]] || { echo "::error::$BIN is missing $A"; exit 1; }
+            done
+          done
           plutil -extract InputMethodServerControllerClass raw "$APP/Contents/Info.plist"
           plutil -extract CFBundleIdentifier raw "$APP/Contents/Info.plist"
           test -f "$APP/Contents/Resources/MenuIcon.tiff"

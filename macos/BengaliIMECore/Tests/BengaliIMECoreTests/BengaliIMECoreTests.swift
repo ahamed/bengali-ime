@@ -110,3 +110,28 @@ final class DocumentTextTests: XCTestCase {
         XCTAssertEqual(DocumentText.clipToParagraph("কখ"), "কখ")
     }
 }
+
+final class InstallLocationTests: XCTestCase {
+    private let home = URL(fileURLWithPath: "/Users/someone", isDirectory: true)
+
+    func testInstalledCopiesRunAsTheInputMethod() {
+        XCTAssertTrue(InstallLocation.isInstalled(
+            bundle: URL(fileURLWithPath: "/Users/someone/Library/Input Methods/Druti.app"), home: home))
+        XCTAssertTrue(InstallLocation.isInstalled(
+            bundle: URL(fileURLWithPath: "/Library/Input Methods/Druti.app"), home: home))
+        XCTAssertTrue(InstallLocation.isInstalled(
+            bundle: URL(fileURLWithPath: "/Users/someone/Library/Input Methods/../Input Methods/Druti.app"), home: home))
+    }
+
+    func testCopiesElsewhereBecomeTheInstaller() {
+        for path in [
+            "/Volumes/Druti 1.0.0/Druti.app",
+            "/Users/someone/Downloads/Druti.app",
+            "/private/var/folders/xy/T/AppTranslocation/1234/d/Druti.app",
+            "/Users/someone/Library/Input Methods/Old/Druti.app",
+            "/Users/other/Library/Input Methods/Druti.app",
+        ] {
+            XCTAssertFalse(InstallLocation.isInstalled(bundle: URL(fileURLWithPath: path), home: home), path)
+        }
+    }
+}

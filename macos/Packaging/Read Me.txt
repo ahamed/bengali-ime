@@ -1,0 +1,37 @@
+Druti @VERSION@
+Type Bengali phonetically in any app on your Mac.
+https://github.com/ahamed/bengali-ime
+
+INSTALL
+
+1. Double-click Druti. It copies itself into your Input Methods folder
+   (~/Library/Input Methods), turns itself on, and tells you when it's done.
+2. If macOS says it can't verify Druti: open System Settings > Privacy &
+   Security, scroll down, click "Open Anyway" next to Druti, and open Druti
+   again. macOS asks once, because Druti isn't notarized by Apple.
+3. Choose Druti in the input menu in the menu bar, or press Control-Space
+   (or the globe key) to switch to it.
+
+Keep ABC or U.S. enabled as well. macOS types passwords with it, and you can
+switch to it if Druti ever misbehaves.
+
+You can eject this disk image and delete it after installing.
+
+UPDATE
+
+Download the newer DMG and double-click Druti again. It replaces the old
+version and keeps your settings.
+
+UNINSTALL
+
+Choose "Uninstall Druti..." from Druti's input menu. It removes Druti from
+your input sources and moves it to the Trash.
+
+REQUIREMENTS
+
+macOS 14 or later, on Apple Silicon or Intel.
+
+LICENSE
+
+Druti is free software under the MIT license. Licenses.txt lists it and the
+licenses of the open source components Druti includes.

@@ -1,0 +1,4 @@
+/* The input source name in System Settings and the input menu. */
+CFBundleName = "Druti";
+CFBundleDisplayName = "Druti";
+"com.ahamed.inputmethod.Druti.Bengali" = "Druti";

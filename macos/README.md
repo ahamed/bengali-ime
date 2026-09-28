@@ -1,53 +1,42 @@
-# Seher for macOS
+# Druti for macOS
 
 A macOS input source that types Bengali with the bengali-ime phonetic algorithm in any app. It uses
 the Rust port of the engine in [`crates/`](../crates/), which CI checks against the TypeScript
 engine keystroke by keystroke. The Bengali text appears as you type each key: `k` shows `ক`, `h`
 turns it into `খ`, and `u` makes `খু`.
 
-It's built for personal use. It installs into your own `~/Library/Input Methods`, signed ad hoc, so
-it needs no Apple Developer account. It targets Apple Silicon and macOS 14 or later.
-
-## Prerequisites (once)
-
-1. **Xcode** from the App Store. Open it once to accept the license, then run
-   `sudo xcode-select -s /Applications/Xcode.app`.
-2. **Rust**: install from <https://rustup.rs>, then run
-   `rustup target add aarch64-apple-darwin`.
-3. **XcodeGen**: `brew install xcodegen`.
+It's free and signed ad hoc, so it needs no Apple Developer account, and it installs into your own
+`~/Library/Input Methods` without an administrator password. It runs on Apple Silicon and Intel
+Macs with macOS 14 or later.
 
 ## Install
 
-```sh
-make -C macos install
-```
+1. Download the latest **Druti-X.Y.Z.dmg** from
+   [Releases](https://github.com/ahamed/bengali-ime/releases/latest) and open it.
+2. Double-click **Druti**. It copies itself into `~/Library/Input Methods`, turns itself on, and
+   tells you when it's done. You can eject the disk image afterwards.
+3. If macOS says it can't verify Druti: open **System Settings → Privacy & Security**, scroll down,
+   click **Open Anyway** next to Druti, and open Druti again. macOS asks once, because Druti isn't
+   notarized by Apple. (Optionally, check the download first with `shasum -a 256`, and compare
+   the output with the `.sha256` file on the release page.)
+4. Choose Druti in the input menu in the menu bar, or press Control-Space (or the 🌐 key) to switch
+   input sources.
 
-This does the following:
-1. Builds the Rust engine and the app.
-2. Signs the app ad hoc.
-3. Copies it to `~/Library/Input Methods/Seher.app`.
-4. Registers it with macOS.
-5. Restarts any running copy.
-
-The first build takes a few minutes; later builds are faster.
-
-**First time only:** open System Settings → Keyboard → Text Input → Input Sources → **Edit…** →
-**+**, pick **Bengali** → **Seher**, and click **Add**. If it isn't listed, log out and back
-in once. Switch input sources from the menu bar or with Control-Space (or the 🌐 key).
+If macOS doesn't let Druti turn itself on, the installer says so and offers to open Keyboard
+settings. There, go to Text Input → Input Sources → **Edit…** → **+**, pick **Bengali** →
+**Druti**, and click **Add**. If it isn't listed, log out and back in once.
 
 **Keep ABC (or U.S.) enabled as well.** You need it for passwords, which macOS always types in
 ASCII. You also need it to keep typing if the input method ever misbehaves.
 
-**Updating:** pull, then run `make -C macos install` again. The next key you type uses the new
-build, without logging out.
+**Updating:** download the newer DMG and double-click Druti again. The next key you type uses the
+new version, and your settings are kept.
 
-## Uninstall
+**Uninstalling:** choose **Uninstall Druti…** from Druti's input menu. It removes Druti from your
+input sources, moves it to the Trash and deletes its settings.
 
-```sh
-make -C macos uninstall
-```
-
-This disables and removes the input source. It may stay listed in System Settings until you log out.
+Intel Macs haven't been tested on real hardware yet. If you use one, please report whether Druti
+works in [Issues](https://github.com/ahamed/bengali-ime/issues).
 
 ## Typing
 
@@ -73,32 +62,77 @@ new syllable. Right after typing, `ki` still gives `কি` in every app.
 
 ## Input menu
 
-Click the **স** icon in the menu bar while Seher is active:
+Click the **দ্রু** icon in the menu bar while Druti is active:
 
 - **Bengali Digits (১২৩)**: on by default. Turn it off to type `2024` as ASCII digits.
 - **দাঁড়ি (।) for Full Stop**: on by default. Turn it off to type `.` as `.`.
 - **Smart Quotes (“ ”)**: on by default. Turn it off for straight `"` and `'`.
 - **Convert Selection to Bengali**: replaces the selected roman text with Bengali, keeping line
   breaks and using the settings above. In apps that don't expose the selection, it does nothing.
+- **Uninstall Druti…**: asks first, then removes Druti (see [Install](#install)).
 
 The toggles are remembered across restarts.
 
-## Development
+## Build from source
+
+For developing Druti. Users don't need any of this.
+
+### Prerequisites (once)
+
+1. **Xcode** from the App Store. Open it once to accept the license, then run
+   `sudo xcode-select -s /Applications/Xcode.app`.
+2. **Rust**: install from <https://rustup.rs>, then run
+   `rustup target add aarch64-apple-darwin x86_64-apple-darwin`.
+3. **XcodeGen**: `brew install xcodegen`.
+4. Only for `make dmg`: **cargo-about** (`cargo install cargo-about --locked --features cli`) and
+   **dmgbuild** (`pip3 install -r macos/Packaging/requirements.txt`, for example in a virtualenv).
+
+### Install from source
+
+```sh
+make -C macos install
+```
+
+This builds the Rust engine and the Universal app, signs it ad hoc, and runs the app's own
+installer (`Druti --install`), the same code path as the DMG:
+1. Copies the app to `~/Library/Input Methods/Druti.app` and stops any running copy.
+2. Registers it with Launch Services and the Text Input system, and enables it.
+3. Restarts the menu bar's input menu and System Settings, so the new name and icon show up.
+
+The first build takes a few minutes; later builds are faster. After a code change, run it again:
+the next key you type uses the new build, without logging out.
+
+```sh
+make -C macos uninstall
+```
+
+This runs `Druti --uninstall`: it disables and deletes the installed copy and its settings. It may
+stay listed in System Settings until you log out.
+
+### Commands
 
 | Command | What it does |
 |---|---|
-| `make -C macos test` | Builds the Rust core and runs the Swift tests (bindings, key routing, context helpers). |
-| `make -C macos app` | Builds and signs `macos/build/.../Seher.app` without installing it (CI runs this). |
-| `make -C macos project` | Generates `Seher.xcodeproj` for browsing the code in Xcode. |
+| `make -C macos install` / `uninstall` | See above. |
+| `make -C macos test` | Builds the Rust core and runs the Swift tests (bindings, key routing, context helpers, install location). |
+| `make -C macos app` | Builds and signs `macos/build/.../Druti.app` without installing it (CI runs this). |
+| `make -C macos dmg` | Builds `macos/build/Druti-X.Y.Z.dmg`, the release DMG (needs cargo-about and dmgbuild). |
+| `make -C macos licenses` | Writes `Licenses.txt` (Druti's license and the Rust crates' notices) for the app bundle. Without cargo-about, it lists only Druti's license. |
+| `make -C macos version` | Prints the app version, `MARKETING_VERSION` in `project.yml`. |
+| `make -C macos project` | Generates `Druti.xcodeproj` for browsing the code in Xcode. |
 | `make -C macos clean` | Removes all build products. |
 
 Layout:
 - `BengaliIMECore/` is a Swift package. It holds the UniFFI bindings (generated by
   [`scripts/build-xcframework.sh`](../scripts/build-xcframework.sh)) and AppKit-free helpers with
   unit tests.
-- `Seher/` is the input method app. `InputController.swift` routes keys and applies the
-  composer's updates, `ClientText.swift` reads from the app's text field, and `Settings.swift` holds
-  the menu toggles.
+- `Druti/` is the input method app. `InputController.swift` routes keys and applies the
+  composer's updates, `ClientText.swift` reads from the app's text field, `Settings.swift` holds
+  the menu toggles, and `Installer.swift` / `InstallerUI.swift` install and uninstall it. Opened
+  from anywhere other than an Input Methods folder, the app installs itself instead of running as
+  the input method.
+- `Packaging/` has the DMG layout (`dmg-settings.py`), the Read Me and release notes templates, and
+  the cargo-about config. `Tools/` renders the menu icon and the DMG background.
 - `project.yml` is the XcodeGen spec. The `.xcodeproj` is generated and not committed.
 
 Bengali logic belongs in Rust (`crates/bengali-ime-core`), where it's tested on any OS. The Swift
@@ -109,11 +143,30 @@ side only routes keys and talks to InputMethodKit.
 Logs:
 
 ```sh
-log stream --predicate 'subsystem == "com.ahamed.inputmethod.Seher"' --level debug
+log stream --predicate 'subsystem == "com.ahamed.inputmethod.Druti"' --level debug
 ```
 
-If typing stops working, switch to ABC, then run `killall Seher`. macOS starts it again on
+If typing stops working, switch to ABC, then run `killall Druti`. macOS starts it again on
 the next key press.
+
+### Releasing
+
+1. Set `MARKETING_VERSION` in `macos/project.yml` to the new version, for example `1.0.1`, and merge
+   it to `main`.
+2. Tag that commit and push the tag:
+   ```sh
+   git tag macos-v1.0.1 && git push origin macos-v1.0.1
+   ```
+   The [Release macOS](../.github/workflows/release-macos.yml) workflow checks that the tag matches
+   the version, runs the tests on both architectures, builds the DMG and creates a **draft**
+   release with the DMG and its `.sha256`.
+3. Download the DMG from the draft with a browser and test it: a fresh install in a clean macOS
+   user account, an upgrade over the previous version, and the pass in
+   [COMPATIBILITY.md](COMPATIBILITY.md).
+4. Write the changes into the draft's notes and publish it.
+
+Never move a published tag. To fix a bad release, delete the draft (or unpublish it) and release
+a new patch version.
 
 ## Compatibility
 

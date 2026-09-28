@@ -3,13 +3,13 @@ import BengaliIMECore
 import InputMethodKit
 
 /// IMK creates one controller per text-input session (roughly, per text field
-/// that uses Seher). All Bengali logic lives in the Rust `Composer`;
+/// that uses Druti). All Bengali logic lives in the Rust `Composer`;
 /// this class routes keys to it and applies its updates to the app:
 /// committed text becomes normal text, and pending text (the cluster that the
 /// next key may still change, e.g. ক before h) is shown as marked text.
 ///
 /// The Objective-C name must match InputMethodServerControllerClass in Info.plist.
-@objc(SeherInputController)
+@objc(DrutiInputController)
 final class InputController: IMKInputController {
     private let composer = Composer(config: Settings.shared.config)
     private var settingsGeneration = Settings.shared.generation
@@ -172,10 +172,10 @@ final class InputController: IMKInputController {
         settingsGeneration = settings.generation
     }
 
-    /// The input menu (the Seher icon in the menu bar).
+    /// The input menu (the Druti icon in the menu bar).
     override func menu() -> NSMenu! {
         let settings = Settings.shared
-        let menu = NSMenu(title: "Seher")
+        let menu = NSMenu(title: "Druti")
 
         func addToggle(_ title: String, _ option: Settings.Option, _ action: Selector) {
             let item = NSMenuItem(title: title, action: action, keyEquivalent: "")
@@ -189,6 +189,9 @@ final class InputController: IMKInputController {
 
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: "Convert Selection to Bengali", action: #selector(convertSelection(_:)), keyEquivalent: ""))
+
+        menu.addItem(.separator())
+        menu.addItem(NSMenuItem(title: "Uninstall Druti\u{2026}", action: #selector(uninstall(_:)), keyEquivalent: ""))
         return menu
     }
 
@@ -221,6 +224,39 @@ final class InputController: IMKInputController {
         }
         client.insertText(converted, replacementRange: selection.range)
         expectedCaret = nil
+    }
+
+    /// Asks, then disables Druti, moves it to the Trash, deletes its settings
+    /// and quits (add-macos-distribution design D5).
+    @objc private func uninstall(_ sender: Any?) {
+        if let client = textInput(nil) {
+            commitPending(client)
+        }
+        let app = NSApplication.shared
+        InstallerUI.bringToFront(app)
+        let alert = NSAlert()
+        alert.messageText = "Uninstall Druti?"
+        alert.informativeText = "Druti will be removed from your input sources and moved to the Trash, and its settings will be deleted."
+        alert.addButton(withTitle: "Uninstall").hasDestructiveAction = true
+        alert.addButton(withTitle: "Cancel")
+        guard alert.runModal() == .alertFirstButtonReturn else {
+            // Back to a background app, so focus returns to the text field.
+            app.setActivationPolicy(.prohibited)
+            app.hide(nil)
+            return
+        }
+        do {
+            try Installer.uninstall(moveToTrash: true)
+            Log.input.info("Uninstalled")
+            exit(0)
+        } catch {
+            let failure = NSAlert(error: error)
+            failure.messageText = "Druti couldn’t be uninstalled"
+            failure.informativeText = error.localizedDescription
+            failure.runModal()
+            app.setActivationPolicy(.prohibited)
+            app.hide(nil)
+        }
     }
 
     // MARK: - Helpers
