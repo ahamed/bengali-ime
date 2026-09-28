@@ -12,7 +12,8 @@ public enum InstallLocation {
 
     /// The system-wide folder. The installer never writes there, but a copy
     /// someone placed there still runs as the input method.
-    public static let systemFolder = URL(fileURLWithPath: "/Library/Input Methods", isDirectory: true)
+    public static let systemFolder = URL(
+        fileURLWithPath: "/Library/Input Methods", isDirectory: true)
 
     /// True when `bundle` sits directly inside either Input Methods folder.
     /// Symlinks and `..` are resolved first, so an odd path to the same place

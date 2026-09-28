@@ -48,7 +48,8 @@ struct Step {
 fn decode_action(value: &Value) -> Action {
     let parts = value.as_array().expect("action is an array");
     let text = |i: usize| parts[i].as_str().expect("text").to_owned();
-    let count = |i: usize| parts[i].as_u64().expect("count") as usize;
+    let count =
+        |i: usize| usize::try_from(parts[i].as_u64().expect("count")).expect("count fits usize");
     match parts[0].as_str().expect("action tag") {
         "i" => Action::Insert { text: text(1) },
         "r" => Action::Replace {

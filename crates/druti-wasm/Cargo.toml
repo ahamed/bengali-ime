@@ -3,6 +3,7 @@ name = "druti-wasm"
 description = "wasm-bindgen bindings for druti-core, used by the web playground"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
 publish = false
@@ -12,5 +13,8 @@ publish = false
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-druti-core = { version = "0.1.0", path = "../druti-core" }
-wasm-bindgen = "=0.2.129"
+druti-core.workspace = true
+wasm-bindgen.workspace = true
+
+[lints]
+workspace = true

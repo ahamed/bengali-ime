@@ -9,8 +9,8 @@
 
 use unicode_segmentation::UnicodeSegmentation;
 
-use crate::data::{lookup, DARI, DASH, ENTER_KEY, ROMAN_TO_PHONETIC_VOWELS};
-use crate::engine::{utf16, Action, Config, Engine};
+use crate::data::{DARI, DASH, ENTER_KEY};
+use crate::engine::{Action, Config, Engine, is_vowel, utf16};
 
 /// What the host applies after a key, in this order:
 /// 1. Delete `replace_before` UTF-16 units of committed text just before the
@@ -23,9 +23,13 @@ use crate::engine::{utf16, Action, Config, Engine};
 /// itself, after applying steps 1–3.
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Update {
+    /// UTF-16 units of committed text to delete before the pending text (step 1).
     pub replace_before: u32,
+    /// Text that replaces the pending text and becomes final (step 2).
     pub commit: String,
+    /// The new pending text (step 3).
     pub pending: String,
+    /// Whether the key was consumed; if not, the application also processes it.
     pub handled: bool,
 }
 
@@ -44,6 +48,7 @@ impl Default for Composer {
 }
 
 impl Composer {
+    /// A composer with nothing pending.
     pub fn new(config: Config) -> Self {
         Self {
             engine: Engine::with_config(config),
@@ -51,6 +56,7 @@ impl Composer {
         }
     }
 
+    /// The current output options.
     pub fn config(&self) -> Config {
         self.engine.config()
     }
@@ -125,9 +131,7 @@ impl Composer {
     /// point, ellipsis) and quotes (balancing). Hosts read the document only
     /// for these keys, and only while nothing is pending.
     pub fn key_reads_document(key: &str) -> bool {
-        matches!(key, "-" | "." | "\"" | "'")
-            || lookup(ROMAN_TO_PHONETIC_VOWELS, key).is_some()
-            || lookup(ROMAN_TO_PHONETIC_VOWELS, &key.to_lowercase()).is_some()
+        matches!(key, "-" | "." | "\"" | "'") || is_vowel(key)
     }
 
     /// How much of the end of the new text stays pending.

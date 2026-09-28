@@ -115,6 +115,7 @@ stay listed in System Settings until you log out.
 |---|---|
 | `make -C macos install` / `uninstall` | See above. |
 | `make -C macos test` | Builds the Rust core and runs the Swift tests (bindings, key routing, context helpers, install location). |
+| `make -C macos lint` / `format` | Checks / rewrites the Swift sources with `swift-format` (bundled with Xcode; rules in `.swift-format`). CI runs `lint`. |
 | `make -C macos app` | Builds and signs `macos/build/.../Druti.app` without installing it (CI runs this). |
 | `make -C macos dmg` | Builds `macos/build/Druti-X.Y.Z.dmg`, the release DMG (needs cargo-about and dmgbuild). |
 | `make -C macos app-zip` | Zips the built app into `macos/build/Druti-X.Y.Z.app.zip` with `ditto`, keeping its signature. Run it after `make dmg`. |

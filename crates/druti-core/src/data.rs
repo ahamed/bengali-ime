@@ -5,18 +5,30 @@
 //! The nukta letters are written as escapes (U+09DC, U+09DD, U+09DF) because
 //! Unicode normalization would otherwise decompose them.
 
+/// Hasant (virama) ্, which stacks two consonants.
 pub const HASANT: &str = "\u{09CD}";
+/// The `.` key, and the ASCII full stop it stays after a digit or another dot.
 pub const FULL_STOP: &str = ".";
+/// The space key.
 pub const SPACE: &str = " ";
+/// The key name hosts pass for Return/Enter.
 pub const ENTER_KEY: &str = "Enter";
+/// দাঁড়ি (।), the Bengali full stop.
 pub const DARI: &str = "\u{0964}";
+/// The `-` key; two in a row become [`DOUBLE_DASH`].
 pub const DASH: &str = "-";
+/// Em dash (—), typed as `--`.
 pub const DOUBLE_DASH: &str = "\u{2014}";
+/// Left double quotation mark (“).
 pub const TYPOGRAPHIC_DOUBLE_QUOTE_OPEN: &str = "\u{201C}";
+/// Right double quotation mark (”).
 pub const TYPOGRAPHIC_DOUBLE_QUOTE_CLOSE: &str = "\u{201D}";
+/// Left single quotation mark (‘).
 pub const TYPOGRAPHIC_SINGLE_QUOTE_OPEN: &str = "\u{2018}";
+/// Right single quotation mark (’), also the apostrophe.
 pub const TYPOGRAPHIC_SINGLE_QUOTE_CLOSE: &str = "\u{2019}";
 
+/// The named symbols above, by name, for the fixture comparison.
 pub const SYMBOLS: &[(&str, &str)] = &[
     ("FULL_STOP", FULL_STOP),
     ("SPACE", SPACE),
@@ -45,70 +57,130 @@ pub const SYMBOLS: &[(&str, &str)] = &[
 ];
 
 // phoneticVowels
-pub const SWAR_E_O: &str = "\u{0985}"; // অ
-pub const SWAR_E_A: &str = "\u{0986}"; // আ
-pub const RASSAW_E: &str = "\u{0987}"; // ই
-pub const DIRGHA_E: &str = "\u{0988}"; // ঈ
-pub const RASSAW_U: &str = "\u{0989}"; // উ
-pub const DIRGHA_U: &str = "\u{098A}"; // ঊ
-pub const RASSAW_RI: &str = "\u{098B}"; // ঋ
-pub const VOWEL_A: &str = "\u{098F}"; // এ
-pub const VOWEL_OI: &str = "\u{0990}"; // ঐ
-pub const VOWEL_O: &str = "\u{0993}"; // ও
-pub const VOWEL_OU: &str = "\u{0994}"; // ঔ
+/// অ
+pub const SWAR_E_O: &str = "\u{0985}";
+/// আ
+pub const SWAR_E_A: &str = "\u{0986}";
+/// ই
+pub const RASSAW_E: &str = "\u{0987}";
+/// ঈ
+pub const DIRGHA_E: &str = "\u{0988}";
+/// উ
+pub const RASSAW_U: &str = "\u{0989}";
+/// ঊ
+pub const DIRGHA_U: &str = "\u{098A}";
+/// ঋ
+pub const RASSAW_RI: &str = "\u{098B}";
+/// এ
+pub const VOWEL_A: &str = "\u{098F}";
+/// ঐ
+pub const VOWEL_OI: &str = "\u{0990}";
+/// ও
+pub const VOWEL_O: &str = "\u{0993}";
+/// ঔ
+pub const VOWEL_OU: &str = "\u{0994}";
 
 // phoneticKar
+/// া (aa-kar).
 pub const A_KAR: &str = "\u{09BE}";
+/// ি (i-kar).
 pub const RASSAW_E_KAR: &str = "\u{09BF}";
+/// ী (ii-kar).
 pub const DIRGHA_E_KAR: &str = "\u{09C0}";
+/// ু (u-kar).
 pub const RASSAW_U_KAR: &str = "\u{09C1}";
+/// ূ (uu-kar).
 pub const DIRGHA_U_KAR: &str = "\u{09C2}";
+/// ৃ (ri-kar).
 pub const RASSAW_RI_KAR: &str = "\u{09C3}";
+/// ে (e-kar).
 pub const E_KAR: &str = "\u{09C7}";
+/// ৈ (oi-kar).
 pub const OI_KAR: &str = "\u{09C8}";
+/// ো (o-kar).
 pub const O_KAR: &str = "\u{09CB}";
+/// ৌ (ou-kar).
 pub const OU_KAR: &str = "\u{09CC}";
 
 // phoneticConsonants
-pub const KONTHYO_KO: &str = "\u{0995}"; // ক
-pub const KONTHYO_KHO: &str = "\u{0996}"; // খ
-pub const KONTHYO_GO: &str = "\u{0997}"; // গ
-pub const KONTHYO_GHO: &str = "\u{0998}"; // ঘ
-pub const KONTHYO_UNGO: &str = "\u{0999}"; // ঙ
-pub const TALOBBO_CHO: &str = "\u{099A}"; // চ
-pub const TALOBBO_CHHO: &str = "\u{099B}"; // ছ
-pub const BORGIYO_JO: &str = "\u{099C}"; // জ
-pub const BORGIYO_JHO: &str = "\u{099D}"; // ঝ
-pub const TALOBBO_NYO: &str = "\u{099E}"; // ঞ
-pub const MURDHONNO_TO: &str = "\u{099F}"; // ট
-pub const MURDHONNO_THO: &str = "\u{09A0}"; // ঠ
-pub const MURDHONNO_DO: &str = "\u{09A1}"; // ড
-pub const MURDHONNO_DHO: &str = "\u{09A2}"; // ঢ
-pub const MURDHONNO_NO: &str = "\u{09A3}"; // ণ
-pub const DONTO_TO: &str = "\u{09A4}"; // ত
-pub const DONTO_THO: &str = "\u{09A5}"; // থ
-pub const DONTO_DO: &str = "\u{09A6}"; // দ
-pub const DONTO_DHO: &str = "\u{09A7}"; // ধ
-pub const DONTO_NO: &str = "\u{09A8}"; // ন
-pub const OSHTHO_PO: &str = "\u{09AA}"; // প
-pub const OSHTHO_PHO: &str = "\u{09AB}"; // ফ
-pub const OSHTHO_BO: &str = "\u{09AC}"; // ব
-pub const OSHTHO_BHO: &str = "\u{09AD}"; // ভ
-pub const OSHTHO_MO: &str = "\u{09AE}"; // ম
-pub const ONTOSTHO_JO: &str = "\u{09AF}"; // য
-pub const ONTOSTHO_RO: &str = "\u{09B0}"; // র
-pub const ONTOSTHO_LO: &str = "\u{09B2}"; // ল
-pub const TALOBBO_SHO: &str = "\u{09B6}"; // শ
-pub const MURDHONNO_SHO: &str = "\u{09B7}"; // ষ
-pub const DONTO_SHO: &str = "\u{09B8}"; // স
-pub const USHMO_HO: &str = "\u{09B9}"; // হ
-pub const D_E_SHUNNO_RO: &str = "\u{09DC}"; // ড়
-pub const DH_E_SHUNNO_RO: &str = "\u{09DD}"; // ঢ়
-pub const ONTOSTHO_YO: &str = "\u{09DF}"; // য়
-pub const KHONDO_TO: &str = "\u{09CE}"; // ৎ
-pub const CHONDROBINDU: &str = "\u{0981}"; // ঁ
-pub const ONUSHWAR: &str = "\u{0982}"; // ং
-pub const BISHORGO: &str = "\u{0983}"; // ঃ
+/// ক
+pub const KONTHYO_KO: &str = "\u{0995}";
+/// খ
+pub const KONTHYO_KHO: &str = "\u{0996}";
+/// গ
+pub const KONTHYO_GO: &str = "\u{0997}";
+/// ঘ
+pub const KONTHYO_GHO: &str = "\u{0998}";
+/// ঙ
+pub const KONTHYO_UNGO: &str = "\u{0999}";
+/// চ
+pub const TALOBBO_CHO: &str = "\u{099A}";
+/// ছ
+pub const TALOBBO_CHHO: &str = "\u{099B}";
+/// জ
+pub const BORGIYO_JO: &str = "\u{099C}";
+/// ঝ
+pub const BORGIYO_JHO: &str = "\u{099D}";
+/// ঞ
+pub const TALOBBO_NYO: &str = "\u{099E}";
+/// ট
+pub const MURDHONNO_TO: &str = "\u{099F}";
+/// ঠ
+pub const MURDHONNO_THO: &str = "\u{09A0}";
+/// ড
+pub const MURDHONNO_DO: &str = "\u{09A1}";
+/// ঢ
+pub const MURDHONNO_DHO: &str = "\u{09A2}";
+/// ণ
+pub const MURDHONNO_NO: &str = "\u{09A3}";
+/// ত
+pub const DONTO_TO: &str = "\u{09A4}";
+/// থ
+pub const DONTO_THO: &str = "\u{09A5}";
+/// দ
+pub const DONTO_DO: &str = "\u{09A6}";
+/// ধ
+pub const DONTO_DHO: &str = "\u{09A7}";
+/// ন
+pub const DONTO_NO: &str = "\u{09A8}";
+/// প
+pub const OSHTHO_PO: &str = "\u{09AA}";
+/// ফ
+pub const OSHTHO_PHO: &str = "\u{09AB}";
+/// ব
+pub const OSHTHO_BO: &str = "\u{09AC}";
+/// ভ
+pub const OSHTHO_BHO: &str = "\u{09AD}";
+/// ম
+pub const OSHTHO_MO: &str = "\u{09AE}";
+/// য
+pub const ONTOSTHO_JO: &str = "\u{09AF}";
+/// র
+pub const ONTOSTHO_RO: &str = "\u{09B0}";
+/// ল
+pub const ONTOSTHO_LO: &str = "\u{09B2}";
+/// শ
+pub const TALOBBO_SHO: &str = "\u{09B6}";
+/// ষ
+pub const MURDHONNO_SHO: &str = "\u{09B7}";
+/// স
+pub const DONTO_SHO: &str = "\u{09B8}";
+/// হ
+pub const USHMO_HO: &str = "\u{09B9}";
+/// ড়
+pub const D_E_SHUNNO_RO: &str = "\u{09DC}";
+/// ঢ়
+pub const DH_E_SHUNNO_RO: &str = "\u{09DD}";
+/// য়
+pub const ONTOSTHO_YO: &str = "\u{09DF}";
+/// ৎ
+pub const KHONDO_TO: &str = "\u{09CE}";
+/// ঁ
+pub const CHONDROBINDU: &str = "\u{0981}";
+/// ং
+pub const ONUSHWAR: &str = "\u{0982}";
+/// ঃ
+pub const BISHORGO: &str = "\u{0983}";
 
 /// `Object.values(phoneticConsonants)`, in declaration order.
 pub const PHONETIC_CONSONANT_GRAPHEMES: &[&str] = &[
@@ -153,6 +225,7 @@ pub const PHONETIC_CONSONANT_GRAPHEMES: &[&str] = &[
     BISHORGO,
 ];
 
+/// Chandrabindu, onushwar and bishorgo: signs that follow a letter but are not letters.
 pub const MODIFIER_GRAPHEME_CHARS: &[&str] = &[CHONDROBINDU, ONUSHWAR, BISHORGO];
 
 /// `Object.values(phoneticVowels)`.
@@ -175,6 +248,7 @@ pub const DEPENDENT_VOWEL_GRAPHEMES: &[&str] = &[
     OU_KAR,
 ];
 
+/// ASCII digit → Bengali digit.
 pub const NUMBER_MAP: &[(&str, &str)] = &[
     ("1", "\u{09E7}"),
     ("2", "\u{09E8}"),
@@ -188,6 +262,7 @@ pub const NUMBER_MAP: &[(&str, &str)] = &[
     ("0", "\u{09E6}"),
 ];
 
+/// Punctuation keys with a fixed Bengali output.
 pub const SPECIAL_CHARACTERS_MAP: &[(&str, &str)] = &[
     (".", DARI),
     ("^", CHONDROBINDU),
@@ -195,12 +270,15 @@ pub const SPECIAL_CHARACTERS_MAP: &[(&str, &str)] = &[
     (",", ","),
 ];
 
+/// Keys handled as punctuation rather than letters.
 pub const SPECIAL_CHARACTER_INPUTS: &[&str] = &[".", "^", ":", ",", "-", "\"", "'"];
 
 /// Independent vowel and its dependent sign (kar) for a roman vowel key.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct VowelData {
+    /// The independent vowel, used at the start of a syllable (আ).
     pub ind: &'static str,
+    /// The dependent sign, used after a consonant (া). Empty for `o`, the inherent vowel.
     pub kar: &'static str,
 }
 
@@ -208,6 +286,7 @@ const fn vowel(ind: &'static str, kar: &'static str) -> VowelData {
     VowelData { ind, kar }
 }
 
+/// Roman vowel key → its independent vowel and kar.
 pub const ROMAN_TO_PHONETIC_VOWELS: &[(&str, VowelData)] = &[
     ("o", vowel(SWAR_E_O, "")),
     ("a", vowel(SWAR_E_A, A_KAR)),
@@ -221,6 +300,7 @@ pub const ROMAN_TO_PHONETIC_VOWELS: &[(&str, VowelData)] = &[
     ("O", vowel(VOWEL_O, O_KAR)),
 ];
 
+/// Lowercase roman key → consonant.
 pub const DEFAULT_CONSONANT_BY_ROMAN_KEY: &[(&str, &str)] = &[
     ("q", KONTHYO_KO),
     ("k", KONTHYO_KO),
@@ -245,6 +325,7 @@ pub const DEFAULT_CONSONANT_BY_ROMAN_KEY: &[(&str, &str)] = &[
     ("x", "\u{0995}\u{09CD}\u{09B8}"), // ক্স
 ];
 
+/// Capital roman keys with their own consonant (retroflex and nukta letters).
 pub const CAPITAL_ROMAN_TO_CONSONANT: &[(&str, &str)] = &[
     ("T", MURDHONNO_TO),
     ("D", MURDHONNO_DO),
@@ -253,9 +334,12 @@ pub const CAPITAL_ROMAN_TO_CONSONANT: &[(&str, &str)] = &[
     ("S", TALOBBO_SHO),
 ];
 
-pub const NYO_CHO: &str = "\u{099E}\u{09CD}\u{099A}"; // ঞ্চ
-pub const NYO_CHHO: &str = "\u{099E}\u{09CD}\u{099B}"; // ঞ্ছ
+/// ঞ্চ
+pub const NYO_CHO: &str = "\u{099E}\u{09CD}\u{099A}";
+/// ঞ্ছ
+pub const NYO_CHHO: &str = "\u{099E}\u{09CD}\u{099B}";
 
+/// Consonant → the consonant that `h` turns it into.
 pub const ASPIRATED_CONSONANT_BY_BASE: &[(&str, &str)] = &[
     (KONTHYO_KO, KONTHYO_KHO),
     (KONTHYO_GO, KONTHYO_GHO),
@@ -278,10 +362,12 @@ pub fn lookup<V: Copy>(table: &[(&str, V)], key: &str) -> Option<V> {
     table.iter().find(|(k, _)| *k == key).map(|(_, v)| *v)
 }
 
+/// True for any of [`PHONETIC_CONSONANT_GRAPHEMES`].
 pub fn is_phonetic_consonant(s: &str) -> bool {
     PHONETIC_CONSONANT_GRAPHEMES.contains(&s)
 }
 
+/// True for any of [`MODIFIER_GRAPHEME_CHARS`].
 pub fn is_modifier(s: &str) -> bool {
     MODIFIER_GRAPHEME_CHARS.contains(&s)
 }

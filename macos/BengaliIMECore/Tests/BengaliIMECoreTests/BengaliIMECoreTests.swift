@@ -1,137 +1,143 @@
-import XCTest
 import BengaliIMECore
+import Foundation
+import Testing
 
-final class ComposerBindingTests: XCTestCase {
+@Suite("Composer bindings")
+struct ComposerBindingTests {
     private func type(_ keys: String, into composer: Composer) -> String {
         var committed = ""
         for key in keys {
             let update = composer.key(key: String(key), textBeforeCaret: nil)
-            XCTAssertTrue(update.handled, "key \(key)")
+            #expect(update.handled, "key \(key)")
             committed += update.commit
         }
         return committed
     }
 
     // Task 4.3: k, h, u, b, space through the bindings commits খুব.
-    func testTypingKhubCommitsTheWord() {
+    @Test func typingKhubCommitsTheWord() {
         let composer = Composer(config: defaultConfig())
-        XCTAssertEqual(type("khub ", into: composer), "খুব ")
-        XCTAssertEqual(composer.pending(), "")
+        #expect(type("khub ", into: composer) == "খুব ")
+        #expect(composer.pending() == "")
     }
 
-    func testPendingThenGraphemeBackspace() {
+    @Test func pendingThenGraphemeBackspace() {
         let composer = Composer(config: defaultConfig())
-        XCTAssertEqual(composer.key(key: "k", textBeforeCaret: nil).pending, "ক")
-        XCTAssertEqual(composer.key(key: "h", textBeforeCaret: nil).pending, "খ")
+        #expect(composer.key(key: "k", textBeforeCaret: nil).pending == "ক")
+        #expect(composer.key(key: "h", textBeforeCaret: nil).pending == "খ")
         let update = composer.backspace()
-        XCTAssertTrue(update.handled)
-        XCTAssertEqual(update.pending, "")
-        XCTAssertFalse(composer.backspace().handled)
+        #expect(update.handled)
+        #expect(update.pending == "")
+        #expect(!composer.backspace().handled)
     }
 
-    func testKarAttachesToDocumentText() {
+    @Test func karAttachesToDocumentText() {
         let composer = Composer(config: defaultConfig())
-        XCTAssertEqual(composer.key(key: "i", textBeforeCaret: "ক").commit, "\u{09BF}")
-        XCTAssertEqual(Composer(config: defaultConfig()).key(key: "i", textBeforeCaret: nil).commit, "ই")
+        #expect(composer.key(key: "i", textBeforeCaret: "ক").commit == "\u{09BF}")
+        #expect(Composer(config: defaultConfig()).key(key: "i", textBeforeCaret: nil).commit == "ই")
     }
 
-    func testHyphenInDocumentBecomesEmDash() {
+    @Test func hyphenInDocumentBecomesEmDash() {
         let update = Composer(config: defaultConfig()).key(key: "-", textBeforeCaret: "a-")
-        XCTAssertEqual(update.replaceBefore, 1)
-        XCTAssertEqual(update.commit, "\u{2014}")
+        #expect(update.replaceBefore == 1)
+        #expect(update.commit == "\u{2014}")
     }
 
-    func testConfigToggles() {
+    @Test func configToggles() {
         let composer = Composer(
             config: Config(bengaliDigits: false, dariForPeriod: true, smartQuotes: true))
-        XCTAssertEqual(type("2", into: composer), "2")
+        #expect(type("2", into: composer) == "2")
     }
 
-    func testKeyReadsDocument() {
-        XCTAssertTrue(keyReadsDocument(key: "i"))
-        XCTAssertTrue(keyReadsDocument(key: "\""))
-        XCTAssertFalse(keyReadsDocument(key: "k"))
+    @Test func keyReadsDocumentOnlyForContextKeys() {
+        #expect(keyReadsDocument(key: "i"))
+        #expect(keyReadsDocument(key: "\""))
+        #expect(!keyReadsDocument(key: "k"))
     }
 
-    func testTranspileSelection() {
+    @Test func transpileSelection() {
         // U+09DF is য় (written escaped so editors can't decompose it).
-        XCTAssertEqual(
-            transpileRomanDocument(
-                document: "ami banglay gan gai", preserveLineBreaks: true, config: defaultConfig()),
-            "আমি বাংলা\u{09DF} গান গাই")
+        let converted = transpileRomanDocument(
+            document: "ami banglay gan gai", preserveLineBreaks: true, config: defaultConfig())
+        #expect(converted == "আমি বাংলা\u{09DF} গান গাই")
     }
 }
 
-final class KeyRoutingTests: XCTestCase {
-    func testPrintableKeysAreTyped() {
-        XCTAssertEqual(KeyRouting.route(KeyPress(keyCode: 40, characters: "k")), .type("k"))
-        XCTAssertEqual(KeyRouting.route(KeyPress(keyCode: 40, characters: "K")), .type("K"))
-        XCTAssertEqual(KeyRouting.route(KeyPress(keyCode: 49, characters: " ")), .type(" "))
-        XCTAssertEqual(KeyRouting.route(KeyPress(keyCode: 44, characters: "?")), .type("?"))
+@Suite("Key routing")
+struct KeyRoutingTests {
+    @Test(arguments: [
+        (UInt16(40), "k"), (40, "K"), (49, " "), (44, "?"),
+    ])
+    func printableKeysAreTyped(keyCode: UInt16, characters: String) {
+        #expect(
+            KeyRouting.route(KeyPress(keyCode: keyCode, characters: characters))
+                == .type(characters))
     }
 
-    func testBackspace() {
-        XCTAssertEqual(KeyRouting.route(KeyPress(keyCode: 51, characters: "\u{7F}")), .backspace)
-        XCTAssertEqual(
-            KeyRouting.route(KeyPress(keyCode: 51, characters: "\u{7F}", option: true)), .commitAndPass)
+    @Test func backspace() {
+        #expect(KeyRouting.route(KeyPress(keyCode: 51, characters: "\u{7F}")) == .backspace)
+        #expect(
+            KeyRouting.route(KeyPress(keyCode: 51, characters: "\u{7F}", option: true))
+                == .commitAndPass)
     }
 
-    func testNavigationAndReturnCommitAndPass() {
-        for code: UInt16 in [36, 76, 48, 53, 117, 115, 119, 116, 121, 123, 124, 125, 126] {
-            XCTAssertEqual(KeyRouting.route(KeyPress(keyCode: code, characters: "x")), .commitAndPass, "\(code)")
-        }
+    @Test(arguments: [36, 76, 48, 53, 117, 115, 119, 116, 121, 123, 124, 125, 126] as [UInt16])
+    func navigationAndReturnCommitAndPass(keyCode: UInt16) {
+        #expect(KeyRouting.route(KeyPress(keyCode: keyCode, characters: "x")) == .commitAndPass)
     }
 
-    func testShortcutsCommitAndPass() {
-        XCTAssertEqual(KeyRouting.route(KeyPress(keyCode: 1, characters: "s", command: true)), .commitAndPass)
-        XCTAssertEqual(KeyRouting.route(KeyPress(keyCode: 8, characters: "c", control: true)), .commitAndPass)
-        XCTAssertEqual(KeyRouting.route(KeyPress(keyCode: 0, characters: "å", option: true)), .commitAndPass)
+    @Test(arguments: [
+        KeyPress(keyCode: 1, characters: "s", command: true),
+        KeyPress(keyCode: 8, characters: "c", control: true),
+        KeyPress(keyCode: 0, characters: "å", option: true),
+    ])
+    func shortcutsCommitAndPass(press: KeyPress) {
+        #expect(KeyRouting.route(press) == .commitAndPass)
     }
 
-    func testFunctionAndControlCharactersCommitAndPass() {
-        XCTAssertEqual(KeyRouting.route(KeyPress(keyCode: 122, characters: "\u{F704}")), .commitAndPass)
-        XCTAssertEqual(KeyRouting.route(KeyPress(keyCode: 0, characters: "\u{1B}")), .commitAndPass)
-        XCTAssertEqual(KeyRouting.route(KeyPress(keyCode: 0, characters: nil)), .commitAndPass)
-        XCTAssertEqual(KeyRouting.route(KeyPress(keyCode: 0, characters: "")), .commitAndPass)
-    }
-}
-
-final class DocumentTextTests: XCTestCase {
-    func testRangeIsBounded() {
-        XCTAssertEqual(DocumentText.rangeBeforeCaret(10), NSRange(location: 0, length: 10))
-        XCTAssertEqual(DocumentText.rangeBeforeCaret(5000), NSRange(location: 3976, length: 1024))
-        XCTAssertEqual(DocumentText.rangeBeforeCaret(0), NSRange(location: 0, length: 0))
-    }
-
-    func testClipsAtParagraphStart() {
-        XCTAssertEqual(DocumentText.clipToParagraph("“আমি\nক"), "ক")
-        XCTAssertEqual(DocumentText.clipToParagraph("আমি\r\n"), "")
-        XCTAssertEqual(DocumentText.clipToParagraph("a\u{2029}b"), "b")
-        XCTAssertEqual(DocumentText.clipToParagraph("কখ"), "কখ")
+    @Test(arguments: ["\u{F704}", "\u{1B}", nil, ""] as [String?])
+    func functionAndControlCharactersCommitAndPass(characters: String?) {
+        #expect(KeyRouting.route(KeyPress(keyCode: 0, characters: characters)) == .commitAndPass)
     }
 }
 
-final class InstallLocationTests: XCTestCase {
+@Suite("Document text")
+struct DocumentTextTests {
+    @Test func rangeIsBounded() {
+        #expect(DocumentText.rangeBeforeCaret(10) == NSRange(location: 0, length: 10))
+        #expect(DocumentText.rangeBeforeCaret(5000) == NSRange(location: 3976, length: 1024))
+        #expect(DocumentText.rangeBeforeCaret(0) == NSRange(location: 0, length: 0))
+    }
+
+    @Test func clipsAtParagraphStart() {
+        #expect(DocumentText.clipToParagraph("“আমি\nক") == "ক")
+        #expect(DocumentText.clipToParagraph("আমি\r\n") == "")
+        #expect(DocumentText.clipToParagraph("a\u{2029}b") == "b")
+        #expect(DocumentText.clipToParagraph("কখ") == "কখ")
+    }
+}
+
+@Suite("Install location")
+struct InstallLocationTests {
     private let home = URL(fileURLWithPath: "/Users/someone", isDirectory: true)
 
-    func testInstalledCopiesRunAsTheInputMethod() {
-        XCTAssertTrue(InstallLocation.isInstalled(
-            bundle: URL(fileURLWithPath: "/Users/someone/Library/Input Methods/Druti.app"), home: home))
-        XCTAssertTrue(InstallLocation.isInstalled(
-            bundle: URL(fileURLWithPath: "/Library/Input Methods/Druti.app"), home: home))
-        XCTAssertTrue(InstallLocation.isInstalled(
-            bundle: URL(fileURLWithPath: "/Users/someone/Library/Input Methods/../Input Methods/Druti.app"), home: home))
+    @Test(arguments: [
+        "/Users/someone/Library/Input Methods/Druti.app",
+        "/Library/Input Methods/Druti.app",
+        "/Users/someone/Library/Input Methods/../Input Methods/Druti.app",
+    ])
+    func installedCopiesRunAsTheInputMethod(path: String) {
+        #expect(InstallLocation.isInstalled(bundle: URL(fileURLWithPath: path), home: home))
     }
 
-    func testCopiesElsewhereBecomeTheInstaller() {
-        for path in [
-            "/Volumes/Druti 1.0.0/Druti.app",
-            "/Users/someone/Downloads/Druti.app",
-            "/private/var/folders/xy/T/AppTranslocation/1234/d/Druti.app",
-            "/Users/someone/Library/Input Methods/Old/Druti.app",
-            "/Users/other/Library/Input Methods/Druti.app",
-        ] {
-            XCTAssertFalse(InstallLocation.isInstalled(bundle: URL(fileURLWithPath: path), home: home), path)
-        }
+    @Test(arguments: [
+        "/Volumes/Druti 1.0.0/Druti.app",
+        "/Users/someone/Downloads/Druti.app",
+        "/private/var/folders/xy/T/AppTranslocation/1234/d/Druti.app",
+        "/Users/someone/Library/Input Methods/Old/Druti.app",
+        "/Users/other/Library/Input Methods/Druti.app",
+    ])
+    func copiesElsewhereBecomeTheInstaller(path: String) {
+        #expect(!InstallLocation.isInstalled(bundle: URL(fileURLWithPath: path), home: home))
     }
 }

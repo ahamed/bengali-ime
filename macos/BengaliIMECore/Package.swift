@@ -1,4 +1,4 @@
-// swift-tools-version:5.9
+// swift-tools-version:6.0
 // The Rust engine for Swift: the UniFFI bindings plus small host helpers that
 // don't need AppKit, so they can be unit-tested with `swift test`.
 //
@@ -10,7 +10,7 @@ let package = Package(
     name: "BengaliIMECore",
     platforms: [.macOS(.v14)],
     products: [
-        .library(name: "BengaliIMECore", targets: ["BengaliIMECore"]),
+        .library(name: "BengaliIMECore", targets: ["BengaliIMECore"])
     ],
     targets: [
         .binaryTarget(name: "BengaliIMEFFI", path: "BengaliIMEFFI.xcframework"),

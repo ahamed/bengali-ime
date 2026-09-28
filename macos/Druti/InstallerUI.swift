@@ -4,6 +4,7 @@ import AppKit
 /// Methods): install itself and explain how to start typing. Druti is a
 /// background-only app, so it becomes an accessory app just long enough to
 /// show its dialogs (add-macos-distribution design D4).
+@MainActor
 enum InstallerUI {
     static func run() -> Never {
         let app = NSApplication.shared
@@ -21,7 +22,8 @@ enum InstallerUI {
             let alert = NSAlert()
             alert.alertStyle = .critical
             alert.messageText = "Druti couldn’t be installed"
-            alert.informativeText = "\(error.localizedDescription)\n\nNothing was changed. Try again, or report the problem on GitHub."
+            alert.informativeText =
+                "\(error.localizedDescription)\n\nNothing was changed. Try again, or report the problem on GitHub."
             alert.runModal()
             exit(1)
         }
@@ -40,7 +42,8 @@ enum InstallerUI {
 
     private static func showInstalled(upgraded: Bool) {
         let alert = NSAlert()
-        alert.messageText = upgraded ? "Druti was updated to \(version)" : "Druti \(version) is installed"
+        alert.messageText =
+            upgraded ? "Druti was updated to \(version)" : "Druti \(version) is installed"
         alert.informativeText = """
             Druti is now in the input menu in the menu bar. Choose it there, or press \
             Control-Space (or the 🌐 key) to switch between input sources.
@@ -55,7 +58,8 @@ enum InstallerUI {
 
     private static func showEnableFailed(upgraded: Bool) {
         let alert = NSAlert()
-        alert.messageText = upgraded ? "Druti was updated to \(version)" : "Druti \(version) is installed"
+        alert.messageText =
+            upgraded ? "Druti was updated to \(version)" : "Druti \(version) is installed"
         alert.informativeText = """
             macOS didn’t let Druti turn itself on. To add it, open System Settings → \
             Keyboard → Text Input → Input Sources → Edit…, click +, choose Bengali → Druti \
@@ -64,7 +68,8 @@ enum InstallerUI {
         alert.addButton(withTitle: "Open Keyboard Settings")
         alert.addButton(withTitle: "Done")
         if alert.runModal() == .alertFirstButtonReturn,
-           let url = URL(string: "x-apple.systempreferences:com.apple.Keyboard-Settings.extension") {
+            let url = URL(string: "x-apple.systempreferences:com.apple.Keyboard-Settings.extension")
+        {
             NSWorkspace.shared.open(url)
         }
     }

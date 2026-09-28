@@ -42,6 +42,19 @@ jobs:
       - run: cargo fmt --all --check
       - run: cargo clippy --all-targets -- -D warnings
       - run: cargo test --all
+      - name: Docs build without warnings (broken links, missing docs)
+        run: cargo doc --no-deps --workspace
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+  msrv:
+    # The workspace's rust-version (Cargo.toml) must stay true.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@1.91
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo check --workspace --all-targets --all-features
 
   macos:
     runs-on: macos-15
@@ -52,6 +65,11 @@ jobs:
           targets: aarch64-apple-darwin, x86_64-apple-darwin
       - uses: Swatinem/rust-cache@v2
       - run: brew install xcodegen
+      - name: Swift format and style
+        # The newest Xcode on the image; its swift-format is closest to current local Xcodes.
+        run: make -C macos lint
+        env:
+          DEVELOPER_DIR: /Applications/Xcode_26.3.app/Contents/Developer
       - name: Install Rosetta if missing (for the x86_64 tests)
         run: arch -x86_64 /usr/bin/true 2>/dev/null || softwareupdate --install-rosetta --agree-to-license
       - name: Swift tests (bindings and helpers)

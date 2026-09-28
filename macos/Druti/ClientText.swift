@@ -27,7 +27,7 @@ enum ClientText {
     static func selection(of client: IMKTextInput) -> (range: NSRange, text: String)? {
         let range = client.selectedRange()
         guard range.location != NSNotFound, range.length > 0,
-              let text = client.attributedSubstring(from: range)?.string, !text.isEmpty
+            let text = client.attributedSubstring(from: range)?.string, !text.isEmpty
         else {
             return nil
         }
