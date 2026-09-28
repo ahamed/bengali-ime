@@ -94,6 +94,10 @@ background-only app can't bring an alert to the front, the fallback is to drop `
 set `LSUIElement` instead, which also has no Dock icon. That would be checked against the IMK behaviour in
 `openspec/specs/macos-input-source`.
 
+**Result (task 1.1, confirmed by the author):** `.accessory` plus `activate()` works. The installer's
+dialogs and the Uninstall confirmation come to the front while `LSBackgroundOnly` stays set, so the
+`LSUIElement` fallback isn't needed.
+
 ### D5. Uninstall shares the installer's code
 `Installer.uninstall()` does the following:
 1. Disables every source with Druti's bundle ID.
