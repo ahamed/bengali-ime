@@ -31,14 +31,17 @@
 - [x] 5.2 Add `.github/workflows/pages.yml` (push to `main` and `workflow_dispatch`: build, `upload-pages-artifact`, `deploy-pages`)
 - [x] 5.3 Add an `app-zip` target to `macos/Makefile` (`ditto -c -k --keepParent`) (design D9). Make `release-macos.yml` build `dmg app-zip`, checksum both files and upload all four assets. Update `release-notes.md` with the zip option, the zip checksum command and the playground link. Verify locally with `make -C macos dmg app-zip`: unzipping gives a bundle whose `codesign -dv` output matches the one in the DMG
 - [x] 5.4 Update the README: Druti title and intro, a "Try it in your browser" link, the macOS download (DMG or zip), a developer section (`cargo test`, `cd examples/playground && yarn dev`), and no npm usage section. Update the Releasing section in `macos/README.md` for the zip asset
-- [ ] 5.5 Run `openspec validate druti-wasm-playground --strict` and `actionlint` (if available) on the workflows. Open the PR and get CI green
+- [x] 5.5 Run `openspec validate druti-wasm-playground --strict` and `actionlint` (if available) on the workflows. Open the PR and get CI green
 
 ## 6. M6: Go live (maintainer approval needed)
 
-- [ ] 6.1 After the author approves, enable GitHub Pages with "GitHub Actions" as the source. After the merge, confirm the Pages workflow deploys and `https://ahamed.github.io/druti-ime/` types `khub` → `খুব`
-- [ ] 6.2 Push the tag `macos-v1.0.0` on `main`. Verify the draft release "Druti 1.0.0" has the DMG, zip and both `.sha256` files, and that the checksums match the downloads
+- [x] 6.1 After the author approves, enable GitHub Pages with "GitHub Actions" as the source. After the merge, confirm the Pages workflow deploys and `https://ahamed.github.io/druti-ime/` types `khub` → `খুব`
+- [x] 6.2 Push the tag `macos-v1.0.0` on `main`. Verify the draft release "Druti 1.0.0" has the DMG, zip and both `.sha256` files, and that the checksums match the downloads
 
 ## 7. M7: Pre-release verification for 1.0.0 (Mac), carried over from `add-macos-distribution`
+
+> Archived on 2026-09-29 with 4.5 and 7.1–7.7 still open. 1.0.0 was published on 2026-09-28
+> before these ran, so they carry over as post-release checks for 1.0.x, listed in the archive PR.
 
 - [ ] 7.1 Carried over from 4.4: download the draft DMG through Safari (so it's quarantined), open it, go through Open Anyway, install, and type `khub` in TextEdit to get `খুব`, with no further Gatekeeper prompt after logging out and back in. Repeat with the `.app.zip`
 - [ ] 7.2 Carried over from 7.1: in TextEdit, clicking after an existing `ক` and typing `i` gives `কি`. In Terminal, the same steps give `কই`
@@ -47,4 +50,4 @@
 - [ ] 7.5 Carried over from 7.4: a password field receives plain ASCII while Druti is selected
 - [ ] 7.6 Carried over from 7.5: run the compatibility pass in `macos/COMPATIBILITY.md` with the 1.0.0 draft build, record a result for every app, and fix any stray or duplicated characters before publishing
 - [ ] 7.7 Carried over from 7.6: fresh-install check in a new macOS user account using only the top-level README. Verify it types Bengali without Xcode, Rust or Homebrew
-- [ ] 7.8 Fill in the release notes' "Changes" section. After the author approves, publish the 1.0.0 release
+- [x] 7.8 Fill in the release notes' "Changes" section. After the author approves, publish the 1.0.0 release
