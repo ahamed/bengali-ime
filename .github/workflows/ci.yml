@@ -7,27 +7,29 @@ on:
     branches: main
 
 jobs:
-  test:
+  web:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: wasm32-unknown-unknown
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-pack@0.15.0
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: yarn
-      - run: yarn install
-      - run: yarn test
-      - name: Check parity fixtures are up to date
+          cache-dependency-path: examples/playground/yarn.lock
+      - run: cargo clippy -p druti-wasm --target wasm32-unknown-unknown -- -D warnings
+      - name: Build the playground (wasm-pack, type check, Vite)
+        working-directory: examples/playground
         run: |
-          yarn fixtures
-          if [ -n "$(git status --porcelain fixtures/)" ]; then
-            echo "::error::fixtures/ is stale. Run 'yarn fixtures' and commit the result."
-            git status --porcelain fixtures/
-            git diff --stat fixtures/
-            exit 1
-          fi
-      - run: yarn run build
-      - run: yarn example:build
+          yarn install --frozen-lockfile
+          yarn build
 
   rust:
     runs-on: ubuntu-latest

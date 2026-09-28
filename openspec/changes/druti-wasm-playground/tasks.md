@@ -27,10 +27,10 @@
 
 ## 5. M5: CI, Pages and release assets (Linux, dry run on GitHub)
 
-- [ ] 5.1 In `ci.yml`, replace the `test` job with a `web` job: Rust with `wasm32-unknown-unknown`, wasm-pack via `taiki-e/install-action`, `cargo build -p druti-wasm --target wasm32-unknown-unknown`, then `yarn --frozen-lockfile && yarn build` in `examples/playground` (design D8). Keep the `rust` and `macos` jobs green with the renamed crates
-- [ ] 5.2 Add `.github/workflows/pages.yml` (push to `main` and `workflow_dispatch`: build, `upload-pages-artifact`, `deploy-pages`)
-- [ ] 5.3 Add an `app-zip` target to `macos/Makefile` (`ditto -c -k --keepParent`) (design D9). Make `release-macos.yml` build `dmg app-zip`, checksum both files and upload all four assets. Update `release-notes.md` with the zip option, the zip checksum command and the playground link. Verify locally with `make -C macos dmg app-zip`: unzipping gives a bundle whose `codesign -dv` output matches the one in the DMG
-- [ ] 5.4 Update the README: Druti title and intro, a "Try it in your browser" link, the macOS download (DMG or zip), a developer section (`cargo test`, `cd examples/playground && yarn dev`), and no npm usage section. Update the Releasing section in `macos/README.md` for the zip asset
+- [x] 5.1 In `ci.yml`, replace the `test` job with a `web` job: Rust with `wasm32-unknown-unknown`, wasm-pack via `taiki-e/install-action`, `cargo build -p druti-wasm --target wasm32-unknown-unknown`, then `yarn --frozen-lockfile && yarn build` in `examples/playground` (design D8). Keep the `rust` and `macos` jobs green with the renamed crates
+- [x] 5.2 Add `.github/workflows/pages.yml` (push to `main` and `workflow_dispatch`: build, `upload-pages-artifact`, `deploy-pages`)
+- [x] 5.3 Add an `app-zip` target to `macos/Makefile` (`ditto -c -k --keepParent`) (design D9). Make `release-macos.yml` build `dmg app-zip`, checksum both files and upload all four assets. Update `release-notes.md` with the zip option, the zip checksum command and the playground link. Verify locally with `make -C macos dmg app-zip`: unzipping gives a bundle whose `codesign -dv` output matches the one in the DMG
+- [x] 5.4 Update the README: Druti title and intro, a "Try it in your browser" link, the macOS download (DMG or zip), a developer section (`cargo test`, `cd examples/playground && yarn dev`), and no npm usage section. Update the Releasing section in `macos/README.md` for the zip asset
 - [ ] 5.5 Run `openspec validate druti-wasm-playground --strict` and `actionlint` (if available) on the workflows. Open the PR and get CI green
 
 ## 6. M6: Go live (maintainer approval needed)
