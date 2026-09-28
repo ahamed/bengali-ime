@@ -80,8 +80,9 @@ The same keys always produce the same text. A few rules make sure the output is 
 `macos/` is **Druti**, a macOS input source that types with this algorithm in any app. It
 uses a Rust port of the engine (`crates/`), which CI checks against the TypeScript engine keystroke by
 keystroke using fixtures generated from this package (`yarn fixtures`). To build and install it on an
-Apple Silicon Mac, see [macos/README.md](macos/README.md). The design and specs are in
-[openspec/changes/add-macos-input-source](openspec/changes/add-macos-input-source/).
+Apple Silicon Mac, see [macos/README.md](macos/README.md). The specs are in
+[openspec/specs](openspec/specs/), and the design in
+[openspec/changes/archive/2026-09-28-add-macos-input-source](openspec/changes/archive/2026-09-28-add-macos-input-source/).
 
 ## Examples in this repo
 

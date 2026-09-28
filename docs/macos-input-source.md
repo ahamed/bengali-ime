@@ -1,8 +1,9 @@
 # macOS input source for bengali-ime — tech stack and design
 
 Status: implemented. This was the original design interview write-up. The specs, the design as
-built and the task list live in the OpenSpec change
-[`openspec/changes/add-macos-input-source/`](../openspec/changes/add-macos-input-source/), and build
+built and the task list live in the archived OpenSpec change
+[`openspec/changes/archive/2026-09-28-add-macos-input-source/`](../openspec/changes/archive/2026-09-28-add-macos-input-source/) (specs now in
+[`openspec/specs/`](../openspec/specs/)), and build
 and install steps are in [`macos/README.md`](../macos/README.md). Where this page and the change
 disagree, the change is correct.
 

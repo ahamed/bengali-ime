@@ -1,6 +1,6 @@
 # App compatibility
 
-Task 6.5 of `openspec/changes/add-macos-input-source`. Type the test paragraph below in each app with
+Pre-release verification for `openspec/changes/add-macos-distribution`. Type the test paragraph below in each app with
 Druti selected, then record what happened. A pass means the output matches exactly, with
 no stray roman letters and no duplicated or missing characters.
 

@@ -36,5 +36,5 @@ yarn fixtures   # regenerate fixtures/engine from the TypeScript engine
 cargo test      # parity fixtures, data tables, composer scenarios and invariants
 ```
 
-`fixtures/composer/` is written by hand from the `ime-composer` spec in
-`openspec/changes/add-macos-input-source/`.
+`fixtures/composer/` is written by hand from the spec in
+`openspec/specs/ime-composer/`.
