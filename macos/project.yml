@@ -7,9 +7,16 @@ options:
   createIntermediateGroups: true
 settings:
   base:
-    ARCHS: arm64
+    # Universal: Apple Silicon and Intel.
+    ARCHS: "arm64 x86_64"
+    ONLY_ACTIVE_ARCH: NO
     SWIFT_VERSION: "5.0"
     MACOSX_DEPLOYMENT_TARGET: "14.0"
+    # The app's version, and its only source: `make version` prints it and the
+    # release workflow checks the macos-vX.Y.Z tag against it. CI overrides the
+    # build number with the workflow run number.
+    MARKETING_VERSION: 1.0.0
+    CURRENT_PROJECT_VERSION: 1
 packages:
   BengaliIMECore:
     path: BengaliIMECore

@@ -189,6 +189,9 @@ final class InputController: IMKInputController {
 
         menu.addItem(.separator())
         menu.addItem(NSMenuItem(title: "Convert Selection to Bengali", action: #selector(convertSelection(_:)), keyEquivalent: ""))
+
+        menu.addItem(.separator())
+        menu.addItem(NSMenuItem(title: "Uninstall Druti\u{2026}", action: #selector(uninstall(_:)), keyEquivalent: ""))
         return menu
     }
 
@@ -221,6 +224,39 @@ final class InputController: IMKInputController {
         }
         client.insertText(converted, replacementRange: selection.range)
         expectedCaret = nil
+    }
+
+    /// Asks, then disables Druti, moves it to the Trash, deletes its settings
+    /// and quits (add-macos-distribution design D5).
+    @objc private func uninstall(_ sender: Any?) {
+        if let client = textInput(nil) {
+            commitPending(client)
+        }
+        let app = NSApplication.shared
+        InstallerUI.bringToFront(app)
+        let alert = NSAlert()
+        alert.messageText = "Uninstall Druti?"
+        alert.informativeText = "Druti will be removed from your input sources and moved to the Trash, and its settings will be deleted."
+        alert.addButton(withTitle: "Uninstall").hasDestructiveAction = true
+        alert.addButton(withTitle: "Cancel")
+        guard alert.runModal() == .alertFirstButtonReturn else {
+            // Back to a background app, so focus returns to the text field.
+            app.setActivationPolicy(.prohibited)
+            app.hide(nil)
+            return
+        }
+        do {
+            try Installer.uninstall(moveToTrash: true)
+            Log.input.info("Uninstalled")
+            exit(0)
+        } catch {
+            let failure = NSAlert(error: error)
+            failure.messageText = "Druti couldn’t be uninstalled"
+            failure.informativeText = error.localizedDescription
+            failure.runModal()
+            app.setActivationPolicy(.prohibited)
+            app.hide(nil)
+        }
     }
 
     // MARK: - Helpers

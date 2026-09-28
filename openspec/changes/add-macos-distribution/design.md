@@ -54,10 +54,14 @@ The installer does the following:
    then `forceTerminate` after a short timeout).
 3. Swaps the partial copy into place with `FileManager.replaceItemAt`. The partial copy is removed on
    any failure, so no half-copied bundle is ever left behind.
-4. Clears any remaining `com.apple.quarantine` on the installed copy.
+4. Clears `com.apple.quarantine` on the staged copy and every file in it, with `removexattr`. It
+   ignores files that don't have the flag and fails the install on any other error.
 
-`ditto` is what `make install` already uses, and `--noqtn` drops the quarantine flag during the copy.
-This is allowed because the user already approved this exact app through Gatekeeper to open it. The
+`ditto` is what `make install` already uses. Contrary to its name, `--noqtn` does **not** remove a
+flag the source already carries (checked on macOS 27), so step 4 is what clears it. Doing that is
+fine, because the user already approved this exact app through Gatekeeper to open it. Gatekeeper
+also kills a quarantined ad-hoc executable run from Terminal (exit 137), so the flag can't simply be
+left on the copy. The
 `com.apple.provenance` attribute on macOS 13 and later can't be removed and isn't removed; it records
 where the file came from but doesn't stop the app from launching.
 - *Alternative:* `FileManager.copyItem` followed by `removexattr` on every file. It works too, but it's
@@ -75,6 +79,9 @@ After the swap, the installer does the following:
 It doesn't quit System Settings on a user's machine. The Makefile still does that for developers.
 - On upgrade, the source is already enabled. Enabling again does nothing, and settings live in the
   `com.ahamed.inputmethod.Druti` defaults domain, which the installer never touches.
+- Checked on macOS 27: `TISEnableInputSource` does enable Druti's mode after a fresh install. The
+  input mode has to be disabled by its own ID, because a bundle ID lookup only finds the parent
+  source. The mode disappears from the list shortly after the bundle is unregistered.
 - If the enabled mode can't be found after registering (the system can take a moment to list it), the
   installer retries for up to ~2 s. After that it treats enabling as failed and shows the manual steps,
   offering to open `x-apple.systempreferences:com.apple.Keyboard-Settings.extension`.
@@ -147,6 +154,10 @@ Druti's own MIT license, followed by one section per crate compiled into `bengal
 Makefile generates it into `Druti/Generated/` (git-ignored, like the icon), `project.yml` copies it into
 `Contents/Resources`, and `make dmg` puts it in the DMG too. If a dependency's license isn't on the
 accepted list, `cargo about` fails, and so does the release.
+
+Everyday builds (`make app`, `make install`, the `ci.yml` job) don't require cargo-about. Without it,
+`Licenses.txt` holds only Druti's own license and the Makefile prints a warning. `make dmg` refuses to
+run without cargo-about and always regenerates the file, so a release never ships the fallback.
 
 ### D10. Release workflow
 `.github/workflows/release-macos.yml` runs on `push: tags: ['macos-v*']`, on `macos-15`, with
