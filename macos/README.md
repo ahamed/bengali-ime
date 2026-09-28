@@ -95,10 +95,9 @@ make -C macos install
 
 This builds the Rust engine and the Universal app, signs it ad hoc, and runs the app's own
 installer (`Druti --install`), the same code path as the DMG:
-1. Removes an earlier install under the old name, Seher, if there is one.
-2. Copies the app to `~/Library/Input Methods/Druti.app` and stops any running copy.
-3. Registers it with Launch Services and the Text Input system, and enables it.
-4. Restarts the menu bar's input menu and System Settings, so the new name and icon show up.
+1. Copies the app to `~/Library/Input Methods/Druti.app` and stops any running copy.
+2. Registers it with Launch Services and the Text Input system, and enables it.
+3. Restarts the menu bar's input menu and System Settings, so the new name and icon show up.
 
 The first build takes a few minutes; later builds are faster. After a code change, run it again:
 the next key you type uses the new build, without logging out.

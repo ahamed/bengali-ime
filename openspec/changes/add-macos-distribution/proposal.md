@@ -15,8 +15,8 @@ paid Apple Developer account).
 - Add an **"Uninstall Druti…"** item to the input menu. After confirmation it disables the input source,
   moves the bundle to the Trash, removes its settings and quits.
 - `make install` now builds the app and runs `Druti --install`, so developers go through the same
-  code path as users. The Makefile keeps only the developer extras: removing the old Seher install and
-  restarting System Settings.
+  code path as users. The Makefile keeps only the developer extra of restarting System Settings, and
+  drops the cleanup of the input source's earlier name, Seher, since Druti is the final name.
 - Build a **Universal** app (arm64 + x86_64) for macOS 14 or later. The XCFramework gets an x86_64
   slice, and CI also runs the Rust and Swift tests for x86_64 under Rosetta.
 - Package a **styled DMG** built with `dmgbuild`. It contains `Druti.app`, a background image with the

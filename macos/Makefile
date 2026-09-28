@@ -21,9 +21,6 @@ LICENSES    := Druti/Generated/Licenses.txt
 DMG_DIR     := build/dmg
 DMG_BG      := $(DMG_DIR)/background.tiff
 DMGBUILD    ?= dmgbuild
-# The input source's earlier name. `install` removes it so only one is listed.
-LEGACY      := $(INSTALL_DIR)/Seher.app
-LSREGISTER  := /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 # The build number. The release workflow passes the workflow run number.
 CURRENT_PROJECT_VERSION ?= 1
 VERSION     := $(shell sed -n 's/^ *MARKETING_VERSION: *//p' project.yml)
@@ -70,14 +67,6 @@ test: core
 	swift test --package-path BengaliIMECore
 
 install: app
-	@# Remove the input source's earlier install, Seher, so the two aren't both listed.
-	@if [ -d "$(LEGACY)" ]; then \
-		echo "Removing $(LEGACY)"; \
-		"$(LEGACY)/Contents/MacOS/Seher" --disable 2>/dev/null; \
-		killall Seher 2>/dev/null; \
-		$(LSREGISTER) -u "$(LEGACY)"; \
-		rm -rf "$(LEGACY)"; \
-	fi; true
 	@# The same installer the DMG runs: copy, register, enable, restart the input menu.
 	"$(APP)/Contents/MacOS/$(APP_NAME)" --install
 	@# System Settings reads the input source list once when it opens.

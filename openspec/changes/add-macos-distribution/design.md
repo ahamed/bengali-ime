@@ -180,8 +180,9 @@ step and the Intel caveat. The maintainer adds the changes by hand before publis
 `ci.yml` jobs are left alone.
 
 ### D11. Makefile after the change
-`install` becomes `app` → Seher cleanup (unchanged) → `$(APP)/Contents/MacOS/Druti --install` →
-`killall "System Settings"`. `uninstall` becomes `Druti --uninstall`, run from the installed copy. There are
+`install` becomes `app` → `$(APP)/Contents/MacOS/Druti --install` → `killall "System Settings"`.
+The cleanup of the input source's earlier name, Seher, is removed: Druti is the final name, and no
+Seher build was ever released. `uninstall` becomes `Druti --uninstall`, run from the installed copy. There are
 new targets `dmg`, `licenses`, `version` and `dmg-background`. `clean` also removes `build/*.dmg`.
 
 ## Risks / Trade-offs
