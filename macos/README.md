@@ -1,8 +1,7 @@
 # Druti for macOS
 
-A macOS input source that types Bengali with the bengali-ime phonetic algorithm in any app. It uses
-the Rust port of the engine in [`crates/`](../crates/), which CI checks against the TypeScript
-engine keystroke by keystroke. The Bengali text appears as you type each key: `k` shows `ক`, `h`
+A macOS input source that types Bengali phonetically in any app. It uses Druti's Rust engine in
+[`crates/`](../crates/), the same engine as the [web playground](https://ahamed.github.io/druti-ime/). The Bengali text appears as you type each key: `k` shows `ক`, `h`
 turns it into `খ`, and `u` makes `খু`.
 
 It's free and signed ad hoc, so it needs no Apple Developer account, and it installs into your own
@@ -12,7 +11,8 @@ Macs with macOS 14 or later.
 ## Install
 
 1. Download the latest **Druti-X.Y.Z.dmg** from
-   [Releases](https://github.com/ahamed/bengali-ime/releases/latest) and open it.
+   [Releases](https://github.com/ahamed/druti-ime/releases/latest) and open it. (There's also a
+   **Druti-X.Y.Z.app.zip** with the same app: unzip it and open Druti from there instead.)
 2. Double-click **Druti**. It copies itself into `~/Library/Input Methods`, turns itself on, and
    tells you when it's done. You can eject the disk image afterwards.
 3. If macOS says it can't verify Druti: open **System Settings → Privacy & Security**, scroll down,
@@ -36,7 +36,7 @@ new version, and your settings are kept.
 input sources, moves it to the Trash and deletes its settings.
 
 Intel Macs haven't been tested on real hardware yet. If you use one, please report whether Druti
-works in [Issues](https://github.com/ahamed/bengali-ime/issues).
+works in [Issues](https://github.com/ahamed/druti-ime/issues).
 
 ## Typing
 
@@ -117,6 +117,7 @@ stay listed in System Settings until you log out.
 | `make -C macos test` | Builds the Rust core and runs the Swift tests (bindings, key routing, context helpers, install location). |
 | `make -C macos app` | Builds and signs `macos/build/.../Druti.app` without installing it (CI runs this). |
 | `make -C macos dmg` | Builds `macos/build/Druti-X.Y.Z.dmg`, the release DMG (needs cargo-about and dmgbuild). |
+| `make -C macos app-zip` | Zips the built app into `macos/build/Druti-X.Y.Z.app.zip` with `ditto`, keeping its signature. Run it after `make dmg`. |
 | `make -C macos licenses` | Writes `Licenses.txt` (Druti's license and the Rust crates' notices) for the app bundle. Without cargo-about, it lists only Druti's license. |
 | `make -C macos version` | Prints the app version, `MARKETING_VERSION` in `project.yml`. |
 | `make -C macos project` | Generates `Druti.xcodeproj` for browsing the code in Xcode. |
@@ -135,7 +136,7 @@ Layout:
   the cargo-about config. `Tools/` renders the menu icon and the DMG background.
 - `project.yml` is the XcodeGen spec. The `.xcodeproj` is generated and not committed.
 
-Bengali logic belongs in Rust (`crates/bengali-ime-core`), where it's tested on any OS. The Swift
+Bengali logic belongs in Rust (`crates/druti-core`), where it's tested on any OS. The Swift
 side only routes keys and talks to InputMethodKit.
 
 ### Debugging
@@ -158,10 +159,10 @@ the next key press.
    git tag macos-v1.0.1 && git push origin macos-v1.0.1
    ```
    The [Release macOS](../.github/workflows/release-macos.yml) workflow checks that the tag matches
-   the version, runs the tests on both architectures, builds the DMG and creates a **draft**
-   release with the DMG and its `.sha256`.
-3. Download the DMG from the draft with a browser and test it: a fresh install in a clean macOS
-   user account, an upgrade over the previous version, and the pass in
+   the version, runs the tests on both architectures, builds the DMG and the zipped app
+   (`make dmg app-zip`) and creates a **draft** release with both and their `.sha256` files.
+3. Download the DMG and the zip from the draft with a browser and test them: a fresh install in a
+   clean macOS user account, an upgrade over the previous version, and the pass in
    [COMPATIBILITY.md](COMPATIBILITY.md).
 4. Write the changes into the draft's notes and publish it.
 

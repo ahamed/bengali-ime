@@ -7,6 +7,7 @@
 #   make version     print the app's version (MARKETING_VERSION in project.yml)
 #   make licenses    write the license notices bundled in the app (needs cargo-about)
 #   make dmg         build the release DMG into build/ (needs cargo-about and dmgbuild)
+#   make app-zip     zip the built app into build/ (run after make dmg; used by the release)
 #   make clean
 #
 # Needs Xcode, rustup (aarch64-apple-darwin, x86_64-apple-darwin) and XcodeGen; see README.md.
@@ -25,7 +26,7 @@ DMGBUILD    ?= dmgbuild
 CURRENT_PROJECT_VERSION ?= 1
 VERSION     := $(shell sed -n 's/^ *MARKETING_VERSION: *//p' project.yml)
 
-.PHONY: all core project app test install uninstall clean version licenses dmg dmg-background
+.PHONY: all core project app test install uninstall clean version licenses dmg dmg-background app-zip
 
 all: app
 
@@ -44,7 +45,7 @@ $(LICENSES): ../LICENSE Packaging/about.toml Packaging/about.hbs ../Cargo.lock
 	@mkdir -p $(dir $(LICENSES))
 	@if command -v cargo-about >/dev/null 2>&1; then \
 		{ echo "Druti"; echo; cat ../LICENSE; echo; echo "Third-party components"; echo; \
-		  cargo about generate --fail -c Packaging/about.toml -m ../crates/bengali-ime-ffi/Cargo.toml Packaging/about.hbs; \
+		  cargo about generate --fail -c Packaging/about.toml -m ../crates/druti-ffi/Cargo.toml Packaging/about.hbs; \
 		} > $@.tmp && mv $@.tmp $@; \
 	else \
 		echo "warning: cargo-about not found; $@ lists only Druti's own license"; \
@@ -100,6 +101,15 @@ dmg:
 		-D readme="$(DMG_DIR)/Read Me.txt" -D licenses="$(LICENSES)" \
 		"Druti $(VERSION)" build/Druti-$(VERSION).dmg
 	@echo "Built build/Druti-$(VERSION).dmg"
+
+# The same signed app as in the DMG, zipped for users who prefer it
+# (druti-wasm-playground design D9). ditto keeps the signature, extended
+# attributes and symlinks intact, which zip -r does not.
+app-zip:
+	@test -d "$(APP)" || { echo "No $(APP): run make dmg (or make app) first"; exit 1; }
+	rm -f build/Druti-$(VERSION).app.zip
+	ditto -c -k --keepParent "$(APP)" build/Druti-$(VERSION).app.zip
+	@echo "Built build/Druti-$(VERSION).app.zip"
 
 version:
 	@echo $(VERSION)

@@ -1,0 +1,18 @@
+{
+  "name": "druti-playground",
+  "private": true,
+  "version": "0.0.0",
+  "description": "Druti in the browser: the Rust engine through WebAssembly",
+  "type": "module",
+  "scripts": {
+    "wasm": "wasm-pack build ../../crates/druti-wasm --target web --out-dir ../../examples/playground/wasm --no-pack",
+    "dev": "yarn wasm && vite",
+    "build": "yarn wasm && tsc --noEmit && vite build",
+    "preview": "vite preview"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5",
+    "vite": "^6"
+  }
+}

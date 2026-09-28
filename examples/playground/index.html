@@ -3,78 +3,96 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Bengali IME — examples</title>
-    <link rel="stylesheet" href="/styles.css" />
+    <title>Druti Playground</title>
+    <meta
+      name="description"
+      content="Type Bengali phonetically in your browser with Druti, the same engine as the Druti input source for macOS."
+    />
+    <link rel="stylesheet" href="./src/styles.css" />
   </head>
   <body>
     <div class="page">
       <header class="hero">
-        <h1>Bengali IME examples</h1>
+        <div class="brand">
+          <span class="mark" aria-hidden="true">দ্রু</span>
+          <h1>Druti</h1>
+        </div>
         <p class="lede">
-          Live typing via <code>BengaliIME</code> and bulk conversion via
-          <code>transpileRomanDocument</code>. Phonetic roman (Avro-style), not
-          translation.
+          Phonetic Bengali typing: type roman letters, get Bengali. This page runs Druti's Rust
+          engine in your browser through WebAssembly, the same engine as the Druti input source
+          for macOS.
         </p>
+        <nav class="links">
+          <a class="btn btn-primary" href="https://github.com/ahamed/druti-ime/releases/latest">
+            Download for macOS
+          </a>
+          <a class="btn" href="https://github.com/ahamed/druti-ime">Source on GitHub</a>
+        </nav>
       </header>
 
-      <section class="panel" aria-labelledby="stream-title">
-        <h2 id="stream-title">Streaming IME</h2>
-        <p class="hint">
-          Keystrokes go through <code>process</code> / <code>processBackspace</code>.
-          If the text before the caret drifts from the IME (paste, native edit), state
-          resyncs and any half-typed cluster is cleared.
-        </p>
-        <div class="row">
-          <textarea
-            id="stream-input"
-            class="field"
-            rows="6"
-            autocomplete="off"
-            spellcheck="false"
-            aria-label="Bengali output, phonetic roman input"
-          ></textarea>
-        </div>
-        <div class="controls">
-          <button type="button" id="toggle-english" class="btn">
-            Toggle English mode
-          </button>
-          <span id="mode-label" class="badge" aria-live="polite"></span>
-        </div>
-      </section>
+      <main>
+        <section class="panel" aria-labelledby="type-title">
+          <h2 id="type-title">Type</h2>
+          <p class="hint">
+            Try <code>ami banglay gan gai</code>. The underlined part is still being typed: the
+            next key may change it (<code>k</code> then <code>h</code> gives খ). Clicking, arrow
+            keys or a word break make it final, just like on the Mac.
+          </p>
+          <div
+            id="editor"
+            class="field editor"
+            role="textbox"
+            aria-multiline="true"
+            aria-label="Bengali editor, phonetic roman input"
+            data-placeholder="Click here and start typing…"
+          ></div>
+          <div class="controls">
+            <button type="button" id="toggle-english" class="btn" aria-pressed="false">
+              English mode
+            </button>
+            <span id="mode-label" class="badge" aria-live="polite"></span>
+          </div>
+          <fieldset class="settings">
+            <legend>Settings</legend>
+            <label class="check">
+              <input type="checkbox" id="opt-digits" checked />
+              Bengali digits (<code>1</code> → ১)
+            </label>
+            <label class="check">
+              <input type="checkbox" id="opt-dari" checked />
+              দাঁড়ি for <code>.</code>
+            </label>
+            <label class="check">
+              <input type="checkbox" id="opt-quotes" checked />
+              Smart quotes (“ ” ‘ ’)
+            </label>
+          </fieldset>
+        </section>
 
-      <section class="panel" aria-labelledby="bulk-title">
-        <h2 id="bulk-title">Bulk transliteration</h2>
-        <p class="hint">
-          Whole-document pass with optional line breaks (same as Enter in the IME).
-        </p>
-        <label class="roman-label" for="roman-input">Roman input</label>
-        <textarea
-          id="roman-input"
-          class="field"
-          rows="5"
-          spellcheck="false"
-          aria-label="Roman text to transliterate"
-        >ami banglay gan gai
-ami banglar gan gai</textarea>
-        <div class="controls">
-          <button type="button" id="transpile-run" class="btn btn-primary">
-            Run transpileRomanDocument
-          </button>
-          <label class="check">
-            <input type="checkbox" id="preserve-breaks" checked />
-            preserveLineBreaks
-          </label>
-        </div>
-        <label class="roman-label" for="bengali-output">Bengali output</label>
-        <textarea
-          id="bengali-output"
-          class="field out"
-          rows="5"
-          readonly
-          aria-label="Transliterated Bengali"
-        ></textarea>
-      </section>
+        <section class="panel" aria-labelledby="bulk-title">
+          <h2 id="bulk-title">Convert a whole text</h2>
+          <p class="hint">Paste roman text and convert it in one go, with the settings above.</p>
+          <label class="field-label" for="roman-input">Roman text</label>
+          <textarea id="roman-input" class="field" rows="4" spellcheck="false">
+ami banglay gan gai
+ami banglar gan gai</textarea
+          >
+          <div class="controls">
+            <button type="button" id="convert" class="btn btn-primary">Convert</button>
+            <label class="check">
+              <input type="checkbox" id="preserve-breaks" checked />
+              Keep line breaks
+            </label>
+          </div>
+          <label class="field-label" for="bengali-output">Bengali</label>
+          <textarea id="bengali-output" class="field out" rows="4" readonly></textarea>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <p id="status" role="status">Loading the engine…</p>
+      </footer>
     </div>
-    <script type="module" src="/main.ts"></script>
+    <script type="module" src="./src/main.ts"></script>
   </body>
 </html>

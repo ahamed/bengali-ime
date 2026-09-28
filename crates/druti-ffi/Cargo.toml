@@ -1,0 +1,24 @@
+[package]
+name = "druti-ffi"
+description = "UniFFI bindings (Swift) for druti-core, used by the macOS input method"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[lib]
+# staticlib for the XCFramework; cdylib so uniffi-bindgen can read the metadata in library mode.
+crate-type = ["lib", "staticlib", "cdylib"]
+name = "bengali_ime_ffi"
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "uniffi-bindgen.rs"
+required-features = ["cli"]
+
+[features]
+cli = ["uniffi/cli"]
+
+[dependencies]
+druti-core = { version = "0.1.0", path = "../druti-core" }
+uniffi = "=0.32.2"

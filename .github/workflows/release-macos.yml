@@ -1,6 +1,7 @@
-# Builds Druti's DMG for a macos-vX.Y.Z tag and attaches it to a draft GitHub
-# Release (add-macos-distribution design D10). The maintainer tests the DMG and
-# publishes the draft by hand. No secrets: the app is signed ad hoc.
+# Builds Druti's DMG and zipped app for a macos-vX.Y.Z tag and attaches them to a
+# draft GitHub Release (add-macos-distribution design D10, druti-wasm-playground
+# D9). The maintainer tests the downloads and publishes the draft by hand. No
+# secrets: the app is signed ad hoc.
 name: Release macOS
 
 on:
@@ -43,17 +44,19 @@ jobs:
 
       - name: Tests on arm64 and x86_64
         run: |
-          cargo test -p bengali-ime-core
-          cargo test --target x86_64-apple-darwin -p bengali-ime-core
+          cargo test -p druti-core
+          cargo test --target x86_64-apple-darwin -p druti-core
           make -C macos test
           arch -x86_64 swift test --package-path macos/BengaliIMECore
 
-      - name: Build the DMG
-        run: make -C macos dmg CURRENT_PROJECT_VERSION=${{ github.run_number }}
+      - name: Build the DMG and the zipped app
+        run: make -C macos dmg app-zip CURRENT_PROJECT_VERSION=${{ github.run_number }}
 
-      - name: Checksum
+      - name: Checksums
         working-directory: macos/build
-        run: shasum -a 256 "Druti-$VERSION.dmg" | tee "Druti-$VERSION.dmg.sha256"
+        run: |
+          shasum -a 256 "Druti-$VERSION.dmg" | tee "Druti-$VERSION.dmg.sha256"
+          shasum -a 256 "Druti-$VERSION.app.zip" | tee "Druti-$VERSION.app.zip.sha256"
 
       - name: Create the draft release
         env:
@@ -64,4 +67,5 @@ jobs:
           if [[ "$VERSION" == *-* ]]; then PRERELEASE="--prerelease"; fi
           gh release create "$GITHUB_REF_NAME" --draft $PRERELEASE --verify-tag \
             --title "Druti $VERSION" --notes-file "$RUNNER_TEMP/notes.md" \
-            "macos/build/Druti-$VERSION.dmg" "macos/build/Druti-$VERSION.dmg.sha256"
+            "macos/build/Druti-$VERSION.dmg" "macos/build/Druti-$VERSION.dmg.sha256" \
+            "macos/build/Druti-$VERSION.app.zip" "macos/build/Druti-$VERSION.app.zip.sha256"
