@@ -44,9 +44,8 @@ struct Step {
 }
 
 #[derive(Deserialize, Debug, PartialEq)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
 struct Expected {
-    replace_before: u32,
     commit: String,
     pending: String,
     handled: bool,
@@ -55,7 +54,6 @@ struct Expected {
 impl From<&Update> for Expected {
     fn from(u: &Update) -> Self {
         Self {
-            replace_before: u.replace_before,
             commit: u.commit.clone(),
             pending: u.pending.clone(),
             handled: u.handled,
@@ -63,7 +61,8 @@ impl From<&Update> for Expected {
     }
 }
 
-/// The host side: committed document text plus the marked (pending) text.
+/// The host side: committed document text. The pending text is marked text
+/// the host shows after it; the composer never touches the committed text.
 #[derive(Default)]
 struct Host {
     committed: Vec<u16>,
@@ -71,11 +70,6 @@ struct Host {
 
 impl Host {
     fn apply(&mut self, update: &Update) {
-        let keep = self
-            .committed
-            .len()
-            .saturating_sub(update.replace_before as usize);
-        self.committed.truncate(keep);
         self.committed.extend(update.commit.encode_utf16());
     }
 }
@@ -106,7 +100,7 @@ fn run(case: &Case) -> Result<(), String> {
         let (label, update) = if let Some(key) = &step.key {
             (format!("key {key:?}"), composer.key(key, ctx))
         } else if step.backspace.is_some() {
-            ("backspace".to_owned(), composer.backspace(ctx))
+            ("backspace".to_owned(), composer.backspace())
         } else if step.flush.is_some() {
             ("flush".to_owned(), composer.flush())
         } else if step.reset.is_some() {
@@ -203,9 +197,10 @@ struct RandomStep {
 }
 
 /// Property: typing any key sequence through the composer (without host
-/// context) keeps committed + pending equal to the engine's output, keeps the
-/// pending text equal to the engine buffer (or a held `-` / `।`), and never
-/// asks the host to rewrite committed text.
+/// context) keeps committed + pending equal to the engine's output, and keeps
+/// the pending text equal to the word being typed: the Bengali letters that
+/// end the output, or a held `-` / `।` (ime-composer spec, "Commit and
+/// pending split").
 #[test]
 fn composer_invariants_over_random_sequences() {
     use druti_core::Engine;
@@ -217,11 +212,14 @@ fn composer_invariants_over_random_sequences() {
         let mut composer = Composer::default();
         let mut reference = Engine::new();
         let mut host = Host::default();
+        // Enter commits the word, so the next word starts after it.
+        let mut word_start = 0;
         for key in case.steps.iter().filter_map(|s| s.k.as_deref()) {
             keys_checked += 1;
             let update = composer.key(key, None);
             if key == "Enter" {
                 reference.end_cluster();
+                word_start = reference.output().len();
             } else {
                 reference.process(key, None);
             }
@@ -231,16 +229,14 @@ fn composer_invariants_over_random_sequences() {
                 String::from_utf16_lossy(&host.committed),
                 update.pending
             );
-            let buffer = reference.buffer();
-            let pending_ok = update.pending == buffer
-                || (buffer.is_empty() && (update.pending == "-" || update.pending == "।"));
-            if shown != reference.output() || !pending_ok || update.replace_before != 0 {
+            let output = reference.output();
+            let word = trailing_word(&output[word_start..]);
+            let pending_ok = update.pending == word
+                || (word.is_empty() && (update.pending == "-" || update.pending == "।"));
+            if shown != output || !pending_ok {
                 failures.push(format!(
-                    "  {:?} key {key:?}: shown {shown:?} engine {:?} pending {:?} buffer {buffer:?} replace_before {}",
-                    case.name,
-                    reference.output(),
-                    update.pending,
-                    update.replace_before
+                    "  {:?} key {key:?}: shown {shown:?} engine {output:?} pending {:?} word {word:?}",
+                    case.name, update.pending,
                 ));
                 break;
             }
@@ -258,6 +254,21 @@ fn composer_invariants_over_random_sequences() {
             .collect::<Vec<_>>()
             .join("\n")
     );
+}
+
+/// The Bengali letters, signs and joiners that end `text`: the word being typed.
+fn trailing_word(text: &str) -> String {
+    let is_word = |ch: char| {
+        ('\u{0980}'..='\u{09E3}').contains(&ch)
+            || matches!(ch, '\u{09F0}' | '\u{09F1}' | '\u{200C}' | '\u{200D}')
+    };
+    let start = text
+        .char_indices()
+        .rev()
+        .take_while(|&(_, ch)| is_word(ch))
+        .last()
+        .map_or(text.len(), |(index, _)| index);
+    text[start..].to_owned()
 }
 
 /// `Composer::key_reads_document` must name every key whose result can depend
@@ -304,17 +315,67 @@ fn key_reads_document_covers_every_context_sensitive_key() {
     assert!(Composer::key_reads_document("A"));
 }
 
-/// ime-composer spec, "Resuming the cluster before the caret": consonant keys
-/// read the document so hosts supply the cluster to resume.
+/// ime-composer spec, "Typing after Backspace or a caret move": a consonant starts a new
+/// letter wherever the caret is, so hosts need not read the document for it.
 #[test]
-fn consonant_keys_read_the_document() {
-    for key in ["h", "k", "i"] {
-        assert!(Composer::key_reads_document(key), "{key:?} should read");
-    }
-    for key in ["1", " "] {
+fn consonant_keys_do_not_read_the_document() {
+    assert!(
+        Composer::key_reads_document("i"),
+        "a vowel attaches as a kar"
+    );
+    for key in ["h", "k", "^", "1", " "] {
         assert!(
             !Composer::key_reads_document(key),
             "{key:?} should not read"
         );
     }
+}
+
+/// ime-composer spec, "Checking the text before the caret".
+#[test]
+fn text_before_caret_is_checked_against_the_composer_output() {
+    let mut composer = Composer::new(Config::default());
+    for key in ["p", "o", " "] {
+        composer.key(key, None);
+    }
+    assert!(
+        composer.matches_text_before_caret("প "),
+        "only the text near the caret"
+    );
+    assert!(
+        !composer.matches_text_before_caret("আমি "),
+        "the caret is elsewhere"
+    );
+
+    composer.reset(None);
+    for key in ["k", "o", " "] {
+        composer.key(key, None);
+    }
+    assert!(
+        composer.matches_text_before_caret("আমি ক "),
+        "a longer text before the caret"
+    );
+
+    composer.reset(None);
+    assert!(
+        !composer.matches_text_before_caret("প"),
+        "nothing typed since the reset"
+    );
+}
+
+/// ime-composer spec, "Document context with fallback": context supplied with
+/// one key is kept for later keys sent without it, as the Mac sends them while
+/// a word is pending.
+#[test]
+fn context_is_kept_for_later_keys() {
+    let mut kept = Composer::default();
+    kept.reset(None);
+    kept.key("a", Some("ক"));
+    let without = kept.key("'", None);
+
+    let mut given = Composer::default();
+    given.reset(None);
+    given.key("a", Some("ক"));
+    let with = given.key("'", Some("ক"));
+    assert_eq!(without, with);
 }

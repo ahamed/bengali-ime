@@ -19,8 +19,8 @@ data in `crates/druti-core/tests/fixtures/`, and the web playground runs the sam
 | Audience | Personal use. Built and installed locally, ad-hoc signed. No paid Apple Developer account, no notarization. |
 | Engine | Port the algorithm to a **Rust core**. At first TypeScript stayed the reference and shared fixtures enforced parity; now Rust is the only engine, also used on the web through WASM. |
 | Platforms | macOS now. The binding layer must also serve an **iOS keyboard extension** later. |
-| Typing UX | Exact Bengali on every keystroke. Only the engine's rewritable cluster (its `buffer`, usually 1–4 characters) is held as marked text, underline hidden where the app allows; everything else is committed immediately. |
-| Backspace | Inside the pending cluster: delete one **letter** (a consonant with the hasant joining it, or one kar or sign). Nothing pending: pass the key to the app. |
+| Typing UX | Exact Bengali on every keystroke. The Bengali word being typed is held as marked text, underline hidden where the app allows; it is committed at the next word break (space, punctuation, digit, Return, caret move). Committed text is never changed afterwards, so no app needs to support replacement ranges. |
+| Backspace | In the pending word: delete one **letter** (a consonant with the hasant joining it, or one kar or sign), decided by the Rust composer; the next consonant starts a new letter. Nothing pending: pass the key to the app. |
 | Bangla ↔ English | The macOS input source switch (Globe key / Ctrl+Space). The engine's English mode is not used. |
 | Kar attach after caret moves | Read the text before the caret from the app when it allows (engine `textBeforeCaret`); otherwise fall back to the independent vowel. |
 | Repo | This repository, as a monorepo. |
@@ -95,17 +95,15 @@ The engine returns edit actions (`Insert`, `Replace(back)`, `Delete(back)`) that
 text it already emitted: `k` then `h` replaces ক with খ. An input method cannot reliably rewrite
 text it has already committed into another app, but it has full control over its **marked text**.
 
-The engine's own state gives the split:
-
-- `buffer` is always a suffix of `output` (checked by fuzzing 20,000 random 12-key sequences).
-- Every rule rewrites only inside `buffer`: aspiration, `kkh` → ক্ষ, `rri` → ঋ/ৃ, `Oi`/`OU`, ya-phala,
-  nasal connectors. **The single exception is `--` → `—`**, which replaces an already committed `-`.
-
-So after every key:
+The engine's own state bounds what can change: `buffer` is always a suffix of `output`, and every
+rule rewrites only inside `buffer` (aspiration, `kkh` → ক্ষ, `rri` → ঋ/ৃ, `Oi`/`OU`, ya-phala, nasal
+connectors). The composer keeps more than that pending: the whole Bengali word that ends the output
+(letters, signs, kars, hasant, nukta, joiners), so Backspace can also edit the word as marked text.
+After every key:
 
 ```
-committed = output[0 .. len(output) - len(buffer)]   → sent with insertText (final text in the app)
-pending   = buffer                                   → sent with setMarkedText (still rewritable)
+pending   = the Bengali word ending output (⊇ buffer)  → sent with setMarkedText (still editable)
+committed = everything before it                        → sent with insertText (final text in the app)
 ```
 
 Example, typing `khub `:
@@ -114,15 +112,19 @@ Example, typing `khub `:
 |---|---|---|---|
 | `k` | ক / ক | ক (pending) | `setMarkedText("ক")` |
 | `h` | খ / খ | খ (pending) | `setMarkedText("খ")` |
-| `u` | খু / "" | খু | `insertText("খু")` (replaces marked text) |
-| `b` | খুব / ব | খুব (ব pending) | `setMarkedText("ব")` |
-| space | খুব␣ / "" | খুব␣ | `insertText("ব ")` |
+| `u` | খু / "" | খু (pending) | `setMarkedText("খু")` |
+| `b` | খুব / ব | খুব (pending) | `setMarkedText("খুব")` |
+| space | খুব␣ / "" | খুব␣ | `insertText("খুব ")` (replaces marked text) |
 
-The `--` exception is handled in the composer: a lone `-` is held as pending, so a second `-` can
-still turn it into `—` without touching committed text.
+Committed text is never changed: `Update` has no way to ask for it. A lone `-` or `।` is held as
+pending, so `--` → `—` and `।.` → `..` stay inside marked text. A rule that would rewrite committed
+text (a `-` committed before a caret move, then another `-`) applies as if the word started at the
+caret. This matters because apps differ in replacement support. Chromium-based apps ignore an empty
+`insertText` over a range, and Cursor's EditContext editor ignores a range on marked text. Replacing
+their own marked text works in every app.
 
 Marked text is set with attributes that remove the underline. Apps that honour the attributes show
-the pending cluster exactly like normal text; the rest show a thin underline under 1–4 characters.
+the pending word exactly like normal text; the rest underline the word being typed.
 
 ### 2. Rust core API (sketch)
 
@@ -132,7 +134,7 @@ pub struct Engine { /* buffer, output, flags */ }
 impl Engine {
     pub fn new(config: Config) -> Self;
     pub fn process(&mut self, key: &str, text_before_caret: Option<&str>) -> Vec<Action>;
-    pub fn process_backspace(&mut self) -> Vec<Action>;   // deletes the last letter, resumes the cluster
+    pub fn process_backspace(&mut self) -> Vec<Action>;   // deletes the last letter, resumes the cluster (engine only)
     pub fn output(&self) -> &str;
     pub fn buffer(&self) -> &str;
 }
@@ -140,15 +142,16 @@ impl Engine {
 // Host adapter for marked-text platforms (macOS, iOS). Exported through UniFFI.
 pub struct Composer { /* Engine + committed length */ }
 pub struct Update {
-    pub commit: String,          // append to the document (replaces current marked text)
+    pub commit: String,          // replaces the current marked text as final text
     pub pending: String,         // new marked text ("" = none)
     pub handled: bool,           // false → let the app process the key itself
 }
 impl Composer {
     pub fn key(&mut self, key: &str, text_before_caret: Option<String>) -> Update;
-    pub fn backspace(&mut self, text_before_caret: Option<&str>) -> Update;   // one letter; handled=false if the app should delete
+    pub fn backspace(&mut self) -> Update;   // one letter of the pending word; handled=false if nothing is pending
     pub fn flush(&mut self) -> Update;       // commit pending (focus loss, arrows, shortcuts)
-    pub fn reset(&mut self);                 // caret moved / app changed: forget engine state
+    pub fn reset(&mut self, text_before_caret: Option<&str>) -> Update;   // caret moved: forget engine state
+    pub fn matches_text_before_caret(&self, text_before_caret: &str) -> bool;   // late caret report or real move?
 }
 pub fn transpile_roman_document(input: &str, preserve_line_breaks: bool, config: Config) -> String;
 
@@ -167,7 +170,7 @@ strings use), even though Rust stores UTF-8.
 | Printable key, no ⌘/⌃/⌥ | `composer.key(event.characters, context)`, apply `Update`, return `true` |
 | Space | Same as above (engine word boundary); pending is committed together with the space |
 | Enter / Return | `flush()`, then return `false` so the app does its own newline or "send". The engine's `splitBlock` is not used. |
-| Backspace | `composer.backspace()`; if `handled == false`, return `false` so the app deletes committed text its own way |
+| Backspace | `composer.backspace()`, apply `Update`, return `true`. If `handled == false` (nothing pending), return `false` so the app deletes committed text its own way |
 | Arrows, Tab, Esc, Home/End, Page keys | `flush()`, return `false` |
 | Any ⌘ / ⌃ / ⌥ combination | `flush()`, return `false` (shortcuts keep working) |
 | `deactivateServer`, `commitComposition` | `flush()` |
@@ -177,7 +180,9 @@ strings use), even though Rust stores UTF-8.
 
 When `pending` is empty and a key could depend on the document (a vowel, which becomes a kar or an
 independent vowel; `"` / `'` smart quotes; `-`; `.`), the controller reads the text before the caret.
-The Rust `key_reads_document(key)` decides which keys qualify:
+The Rust `key_reads_document(key)` decides which keys qualify. Consonants don't read it: after a
+caret move a consonant always starts a new letter. The composer keeps the text as its view of the
+document, so later keys in the same word agree with it:
 
 ```
 range = client.selectedRange()
@@ -192,9 +197,12 @@ The composer resets on every caret move, focus change and Return, so after a cli
 vowel is independent (`কই`, not `কি`). That is the documented degraded behaviour (design D5).
 
 **Caret-move detection:** before each key the controller compares `selectedRange()` with where it
-expects the caret. On a mismatch (click, paste, edits by the app) it calls `reset()`, so the engine
-never builds a cluster on text that isn't there. Arrow keys, Return and shortcuts commit and reset
-directly.
+expects the caret. On a mismatch it reads the text before the caret and asks
+`matches_text_before_caret`. Some apps report the caret late or only for a small window around it
+(Cursor reports caret 1 with text `প` after `po`), so a text that still ends like what Druti typed
+is not a move. Otherwise (click, paste, edits by the app) it calls `reset()`, so the engine never
+builds on text that isn't there: click after the `ত` of `করত` and type `h` to get `করতহ`. Arrow
+keys, Return and shortcuts commit and reset directly.
 
 ### 5. Menu (`InputController.menu()`)
 
@@ -232,6 +240,8 @@ directly.
    review shows both. Anything else that breaks a fixture is a regression.
 4. Composer-only behaviour (commit/pending split, letter backspace, `-` holding, config toggles)
    has its own hand-written fixtures in `tests/fixtures/composer/`.
+5. `crates/druti-core/tests/hosts.rs` types scripts and the random sequences into models of the
+   playground, a Mac app and a terminal, and requires the same text in each.
 
 **Letter boundaries.** Backspace deletes one letter (`crates/druti-core/src/letters.rs`): a consonant
 with its nukta and joining hasant, one other Bengali code point, or one grapheme cluster of other text.
@@ -254,6 +264,6 @@ The engine and composer fixtures pin it.
 
 - Input source name **Druti**, bundle id `com.ahamed.inputmethod.Druti`.
 - Keys are read from `event.characters`, which assumes a US QWERTY base layout, the same as the web playground.
-- Esc commits the pending cluster (it doesn't cancel it), because what you see is already the final text.
+- Esc commits the pending word (it doesn't cancel it), because what you see is already the final text.
 - UniFFI instead of a hand-written C ABI (cbindgen). Revisit if a Windows or Linux input method is
   ever added, since those need a C ABI.

@@ -613,16 +613,6 @@ pub(crate) fn is_vowel(key: &str) -> bool {
         || lookup(ROMAN_TO_PHONETIC_VOWELS, &key.to_lowercase()).is_some()
 }
 
-/// True for keys the engine maps to a consonant, looked up as
-/// `process_consonant` does (the key itself, then its lowercase form).
-pub(crate) fn is_consonant_key(key: &str) -> bool {
-    let lower = key.to_lowercase();
-    [key, lower.as_str()].into_iter().any(|k| {
-        lookup(DEFAULT_CONSONANT_BY_ROMAN_KEY, k).is_some()
-            || lookup(CAPITAL_ROMAN_TO_CONSONANT, k).is_some()
-    })
-}
-
 fn is_number(key: &str) -> bool {
     lookup(NUMBER_MAP, key).is_some()
 }

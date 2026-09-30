@@ -52,14 +52,14 @@ Three options can be turned off in the Mac input menu and in the playground: Ben
 
 ## Repository
 
-| Path | What it is |
-|---|---|
-| [`crates/druti-core`](crates/druti-core/) | The engine, in Rust: keystroke rules, the pending/commit composer, bulk conversion. Its behaviour is pinned by golden fixtures in `tests/fixtures/`. |
-| [`crates/druti-ffi`](crates/druti-ffi/) | UniFFI bindings for Swift, used by the Mac app. |
-| [`crates/druti-wasm`](crates/druti-wasm/) | wasm-bindgen bindings for JavaScript, used by the playground. |
-| [`examples/playground`](examples/playground/) | The web playground (Vite + TypeScript), deployed to GitHub Pages from `main`. |
-| [`macos`](macos/) | The Druti input source (Swift, AppKit, InputMethodKit). |
-| [`openspec`](openspec/) | Specs and the design history of each change. |
+| Path                                          | What it is                                                                                                                                           |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`crates/druti-core`](crates/druti-core/)     | The engine, in Rust: keystroke rules, the pending/commit composer, bulk conversion. Its behaviour is pinned by golden fixtures in `tests/fixtures/`. |
+| [`crates/druti-ffi`](crates/druti-ffi/)       | UniFFI bindings for Swift, used by the Mac app.                                                                                                      |
+| [`crates/druti-wasm`](crates/druti-wasm/)     | wasm-bindgen bindings for JavaScript, used by the playground.                                                                                        |
+| [`examples/playground`](examples/playground/) | The web playground (Vite + TypeScript), deployed to GitHub Pages from `main`.                                                                        |
+| [`macos`](macos/)                             | The Druti input source (Swift, AppKit, InputMethodKit).                                                                                              |
+| [`openspec`](openspec/)                       | Specs and the design history of each change.                                                                                                         |
 
 ## Development
 

@@ -5,8 +5,9 @@ import InputMethodKit
 /// IMK creates one controller per text-input session (roughly, per text field
 /// that uses Druti). All Bengali logic lives in the Rust `Composer`;
 /// this class routes keys to it and applies its updates to the app:
-/// committed text becomes normal text, and pending text (the cluster that the
-/// next key may still change, e.g. ক before h) is shown as marked text.
+/// committed text becomes normal text, and pending text (the Bengali word being
+/// typed, which later keys and Backspace may still change) is shown as marked
+/// text.
 ///
 /// The Objective-C name must match InputMethodServerControllerClass in Info.plist.
 @objc(DrutiInputController)
@@ -73,9 +74,11 @@ final class InputController: IMKInputController {
             return false
 
         case .backspace:
+            // whole-word-pending design D2: Druti edits only its own pending
+            // word. With nothing pending the app deletes committed text by its
+            // own rules, and the composer has reset.
             let update = composer.backspace()
             guard update.handled else {
-                // Nothing pending: the app deletes, and the composer has reset.
                 expectedCaret = nil
                 return false
             }
@@ -97,23 +100,17 @@ final class InputController: IMKInputController {
         }
     }
 
-    /// Applies a composer update: replace `replaceBefore` units before the
-    /// caret (only possible in apps that support replacement ranges), commit
-    /// `commit` in place of the marked text, then show `pending` as marked text.
+    /// Applies a composer update: commit `commit` in place of the marked text,
+    /// then show `pending` as marked text. Updates never change text committed
+    /// earlier, so no replacement range is ever needed; apps that ignore one
+    /// (Chromium-based apps, editors built on EditContext) behave like the rest
+    /// (whole-word-pending design D2).
     private func apply(_ update: Update, to client: IMKTextInput) {
-        var replacement = Self.noReplacement
-        if update.replaceBefore > 0, shownPending.isEmpty,
-            let caret = ClientText.caret(of: client), caret >= Int(update.replaceBefore)
-        {
-            let count = Int(update.replaceBefore)
-            replacement = NSRange(location: caret - count, length: count)
-        }
-
-        if !update.commit.isEmpty || replacement.location != NSNotFound {
-            // Replaces the marked text (or `replacement`) with final text.
-            client.insertText(update.commit, replacementRange: replacement)
+        if !update.commit.isEmpty {
+            // Replaces the marked text with final text.
+            client.insertText(update.commit, replacementRange: Self.noReplacement)
         } else if !shownPending.isEmpty && update.pending.isEmpty {
-            // Backspace removed the whole pending cluster.
+            // Backspace removed the whole pending word.
             client.setMarkedText(
                 "", selectionRange: NSRange(location: 0, length: 0),
                 replacementRange: Self.noReplacement)
@@ -131,7 +128,7 @@ final class InputController: IMKInputController {
     }
 
     /// Pending text styled to look like normal text. Apps may still draw their
-    /// own marked-text underline; then only the pending cluster is underlined.
+    /// own marked-text underline; then the word being typed is underlined.
     private func markedText(_ text: String) -> NSAttributedString {
         NSAttributedString(
             string: text,
@@ -160,7 +157,20 @@ final class InputController: IMKInputController {
             return
         }
         if selection.location != expected || selection.length > 0 {
-            Log.input.debug("Caret moved from \(expected) to \(selection.location); resetting")
+            // whole-word-pending design D4: Chromium-based apps report the
+            // caret late or in their own coordinates. If the text before the
+            // caret still ends like what the composer typed, keep typing.
+            if let text = ClientText.beforeCaret(of: client),
+                composer.matchesTextBeforeCaret(textBeforeCaret: text)
+            {
+                Log.input.debug(
+                    "Caret at \(selection.location, privacy: .public), expected \(expected, privacy: .public); text matches, not resetting"
+                )
+                return
+            }
+            Log.input.debug(
+                "Caret moved from \(expected, privacy: .public) to \(selection.location, privacy: .public)+\(selection.length, privacy: .public); resetting"
+            )
             _ = composer.reset(textBeforeCaret: nil)
             expectedCaret = nil
         }

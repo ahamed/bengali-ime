@@ -3,9 +3,9 @@
   "description": "ime-composer spec: Output toggles",
   "cases": [
     {"name": "defaults", "steps": [{"key": "1"}, {"key": " "}, {"key": "."}, {"key": " "}], "committed": "১ । "},
-    {"name": "ASCII digits", "config": {"bengaliDigits": false}, "steps": [{"key": "2", "expect": {"replaceBefore": 0, "commit": "2", "pending": "", "handled": true}}], "committed": "2"},
-    {"name": "plain full stop", "config": {"dariForPeriod": false}, "steps": [{"key": "a"}, {"key": ".", "expect": {"replaceBefore": 0, "commit": ".", "pending": "", "handled": true}}], "committed": "আ."},
-    {"name": "straight quotes", "config": {"smartQuotes": false}, "steps": [{"key": "\"", "expect": {"replaceBefore": 0, "commit": "\"", "pending": "", "handled": true}}, {"key": "'", "expect": {"replaceBefore": 0, "commit": "'", "pending": "", "handled": true}}], "committed": "\"'"},
-    {"name": "smart quotes by default", "steps": [{"key": "\"", "expect": {"replaceBefore": 0, "commit": "“", "pending": "", "handled": true}}, {"key": "a"}, {"key": "\"", "expect": {"replaceBefore": 0, "commit": "”", "pending": "", "handled": true}}], "committed": "“আ”"}
+    {"name": "ASCII digits", "config": {"bengaliDigits": false}, "steps": [{"key": "2", "expect": {"commit": "2", "pending": "", "handled": true}}], "committed": "2"},
+    {"name": "plain full stop", "config": {"dariForPeriod": false}, "steps": [{"key": "a"}, {"key": ".", "expect": {"commit": "আ.", "pending": "", "handled": true}}], "committed": "আ."},
+    {"name": "straight quotes", "config": {"smartQuotes": false}, "steps": [{"key": "\"", "expect": {"commit": "\"", "pending": "", "handled": true}}, {"key": "'", "expect": {"commit": "'", "pending": "", "handled": true}}], "committed": "\"'"},
+    {"name": "smart quotes by default", "steps": [{"key": "\"", "expect": {"commit": "“", "pending": "", "handled": true}}, {"key": "a"}, {"key": "\"", "expect": {"commit": "আ”", "pending": "", "handled": true}}], "committed": "“আ”"}
   ]
 }

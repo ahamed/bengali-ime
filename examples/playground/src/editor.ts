@@ -1,12 +1,12 @@
 import { Composer, Config, type Update } from '../wasm/druti_wasm.js';
 
 /** A composer update copied out of WASM memory. */
-type Edit = Pick<Update, 'replaceBefore' | 'commit' | 'pending' | 'handled'>;
+type Edit = Pick<Update, 'commit' | 'pending' | 'handled'>;
 
 /**
  * Keys that only modify the next key. Pressing one alone must not end the
- * cluster: Shift before `T` in `ekoTa` would otherwise reset the composer,
- * and the reset would resume `ক` from the document (`এক্টা`, not `একটা`).
+ * word: Shift before `T` in `ekoTa` would otherwise commit `এক` and start a
+ * new word at `T`, so Backspace could no longer edit the whole word.
  */
 const MODIFIER_KEYS = new Set([
   'Shift',
@@ -24,9 +24,9 @@ const MODIFIER_KEYS = new Set([
 ]);
 
 const toEdit = (update: Update): Edit => {
-  const { replaceBefore, commit, pending, handled } = update;
+  const { commit, pending, handled } = update;
   update.free();
-  return { replaceBefore, commit, pending, handled };
+  return { commit, pending, handled };
 };
 
 /**
@@ -134,7 +134,7 @@ export class DrutiEditor {
     const update = this.guard(() =>
       toEdit(
         e.key === 'Backspace'
-          ? this.composer.backspace(this.text.slice(0, this.caret))
+          ? this.composer.backspace()
           : this.composer.key(e.key, this.text.slice(0, this.caret)),
       ),
     );
@@ -158,16 +158,16 @@ export class DrutiEditor {
     if (update.handled) {
       e.preventDefault();
     } else {
-      // Backspace after text that isn't Bengali: the browser deletes.
+      // Backspace with nothing pending: the browser deletes committed text.
+      // The composer has reset; the next key re-reads the document.
       this.stale = true;
     }
   }
 
-  /** Applies an update: delete, replace the pending text with the commit, show the new pending. */
+  /** Applies an update: replace the pending text with the commit, show the new pending. */
   private apply(update: Edit): void {
-    const start = Math.max(0, this.caret - update.replaceBefore);
-    this.text = this.text.slice(0, start) + update.commit + this.text.slice(this.caret);
-    this.caret = start + update.commit.length;
+    this.text = this.text.slice(0, this.caret) + update.commit + this.text.slice(this.caret);
+    this.caret += update.commit.length;
     this.pending = update.pending;
   }
 

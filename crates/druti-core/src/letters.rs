@@ -1,9 +1,11 @@
-//! What one Backspace removes, and which cluster resumes before the caret
-//! (design D1 of the letter-backspace-and-caret-cluster change).
+//! What one Backspace removes, which cluster resumes before the caret
+//! (design D1 of the letter-backspace-and-caret-cluster change), and where the
+//! word being typed starts (whole-word-pending design D1).
 //!
-//! Both work on UTF-16 units, the engine's storage, and only ever cut at code
+//! They work on UTF-16 units, the engine's storage, and only ever cut at code
 //! point boundaries. The engine uses them for its Backspace and for
-//! [`Engine::resume_cluster`](crate::Engine::resume_cluster).
+//! [`Engine::resume_cluster`](crate::Engine::resume_cluster); the composer
+//! uses them for the pending word.
 
 use std::ops::RangeInclusive;
 
@@ -118,12 +120,25 @@ pub(crate) fn trailing_consonant_run_len_utf16(units: &[u16]) -> usize {
     units.len() - start
 }
 
-/// Whether the last code point of `text` is in the Bengali block, so a
-/// Backspace there is Druti's to handle (design D6).
-pub(crate) fn ends_in_bengali(text: &str) -> bool {
-    text.chars()
-        .next_back()
-        .is_some_and(|ch| BENGALI.contains(&ch))
+/// Whether `ch` belongs to a Bengali word: a letter, a sign, a kar, the hasant
+/// or nukta, or a joiner. Digits, currency signs and punctuation end a word.
+fn is_word_char(ch: char) -> bool {
+    ('\u{0980}'..='\u{09E3}').contains(&ch)
+        || matches!(ch, '\u{09F0}' | '\u{09F1}' | '\u{200C}' | '\u{200D}')
+}
+
+/// The UTF-16 length of the Bengali word that ends `units`: what the
+/// composer keeps pending (whole-word-pending design D1). Returns 0 when
+/// `units` ends in anything else, such as a space, a digit or punctuation.
+pub(crate) fn trailing_word_len_utf16(units: &[u16]) -> usize {
+    let mut start = units.len();
+    while let Some((index, ch)) = last_char(&units[..start]) {
+        if !is_word_char(ch) {
+            break;
+        }
+        start = index;
+    }
+    units.len() - start
 }
 
 #[cfg(test)]
@@ -183,6 +198,18 @@ mod tests {
     fn khondo_to_is_a_letter_but_never_starts_a_run() {
         assert_eq!(letter("কৎ"), 1);
         assert_eq!(run("কৎ"), 0);
+    }
+
+    #[test]
+    fn word_ends_at_spaces_digits_and_punctuation() {
+        let word = |s: &str| trailing_word_len_utf16(&units(s));
+        assert_eq!(word("আমি পদ্ম"), 4);
+        assert_eq!(word("কি?"), 0);
+        assert_eq!(word("ক১"), 0);
+        assert_eq!(word("১ক"), 1);
+        assert_eq!(word("ক।"), 0);
+        assert_eq!(word("ক\u{200C}ষ"), 3);
+        assert_eq!(word(""), 0);
     }
 
     #[test]
