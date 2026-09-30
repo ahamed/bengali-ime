@@ -26,5 +26,5 @@
 
 ## 5. Manual checks (Mac)
 
-- [ ] 5.1 Install with `make -C macos install`. In TextEdit, Notes, Safari, Chrome, Cursor, Slack and the Claude app, check: `podmo` + Backspace → `পদ`; `ekoTa podmo` → `একটা পদ্ম`, then Backspace → `একটা পদ`; `korote` + three Backspaces → `ক`; `ka` + Backspace + `k` → `কক`; Backspace after a space deletes the space; a click after `কর` in `করতে` then `i` → `করিতে`
-- [ ] 5.2 In Terminal and iTerm2, check that typing and Backspace work, and Backspace with nothing pending deletes as usual
+- [x] 5.1 Install with `make -C macos install`. In TextEdit, Notes, Safari, Chrome, Cursor, Slack and the Claude app, check: `podmo` + Backspace → `পদ`; `ekoTa podmo` → `একটা পদ্ম`, then Backspace → `একটা পদ`; `korote` + three Backspaces → `ক`; `ka` + Backspace + `k` → `কক`; Backspace after a space deletes the space; a click after `কর` in `করতে` then `i` → `করিতে`
+- [x] 5.2 In Terminal and iTerm2, check that typing and Backspace work, and Backspace with nothing pending deletes as usual
