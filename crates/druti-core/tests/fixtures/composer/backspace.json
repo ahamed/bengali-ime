@@ -1,12 +1,22 @@
 {
   "format": 1,
-  "description": "ime-composer spec: Grapheme backspace in pending text",
+  "description": "ime-composer spec: Letter backspace",
   "cases": [
-    {"name": "remove a whole conjunct", "steps": [{"key": "k"}, {"key": "k"}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "ক্ষ", "handled": true}}, {"backspace": 1, "expect": {"replaceBefore": 0, "commit": "", "pending": "", "handled": true}}]},
+    {"name": "remove one consonant from a conjunct", "steps": [{"key": "d"}, {"key": "m", "expect": {"replaceBefore": 0, "commit": "", "pending": "দ্ম", "handled": true}}, {"backspace": 1, "expect": {"replaceBefore": 0, "commit": "", "pending": "দ", "handled": true}}]},
+    {"name": "remove the last consonant of ক্ষ", "steps": [{"key": "k"}, {"key": "k"}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "ক্ষ", "handled": true}}, {"backspace": 1, "expect": {"replaceBefore": 0, "commit": "", "pending": "ক", "handled": true}}]},
     {"name": "remove an aspirated consonant", "steps": [{"key": "k"}, {"key": "h"}, {"backspace": 1, "expect": {"replaceBefore": 0, "commit": "", "pending": "", "handled": true}}]},
-    {"name": "nothing pending", "steps": [{"key": "k"}, {"key": "h"}, {"key": "u"}, {"key": " "}, {"backspace": 1, "expect": {"replaceBefore": 0, "commit": "", "pending": "", "handled": false}}]},
-    {"name": "remaining pending text is committed", "steps": [{"key": "O"}, {"key": "C", "expect": {"replaceBefore": 0, "commit": "", "pending": "ওছ", "handled": true}}, {"backspace": 1, "expect": {"replaceBefore": 0, "commit": "ও", "pending": "", "handled": true}}], "committed": "ও"},
+    {"name": "remainder stays live", "steps": [{"key": "d"}, {"key": "m"}, {"backspace": 1}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "ধ", "handled": true}}]},
+    {"name": "remaining vowel is committed", "steps": [{"key": "O"}, {"key": "C", "expect": {"replaceBefore": 0, "commit": "", "pending": "ওছ", "handled": true}}, {"backspace": 1, "expect": {"replaceBefore": 0, "commit": "ও", "pending": "", "handled": true}}], "committed": "ও"},
     {"name": "held hyphen", "steps": [{"key": "-"}, {"backspace": 1, "expect": {"replaceBefore": 0, "commit": "", "pending": "", "handled": true}}], "committed": ""},
-    {"name": "next key starts a new cluster", "steps": [{"key": "k"}, {"key": "h"}, {"backspace": 1}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "হ", "handled": true}}]}
+    {"name": "next key after removing the whole cluster", "steps": [{"key": "k"}, {"key": "h"}, {"backspace": 1}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "হ", "handled": true}}]},
+    {"name": "committed conjunct loses one consonant", "document": "দ্ম", "steps": [{"backspace": 1, "ctx": "দ্ম", "expect": {"replaceBefore": 2, "commit": "", "pending": "", "handled": true}}], "committed": "দ"},
+    {"name": "committed kar is removed on its own", "document": "করতে", "steps": [{"backspace": 1, "ctx": "করতে", "expect": {"replaceBefore": 1, "commit": "", "pending": "", "handled": true}}], "committed": "করত"},
+    {"name": "committed remainder continues on the next key", "document": "করতে", "steps": [{"backspace": 1, "ctx": "করতে"}, {"key": "h", "ctx": "করত", "expect": {"replaceBefore": 1, "commit": "", "pending": "থ", "handled": true}}], "committed": "কর"},
+    {"name": "nothing pending and no context", "steps": [{"key": "k"}, {"key": "h"}, {"key": "u"}, {"key": " "}, {"backspace": 1, "expect": {"replaceBefore": 0, "commit": "", "pending": "", "handled": false}}]},
+    {"name": "text before the caret is not Bengali", "document": "আমি ", "steps": [{"backspace": 1, "ctx": "আমি ", "expect": {"replaceBefore": 0, "commit": "", "pending": "", "handled": false}}], "committed": "আমি "},
+    {"name": "next key resumes after the host handled backspace", "steps": [{"backspace": 1, "expect": {"replaceBefore": 0, "commit": "", "pending": "", "handled": false}}, {"key": "h", "ctx": "করত", "expect": {"replaceBefore": 1, "commit": "", "pending": "থ", "handled": true}}]},
+    {"name": "backspace forgets the silent o", "steps": [{"key": "k"}, {"key": "o"}, {"key": "m", "expect": {"replaceBefore": 0, "commit": "", "pending": "ম", "handled": true}}, {"backspace": 1}, {"key": "m", "expect": {"replaceBefore": 1, "commit": "", "pending": "ক্ম", "handled": true}}]},
+    {"name": "korote then three backspaces with host context", "hostContext": true, "steps": [{"key": "k"}, {"key": "o"}, {"key": "r"}, {"key": "o"}, {"key": "t"}, {"key": "e"}, {"backspace": 1}, {"backspace": 1}, {"backspace": 1}], "committed": "ক"},
+    {"name": "dm then backspace and a kar with host context", "hostContext": true, "steps": [{"key": "d"}, {"key": "m"}, {"backspace": 1, "expect": {"replaceBefore": 0, "commit": "", "pending": "দ", "handled": true}}, {"key": "a", "expect": {"replaceBefore": 0, "commit": "দা", "pending": "", "handled": true}}], "committed": "দা"}
   ]
 }

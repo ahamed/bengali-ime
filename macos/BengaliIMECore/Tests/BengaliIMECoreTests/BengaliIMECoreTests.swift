@@ -49,10 +49,13 @@ struct ComposerBindingTests {
         #expect(type("2", into: composer) == "2")
     }
 
+    // Consonants read the document too: after a caret move they resume the
+    // cluster before it (letter-backspace-and-caret-cluster).
     @Test func keyReadsDocumentOnlyForContextKeys() {
         #expect(keyReadsDocument(key: "i"))
         #expect(keyReadsDocument(key: "\""))
-        #expect(!keyReadsDocument(key: "k"))
+        #expect(keyReadsDocument(key: "k"))
+        #expect(!keyReadsDocument(key: "1"))
     }
 
     @Test func transpileSelection() {

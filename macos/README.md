@@ -47,7 +47,7 @@ The phonetic rules are the same as the web version. See the [main README](../REA
 | Letters, digits, punctuation | Bengali, shown right away. The last cluster (for example `ক` before `h`) is still pending and may change with the next key. |
 | Space | Ends the word and commits it. |
 | Return | Commits, then the app gets Return, so chat apps send the whole word. |
-| Backspace | Deletes one whole character of the pending cluster (`ক্ষ` goes at once). With nothing pending, the app deletes as usual. |
+| Backspace | Deletes one letter of the pending cluster: `দ্ম` becomes `দ`, never `দ্`. With nothing pending, the app deletes as usual. |
 | Arrow keys, Tab, Esc, Home/End, Page Up/Down | Commits, then the app handles the key. |
 | ⌘, ⌃ or ⌥ shortcuts | Commits, then the shortcut works as usual. |
 | Keys with no Bengali mapping (`? ! ( ) @ /` …) | Typed as-is. |

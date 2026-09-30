@@ -32,6 +32,12 @@ Each key shows its Bengali right away. The last few characters (the cluster you'
 stay **pending**, shown underlined, because the next key may change them: `k` gives `ক`, then `h`
 turns it into `খ`. A space, punctuation, a click or an arrow key makes the pending text final.
 
+**Backspace** removes one letter: a consonant goes together with the hasant that joins it, so `দ্ম`
+becomes `দ` (never `দ্`), and a kar goes on its own (`করতে` → `করত` → `কর` → `ক`). What is left
+is still being typed: `dm`, Backspace, `h` gives `ধ`. **Placing the caret** after a word picks it
+up again: a vowel attaches as a kar (`i` after `র` in `করতে` gives `করিতে`), and a consonant
+continues the cluster (`h` after `করত` gives `করথ`).
+
 The same keys always produce the same text. A few rules make sure the output is always well-formed
 Bangla:
 

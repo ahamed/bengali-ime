@@ -14,10 +14,10 @@ use crate::data::{
     TYPOGRAPHIC_DOUBLE_QUOTE_CLOSE, TYPOGRAPHIC_DOUBLE_QUOTE_OPEN, TYPOGRAPHIC_SINGLE_QUOTE_CLOSE,
     TYPOGRAPHIC_SINGLE_QUOTE_OPEN, is_ascii_or_bengali_digit, is_kar_taking_consonant, lookup,
 };
-use crate::rules;
 use crate::vowel_attach::{
     ends_with_consonant_and_chandrabindu_units, ends_with_kar_taking_consonant_units,
 };
+use crate::{letters, rules};
 
 /// One edit the host applies at the caret, in order. Back counts are UTF-16
 /// code units.
@@ -133,22 +133,6 @@ impl Default for Config {
     }
 }
 
-/// Undo record for one keystroke: the state to restore when it is backspaced.
-#[derive(Debug, Clone)]
-struct UndoEntry {
-    keep_length: usize,
-    removed_tail: Vec<u16>,
-    buffer: Vec<u16>,
-    skip_document_kar_for_next_vowel: bool,
-}
-
-/// At least this many keystrokes can always be undone.
-const MAX_UNDO_ENTRIES: usize = 1024;
-
-/// A keystroke never rewrites more than a few units of existing output, so
-/// only this much of it is saved for undo.
-const UNDO_SNAPSHOT_UNITS: usize = 64;
-
 /// Phonetic roman-to-Bengali state machine. See the crate docs for how its
 /// behaviour is pinned.
 #[derive(Debug, Default, Clone)]
@@ -159,12 +143,6 @@ pub struct Engine {
     config: Config,
     actions: Vec<Action>,
     skip_document_kar_for_next_vowel: bool,
-    /// One entry per keystroke, so Backspace can restore the exact prior state.
-    undo_stack: Vec<UndoEntry>,
-    /// Set when the host assigns `output`.
-    output_assigned: bool,
-    /// Lowest output index modified by the current keystroke.
-    touched_from: usize,
 }
 
 impl Engine {
@@ -191,58 +169,44 @@ impl Engine {
         self.config = config;
     }
 
-    /// `processBackspace`: undoes the last keystroke, so output, buffer and
-    /// flags are exactly what they were before it. With no undo history (for
-    /// example after [`Engine::set_output`]) it deletes one code point, plus a
-    /// hasant it would leave dangling.
+    /// Backspace: deletes the last letter of the output and resumes the
+    /// cluster before it (rust-engine-core spec, "Letter backspace").
+    ///
+    /// A letter is a consonant with its nukta and the hasant joining it to the
+    /// consonant before (`দ্ম` → `দ`, never `দ্`), any other single Bengali
+    /// code point (a kar, a sign, a vowel), or one grapheme cluster of other
+    /// text. Only visible text counts, so a keystroke that produced nothing
+    /// (the silent `o`) never uses up a Backspace. Returns one delete action,
+    /// or none on an empty output.
     pub fn process_backspace(&mut self) -> Vec<Action> {
         self.actions.clear();
-        self.drop_undo_history_if_resynced();
-
-        if let Some(entry) = self.undo_stack.pop() {
-            self.restore(entry);
-        } else {
-            self.delete_last_code_point();
+        let count = letters::last_letter_len_utf16(&self.output);
+        if count > 0 {
+            self.pop(count);
+            self.resume_cluster();
         }
-
-        self.track_state();
         std::mem::take(&mut self.actions)
     }
 
     /// `process(char, { textBeforeCaret })`.
     pub fn process(&mut self, key: &str, text_before_caret: Option<&str>) -> Vec<Action> {
         self.actions.clear();
-        self.drop_undo_history_if_resynced();
-
-        let length_before = self.output.len();
-        let snapshot_start = length_before.saturating_sub(UNDO_SNAPSHOT_UNITS);
-        let snapshot = self.output[snapshot_start..].to_vec();
-        let buffer_before = self.buffer.clone();
-        let skip_before = self.skip_document_kar_for_next_vowel;
-        self.touched_from = length_before;
-
         self.process_keystroke(key, text_before_caret);
-
-        if !self.actions.is_empty() {
-            if self.touched_from >= snapshot_start {
-                self.undo_stack.push(UndoEntry {
-                    keep_length: self.touched_from,
-                    removed_tail: snapshot[self.touched_from - snapshot_start..].to_vec(),
-                    buffer: buffer_before,
-                    skip_document_kar_for_next_vowel: skip_before,
-                });
-                if self.undo_stack.len() > MAX_UNDO_ENTRIES * 2 {
-                    self.undo_stack.drain(..MAX_UNDO_ENTRIES);
-                }
-            } else {
-                // Unreachable with the current rules; losing undo beats restoring wrong text.
-                debug_assert!(false, "keystroke rewrote more than the undo snapshot");
-                self.undo_stack.clear();
-            }
-        }
-
-        self.track_state();
         std::mem::take(&mut self.actions)
+    }
+
+    /// Makes the consonant run at the end of the output the current cluster,
+    /// so the next consonant continues it as if the run had just been typed:
+    /// after `করত`, `h` gives `থ` (design D3). The run is consonants joined by
+    /// hasants; after anything else (a kar, `ং`, a space) the cluster is empty.
+    ///
+    /// Hosts call this when the engine lost track of the caret. The engine
+    /// never resumes on its own after ending a cluster itself, so `kom` stays
+    /// `কম`. Returns no actions and leaves the output unchanged.
+    pub fn resume_cluster(&mut self) {
+        let run = letters::trailing_consonant_run_len_utf16(&self.output);
+        self.buffer = self.output[self.output.len() - run..].to_vec();
+        self.skip_document_kar_for_next_vowel = false;
     }
 
     /// Flips English mode and ends the current Bangla cluster.
@@ -250,7 +214,6 @@ impl Engine {
         self.english_mode = !self.english_mode;
         self.flush_buffer();
         self.skip_document_kar_for_next_vowel = false;
-        self.track_state();
     }
 
     /// Whether keys are currently passed through as English.
@@ -258,11 +221,10 @@ impl Engine {
         self.english_mode
     }
 
-    /// Assigns `output` directly (a host resync).
-    /// The buffer is kept and the undo history is cleared.
+    /// Assigns `output` directly (a host resync). The buffer is kept; call
+    /// [`Engine::resume_cluster`] to take the cluster from the new output.
     pub fn set_output(&mut self, output: &str) {
         self.output = utf16(output);
-        self.output_assigned = true;
     }
 
     /// Everything the engine has produced (or was given by [`Engine::set_output`]).
@@ -280,16 +242,6 @@ impl Engine {
     pub fn end_cluster(&mut self) {
         self.flush_buffer();
         self.skip_document_kar_for_next_vowel = false;
-        self.track_state();
-    }
-
-    /// Removes the last `count` UTF-16 units of the output and ends the
-    /// cluster. The undo history is dropped, since it no longer matches.
-    pub(crate) fn delete_tail(&mut self, count: usize) {
-        self.pop(count);
-        self.actions.clear();
-        self.undo_stack.clear();
-        self.track_state();
     }
 
     /// Length of `output` in UTF-16 code units.
@@ -302,26 +254,11 @@ impl Engine {
         self.buffer.len()
     }
 
-    fn touch(&mut self, index: usize) {
-        self.touched_from = self.touched_from.min(index);
-    }
-
-    fn track_state(&mut self) {
-        self.output_assigned = false;
-    }
-
-    fn drop_undo_history_if_resynced(&mut self) {
-        if self.output_assigned {
-            self.undo_stack.clear();
-        }
-    }
-
     /// `spliceTail`: replaces the last `count` units of the output with `text`.
     /// Keeps JavaScript's `slice(0, negative)` behaviour when `count` exceeds
     /// the output length (only possible after a resync shortened the output).
     fn splice_tail(&mut self, count: usize, text: &[u16]) {
         let len = self.output.len();
-        self.touch(len.saturating_sub(count));
         let keep = if count <= len {
             len - count
         } else {
@@ -329,44 +266,6 @@ impl Engine {
         };
         self.output.truncate(keep);
         self.output.extend_from_slice(text);
-    }
-
-    fn restore(&mut self, entry: UndoEntry) {
-        let chars_back = self.output.len() - entry.keep_length;
-        let tail = String::from_utf16_lossy(&entry.removed_tail);
-        if chars_back > 0 && !entry.removed_tail.is_empty() {
-            self.actions.push(Action::Replace {
-                chars_back,
-                text: tail,
-            });
-        } else if chars_back > 0 {
-            self.actions.push(Action::Delete { chars_back });
-        } else if !entry.removed_tail.is_empty() {
-            self.actions.push(Action::Insert { text: tail });
-        }
-
-        self.splice_tail(chars_back, &entry.removed_tail);
-        self.buffer = entry.buffer;
-        self.skip_document_kar_for_next_vowel = entry.skip_document_kar_for_next_vowel;
-    }
-
-    /// Deletes one code point, plus a hasant it would leave dangling (ক্ত → ক).
-    fn delete_last_code_point(&mut self) {
-        let len = self.output.len();
-        if len == 0 {
-            return;
-        }
-        let low = self.output[len - 1];
-        let mut count = if len >= 2 && (0xDC00..=0xDFFF).contains(&low) {
-            2
-        } else {
-            1
-        };
-        let hasant = utf16(HASANT);
-        if self.output[..len - count].ends_with(&hasant) {
-            count += hasant.len();
-        }
-        self.pop(count);
     }
 
     fn process_keystroke(&mut self, key: &str, text_before_caret: Option<&str>) {
@@ -712,6 +611,16 @@ impl Engine {
 pub(crate) fn is_vowel(key: &str) -> bool {
     lookup(ROMAN_TO_PHONETIC_VOWELS, key).is_some()
         || lookup(ROMAN_TO_PHONETIC_VOWELS, &key.to_lowercase()).is_some()
+}
+
+/// True for keys the engine maps to a consonant, looked up as
+/// `process_consonant` does (the key itself, then its lowercase form).
+pub(crate) fn is_consonant_key(key: &str) -> bool {
+    let lower = key.to_lowercase();
+    [key, lower.as_str()].into_iter().any(|k| {
+        lookup(DEFAULT_CONSONANT_BY_ROMAN_KEY, k).is_some()
+            || lookup(CAPITAL_ROMAN_TO_CONSONANT, k).is_some()
+    })
 }
 
 fn is_number(key: &str) -> bool {

@@ -8,6 +8,7 @@
 mod composer;
 pub mod data;
 mod engine;
+mod letters;
 mod rules;
 mod transpile;
 mod vowel_attach;

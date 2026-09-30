@@ -1,6 +1,6 @@
 {
   "format": 1,
-  "description": "ime-composer spec: Document context with fallback; Flush and reset",
+  "description": "ime-composer spec: Document context with fallback; Flush and reset; Resuming the cluster before the caret",
   "cases": [
     {"name": "host provides context", "steps": [{"reset": 1}, {"key": "i", "ctx": "ক", "expect": {"replaceBefore": 0, "commit": "ি", "pending": "", "handled": true}}]},
     {"name": "host context is followed by the pending text", "steps": [{"key": "k"}, {"key": "a", "ctx": "এ", "expect": {"replaceBefore": 0, "commit": "কা", "pending": "", "handled": true}}], "committed": "কা"},
@@ -9,6 +9,14 @@
     {"name": "host cannot provide context after reset", "steps": [{"reset": 1}, {"key": "i", "expect": {"replaceBefore": 0, "commit": "ই", "pending": "", "handled": true}}]},
     {"name": "reset seeded with the text before the caret", "steps": [{"reset": 1, "ctx": "ক"}, {"key": "i", "expect": {"replaceBefore": 0, "commit": "ি", "pending": "", "handled": true}}]},
     {"name": "flush on focus change", "steps": [{"key": "k"}, {"key": "h"}, {"flush": 1, "expect": {"replaceBefore": 0, "commit": "খ", "pending": "", "handled": true}}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "হ", "handled": true}}]},
-    {"name": "reset after caret move", "steps": [{"key": "k"}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "খ", "handled": true}}, {"reset": 1}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "হ", "handled": true}}]}
+    {"name": "reset after caret move", "steps": [{"key": "k"}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "খ", "handled": true}}, {"reset": 1}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "হ", "handled": true}}]},
+    {"name": "aspiration after a caret move", "steps": [{"reset": 1, "ctx": "করত"}, {"key": "h", "ctx": "করত", "expect": {"replaceBefore": 1, "commit": "", "pending": "থ", "handled": true}}]},
+    {"name": "conjunct after a reset without context", "steps": [{"reset": 1}, {"key": "m", "ctx": "দ", "expect": {"replaceBefore": 1, "commit": "", "pending": "দ্ম", "handled": true}}]},
+    {"name": "kar after a resumed conjunct", "document": "এক", "hostContext": true, "steps": [{"reset": 1}, {"key": "T", "expect": {"replaceBefore": 1, "commit": "", "pending": "ক্ট", "handled": true}}, {"key": "a", "expect": {"replaceBefore": 0, "commit": "ক্টা", "pending": "", "handled": true}}], "committed": "এক্টা"},
+    {"name": "vowel in the middle of a word", "steps": [{"reset": 1, "ctx": "কর"}, {"key": "i", "ctx": "কর", "expect": {"replaceBefore": 0, "commit": "ি", "pending": "", "handled": true}}]},
+    {"name": "nothing to resume after a kar", "steps": [{"reset": 1, "ctx": "কি"}, {"key": "h", "ctx": "কি", "expect": {"replaceBefore": 0, "commit": "", "pending": "হ", "handled": true}}]},
+    {"name": "silent o is not undone by context", "hostContext": true, "steps": [{"key": "k"}, {"key": "o"}, {"key": "m", "expect": {"replaceBefore": 0, "commit": "", "pending": "ম", "handled": true}}]},
+    {"name": "a new composer resumes from the first key's context", "steps": [{"key": "h", "ctx": "ত", "expect": {"replaceBefore": 1, "commit": "", "pending": "থ", "handled": true}}]},
+    {"name": "only the first key after a reset resumes", "steps": [{"reset": 1}, {"key": "a", "ctx": "ক", "expect": {"replaceBefore": 0, "commit": "া", "pending": "", "handled": true}}, {"key": "h", "ctx": "কা", "expect": {"replaceBefore": 0, "commit": "", "pending": "হ", "handled": true}}]}
   ]
 }

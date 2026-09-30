@@ -3,6 +3,26 @@ import { Composer, Config, type Update } from '../wasm/druti_wasm.js';
 /** A composer update copied out of WASM memory. */
 type Edit = Pick<Update, 'replaceBefore' | 'commit' | 'pending' | 'handled'>;
 
+/**
+ * Keys that only modify the next key. Pressing one alone must not end the
+ * cluster: Shift before `T` in `ekoTa` would otherwise reset the composer,
+ * and the reset would resume `ক` from the document (`এক্টা`, not `একটা`).
+ */
+const MODIFIER_KEYS = new Set([
+  'Shift',
+  'Control',
+  'Alt',
+  'AltGraph',
+  'Meta',
+  'CapsLock',
+  'Fn',
+  'FnLock',
+  'Hyper',
+  'Super',
+  'Symbol',
+  'SymbolLock',
+]);
+
 const toEdit = (update: Update): Edit => {
   const { replaceBefore, commit, pending, handled } = update;
   update.free();
@@ -92,7 +112,7 @@ export class DrutiEditor {
   }
 
   private onKeyDown(e: KeyboardEvent): void {
-    if (e.defaultPrevented || e.isComposing || this.english) return;
+    if (e.defaultPrevented || e.isComposing || this.english || MODIFIER_KEYS.has(e.key)) return;
 
     const plain = !e.ctrlKey && !e.metaKey && !e.altKey;
     const typed = plain && e.key.length === 1;
@@ -114,7 +134,7 @@ export class DrutiEditor {
     const update = this.guard(() =>
       toEdit(
         e.key === 'Backspace'
-          ? this.composer.backspace()
+          ? this.composer.backspace(this.text.slice(0, this.caret))
           : this.composer.key(e.key, this.text.slice(0, this.caret)),
       ),
     );
@@ -138,7 +158,7 @@ export class DrutiEditor {
     if (update.handled) {
       e.preventDefault();
     } else {
-      // Backspace with nothing pending: the browser deletes.
+      // Backspace after text that isn't Bengali: the browser deletes.
       this.stale = true;
     }
   }

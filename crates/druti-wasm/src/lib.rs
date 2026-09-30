@@ -116,9 +116,14 @@ impl Composer {
         self.inner.key(key, text_before_caret.as_deref()).into()
     }
 
-    /// Backspace; see `druti_core::Composer::backspace`.
-    pub fn backspace(&mut self) -> Update {
-        self.inner.backspace().into()
+    /// Backspace: removes one letter; see `druti_core::Composer::backspace`.
+    /// `textBeforeCaret` is the committed text before the pending text; when
+    /// it is omitted, Backspace on committed text is left to the editor.
+    pub fn backspace(
+        &mut self,
+        #[wasm_bindgen(js_name = textBeforeCaret)] text_before_caret: Option<String>,
+    ) -> Update {
+        self.inner.backspace(text_before_caret.as_deref()).into()
     }
 
     /// Commits all pending text and ends the cluster.
@@ -218,7 +223,20 @@ mod tests {
                 core.key(key, Some("ক")).into()
             );
         }
-        assert_eq!(wasm.backspace(), core.backspace().into());
+        assert_eq!(wasm.backspace(None), core.backspace(None).into());
+        // Committed দ্ম loses ম; করতে loses ে and `h` then continues ত; the
+        // editor deletes the space after আমি.
+        for context in ["দ্ম", "করতে", "আমি "] {
+            assert_eq!(
+                wasm.backspace(Some(context.into())),
+                core.backspace(Some(context)).into(),
+                "backspace after {context:?}"
+            );
+        }
+        assert_eq!(
+            wasm.key("h", Some("করত".into())),
+            core.key("h", Some("করত")).into()
+        );
         assert_eq!(wasm.flush(), core.flush().into());
         assert_eq!(wasm.reset(Some("ক".into())), core.reset(Some("ক")).into());
     }

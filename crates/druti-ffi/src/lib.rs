@@ -115,9 +115,13 @@ impl Composer {
         self.guarded(|c| c.key(&key, text_before_caret.as_deref()))
     }
 
-    /// Backspace; see `druti_core::Composer::backspace`.
-    pub fn backspace(&self) -> Update {
-        self.guarded(druti_core::Composer::backspace)
+    /// Backspace: removes one letter; see `druti_core::Composer::backspace`.
+    /// `text_before_caret` is the committed text before the pending text when
+    /// the app exposes it; without it, Backspace on committed text is left to
+    /// the app. Defaults to `None`, so existing Swift call sites keep compiling.
+    #[uniffi::method(default(text_before_caret = None))]
+    pub fn backspace(&self, text_before_caret: Option<String>) -> Update {
+        self.guarded(|c| c.backspace(text_before_caret.as_deref()))
     }
 
     /// Commits all pending text and ends the cluster.
@@ -199,18 +203,39 @@ mod tests {
     fn document_keys() {
         assert!(key_reads_document("i".into()));
         assert!(key_reads_document("-".into()));
-        assert!(!key_reads_document("k".into()));
+        assert!(key_reads_document("k".into()));
+        assert!(!key_reads_document("1".into()));
     }
 
     #[test]
     fn pending_and_backspace() {
         let composer = Composer::new(default_config());
-        assert_eq!(composer.key("k".into(), None).pending, "ক");
-        assert_eq!(composer.key("h".into(), None).pending, "খ");
-        let update = composer.backspace();
+        assert_eq!(composer.key("d".into(), None).pending, "দ");
+        assert_eq!(composer.key("m".into(), None).pending, "দ্ম");
+        let update = composer.backspace(None);
         assert!(update.handled);
-        assert_eq!(update.pending, "");
-        assert!(!composer.backspace().handled);
+        assert_eq!(update.pending, "দ");
+        assert_eq!(composer.backspace(None).pending, "");
+        assert!(!composer.backspace(None).handled);
+    }
+
+    #[test]
+    fn same_backspace_updates_as_the_core_composer() {
+        let ffi = Composer::new(default_config());
+        let mut core = druti_core::Composer::new(druti_core::Config::default());
+        // Committed দ্ম loses ম; করতে loses ে and `h` then continues ত; the
+        // app deletes the space after আমি.
+        for context in ["দ্ম", "করতে", "আমি "] {
+            assert_eq!(
+                ffi.backspace(Some(context.into())),
+                core.backspace(Some(context)).into(),
+                "backspace after {context:?}"
+            );
+        }
+        assert_eq!(
+            ffi.key("h".into(), Some("করত".into())),
+            core.key("h", Some("করত")).into()
+        );
     }
 
     #[test]

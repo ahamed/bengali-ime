@@ -20,9 +20,15 @@ struct ConfigPatch {
 }
 
 #[derive(Deserialize)]
+#[serde(rename_all = "camelCase")]
 struct Case {
     name: String,
     config: Option<ConfigPatch>,
+    /// Committed text already in the host document before the first step.
+    document: Option<String>,
+    /// Pass the host's committed text as `ctx` to every key, Backspace and
+    /// reset without its own `ctx`, as the playground does.
+    host_context: Option<bool>,
     steps: Vec<Step>,
     committed: Option<String>,
 }
@@ -82,19 +88,29 @@ fn run(case: &Case) -> Result<(), String> {
         config.smart_quotes = patch.smart_quotes.unwrap_or(config.smart_quotes);
     }
     let mut composer = Composer::new(config);
-    let mut host = Host::default();
+    let mut host = Host {
+        committed: case
+            .document
+            .as_deref()
+            .unwrap_or_default()
+            .encode_utf16()
+            .collect(),
+    };
     for (index, step) in case.steps.iter().enumerate() {
+        let ctx = step.ctx.clone().or_else(|| {
+            case.host_context
+                .unwrap_or_default()
+                .then(|| String::from_utf16_lossy(&host.committed))
+        });
+        let ctx = ctx.as_deref();
         let (label, update) = if let Some(key) = &step.key {
-            (
-                format!("key {key:?}"),
-                composer.key(key, step.ctx.as_deref()),
-            )
+            (format!("key {key:?}"), composer.key(key, ctx))
         } else if step.backspace.is_some() {
-            ("backspace".to_owned(), composer.backspace())
+            ("backspace".to_owned(), composer.backspace(ctx))
         } else if step.flush.is_some() {
             ("flush".to_owned(), composer.flush())
         } else if step.reset.is_some() {
-            ("reset".to_owned(), composer.reset(step.ctx.as_deref()))
+            ("reset".to_owned(), composer.reset(ctx))
         } else {
             return Err(format!("step {index}: no operation"));
         };
@@ -284,7 +300,21 @@ fn key_reads_document_covers_every_context_sensitive_key() {
         missing.is_empty(),
         "context-sensitive keys not reported: {missing:?}"
     );
-    assert!(!Composer::key_reads_document("k"));
     assert!(Composer::key_reads_document("i"));
     assert!(Composer::key_reads_document("A"));
+}
+
+/// ime-composer spec, "Resuming the cluster before the caret": consonant keys
+/// read the document so hosts supply the cluster to resume.
+#[test]
+fn consonant_keys_read_the_document() {
+    for key in ["h", "k", "i"] {
+        assert!(Composer::key_reads_document(key), "{key:?} should read");
+    }
+    for key in ["1", " "] {
+        assert!(
+            !Composer::key_reads_document(key),
+            "{key:?} should not read"
+        );
+    }
 }

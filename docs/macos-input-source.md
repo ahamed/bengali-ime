@@ -20,7 +20,7 @@ data in `crates/druti-core/tests/fixtures/`, and the web playground runs the sam
 | Engine | Port the algorithm to a **Rust core**. At first TypeScript stayed the reference and shared fixtures enforced parity; now Rust is the only engine, also used on the web through WASM. |
 | Platforms | macOS now. The binding layer must also serve an **iOS keyboard extension** later. |
 | Typing UX | Exact Bengali on every keystroke. Only the engine's rewritable cluster (its `buffer`, usually 1–4 characters) is held as marked text, underline hidden where the app allows; everything else is committed immediately. |
-| Backspace | Inside the pending cluster: delete one **grapheme cluster**. Nothing pending: pass the key to the app. |
+| Backspace | Inside the pending cluster: delete one **letter** (a consonant with the hasant joining it, or one kar or sign). Nothing pending: pass the key to the app. |
 | Bangla ↔ English | The macOS input source switch (Globe key / Ctrl+Space). The engine's English mode is not used. |
 | Kar attach after caret moves | Read the text before the caret from the app when it allows (engine `textBeforeCaret`); otherwise fall back to the independent vowel. |
 | Repo | This repository, as a monorepo. |
@@ -32,7 +32,7 @@ data in `crates/druti-core/tests/fixtures/`, and the web playground runs the sam
 | Layer | Choice | Why |
 |---|---|---|
 | Engine core | **Rust** (stable, edition 2021), crate `druti-core`, no `unsafe`, no I/O | Single engine for macOS, the web (WASM) and later iOS. Pure string state machine. |
-| Grapheme segmentation | `unicode-segmentation` crate | Powers the composer's grapheme Backspace (the engine itself no longer segments). |
+| Grapheme segmentation | `unicode-segmentation` crate | Finds the last grapheme cluster when Backspace deletes text that isn't Bengali (an emoji, Latin). |
 | FFI | **UniFFI** (proc-macro mode), crate `druti-ffi` (library name `bengali_ime_ffi`) | Generates an idiomatic Swift API (strings, structs, enums) with no hand-written C. The same generated binding works in an iOS keyboard extension. |
 | Native packaging | Static lib for `aarch64-apple-darwin` packaged as an **XCFramework** (`scripts/build-xcframework.sh`) | Xcode links it like any framework; iOS slices (`aarch64-apple-ios`, `aarch64-apple-ios-sim`) are added to the same XCFramework later. |
 | Input method | **Swift 6 + AppKit + InputMethodKit** (`IMKServer`, `IMKInputController`) | The only supported API for a third-party input source on macOS. No SwiftUI needed. |
@@ -56,7 +56,7 @@ flowchart LR
     Bind["Generated Swift binding (UniFFI)"]
   end
   subgraph Rust["druti-core (Rust)"]
-    Composer["Composer<br/>commit / pending split,<br/>grapheme backspace"]
+    Composer["Composer<br/>commit / pending split,<br/>letter backspace"]
     Engine["Engine<br/>keystroke rules"]
     Data["Lookup tables"]
   end
@@ -132,7 +132,7 @@ pub struct Engine { /* buffer, output, flags */ }
 impl Engine {
     pub fn new(config: Config) -> Self;
     pub fn process(&mut self, key: &str, text_before_caret: Option<&str>) -> Vec<Action>;
-    pub fn process_backspace(&mut self) -> Vec<Action>;   // undoes the last keystroke
+    pub fn process_backspace(&mut self) -> Vec<Action>;   // deletes the last letter, resumes the cluster
     pub fn output(&self) -> &str;
     pub fn buffer(&self) -> &str;
 }
@@ -146,7 +146,7 @@ pub struct Update {
 }
 impl Composer {
     pub fn key(&mut self, key: &str, text_before_caret: Option<String>) -> Update;
-    pub fn backspace(&mut self) -> Update;   // one grapheme cluster of `pending`; handled=false if nothing pending
+    pub fn backspace(&mut self, text_before_caret: Option<&str>) -> Update;   // one letter; handled=false if the app should delete
     pub fn flush(&mut self) -> Update;       // commit pending (focus loss, arrows, shortcuts)
     pub fn reset(&mut self);                 // caret moved / app changed: forget engine state
 }
@@ -230,11 +230,12 @@ directly.
    state after every key.
 3. An intended behaviour change edits the affected fixture entries in the same commit, so the
    review shows both. Anything else that breaks a fixture is a regression.
-4. Composer-only behaviour (commit/pending split, grapheme backspace, `-` holding, config toggles)
+4. Composer-only behaviour (commit/pending split, letter backspace, `-` holding, config toggles)
    has its own hand-written fixtures in `tests/fixtures/composer/`.
 
-**Grapheme boundaries.** The engine does not segment graphemes; the composer's Backspace is the only operation that does.
-It has its own fixtures.
+**Letter boundaries.** Backspace deletes one letter (`crates/druti-core/src/letters.rs`): a consonant
+with its nukta and joining hasant, one other Bengali code point, or one grapheme cluster of other text.
+The engine and composer fixtures pin it.
 
 ## Milestones
 
