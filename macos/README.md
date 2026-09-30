@@ -44,16 +44,16 @@ The phonetic rules are the same as the web version. See the [main README](../REA
 
 | You press | You get |
 |---|---|
-| Letters, digits, punctuation | Bengali, shown right away. The last cluster (for example `ক` before `h`) is still pending and may change with the next key. |
+| Letters, digits, punctuation | Bengali, shown right away. The word you're typing is still pending and may change with the next key (`ক` becomes `খ` after `h`). |
 | Space | Ends the word and commits it. |
 | Return | Commits, then the app gets Return, so chat apps send the whole word. |
-| Backspace | Deletes one whole character of the pending cluster (`ক্ষ` goes at once). With nothing pending, the app deletes as usual. |
+| Backspace | In the word you're typing, deletes one letter: `দ্ম` becomes `দ`, never `দ্`, and `করতে` becomes `করত`. The same in every app, including Chrome, Cursor and Terminal. A consonant typed next starts a new letter (`ka`, Backspace, `k` gives `কক`). In text that is already final, the app deletes as usual, one character at a time. |
 | Arrow keys, Tab, Esc, Home/End, Page Up/Down | Commits, then the app handles the key. |
 | ⌘, ⌃ or ⌥ shortcuts | Commits, then the shortcut works as usual. |
 | Keys with no Bengali mapping (`? ! ( ) @ /` …) | Typed as-is. |
 
-Some apps draw an underline under the pending cluster. It becomes normal text on the next key that
-commits it.
+Some apps draw an underline under the word you're typing. It becomes normal text at the next space,
+punctuation mark, click or arrow key.
 
 In apps that let input methods read their text (TextEdit, Notes, Safari, Pages, ...), a vowel typed
 right after an existing consonant becomes a kar: click after `ক` and type `i` to get `কি`. Apps

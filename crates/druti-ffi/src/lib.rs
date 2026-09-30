@@ -47,12 +47,10 @@ pub fn default_config() -> Config {
     druti_core::Config::default().into()
 }
 
-/// What the host applies after a key; see `druti_core::Update`.
-/// `replace_before` is in UTF-16 code units (`NSString` / `NSRange` units).
+/// What the host applies after a key; see `druti_core::Update`. It never
+/// changes text committed earlier.
 #[derive(Debug, Clone, PartialEq, Eq, uniffi::Record)]
 pub struct Update {
-    /// UTF-16 units of committed text to delete before the marked text.
-    pub replace_before: u32,
     /// Text that replaces the marked text and becomes final.
     pub commit: String,
     /// The new marked text (empty: none).
@@ -64,7 +62,6 @@ pub struct Update {
 impl From<druti_core::Update> for Update {
     fn from(u: druti_core::Update) -> Self {
         Self {
-            replace_before: u.replace_before,
             commit: u.commit,
             pending: u.pending,
             handled: u.handled,
@@ -115,7 +112,8 @@ impl Composer {
         self.guarded(|c| c.key(&key, text_before_caret.as_deref()))
     }
 
-    /// Backspace; see `druti_core::Composer::backspace`.
+    /// Backspace: removes one letter of the pending text; with nothing
+    /// pending it is left to the app. See `druti_core::Composer::backspace`.
     pub fn backspace(&self) -> Update {
         self.guarded(druti_core::Composer::backspace)
     }
@@ -128,6 +126,14 @@ impl Composer {
     /// Forgets all state without committing (the caret moved).
     pub fn reset(&self, text_before_caret: Option<String>) -> Update {
         self.guarded(|c| c.reset(text_before_caret.as_deref()))
+    }
+
+    /// Whether the text before the caret still matches what the composer
+    /// typed since its last reset; see
+    /// `druti_core::Composer::matches_text_before_caret`. Hosts ask this when
+    /// the caret isn't where they expected it.
+    pub fn matches_text_before_caret(&self, text_before_caret: String) -> bool {
+        self.lock().matches_text_before_caret(&text_before_caret)
     }
 
     /// The pending text the host should currently be showing.
@@ -200,17 +206,50 @@ mod tests {
         assert!(key_reads_document("i".into()));
         assert!(key_reads_document("-".into()));
         assert!(!key_reads_document("k".into()));
+        assert!(!key_reads_document("1".into()));
     }
 
     #[test]
     fn pending_and_backspace() {
         let composer = Composer::new(default_config());
-        assert_eq!(composer.key("k".into(), None).pending, "ক");
-        assert_eq!(composer.key("h".into(), None).pending, "খ");
+        assert_eq!(composer.key("d".into(), None).pending, "দ");
+        assert_eq!(composer.key("m".into(), None).pending, "দ্ম");
         let update = composer.backspace();
         assert!(update.handled);
-        assert_eq!(update.pending, "");
+        assert_eq!(update.pending, "দ");
+        assert_eq!(composer.backspace().pending, "");
         assert!(!composer.backspace().handled);
+    }
+
+    #[test]
+    fn same_updates_as_the_core_composer() {
+        let ffi = Composer::new(default_config());
+        let mut core = druti_core::Composer::new(druti_core::Config::default());
+        for key in ["p", "o", "d", "m", "o"] {
+            assert_eq!(ffi.key(key.into(), None), core.key(key, None).into());
+        }
+        assert_eq!(
+            ffi.backspace(),
+            core.backspace().into(),
+            "backspace in the word"
+        );
+        assert_eq!(ffi.key(" ".into(), None), core.key(" ", None).into());
+        assert_eq!(
+            ffi.backspace(),
+            core.backspace().into(),
+            "backspace after the word"
+        );
+        assert_eq!(
+            ffi.key("h".into(), Some("করত".into())),
+            core.key("h", Some("করত")).into()
+        );
+        for context in ["ধ", "আমি "] {
+            assert_eq!(
+                ffi.matches_text_before_caret(context.into()),
+                core.matches_text_before_caret(context),
+                "matches {context:?}"
+            );
+        }
     }
 
     #[test]

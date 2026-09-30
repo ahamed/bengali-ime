@@ -27,7 +27,7 @@ done; a change is not finished while any of them fails or warns.
 - **Behaviour is pinned by golden fixtures** in `crates/druti-core/tests/fixtures/`. A change that
   alters typing output updates the affected fixtures in the same commit; a refactor changes none.
 - **Lengths across the FFI and WASM boundaries are UTF-16 code units** (`NSRange`, JavaScript
-  strings). Name them as such (`replace_before`, `chars_back`, `_utf16`), never as "characters".
+  strings). Name them as such (`chars_back`, `last_letter_len_utf16`, `_utf16`), never as "characters".
 - **The binding surfaces mirror each other.** `druti-ffi` (UniFFI, Swift) and `druti-wasm`
   (wasm-bindgen, JavaScript) expose the same types and functions with the same docs. Change both
   together; each has a test that it matches `druti_core`.

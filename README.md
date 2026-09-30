@@ -32,6 +32,12 @@ Each key shows its Bengali right away. The last few characters (the cluster you'
 stay **pending**, shown underlined, because the next key may change them: `k` gives `ক`, then `h`
 turns it into `খ`. A space, punctuation, a click or an arrow key makes the pending text final.
 
+**Backspace** removes one letter: a consonant goes together with the hasant that joins it, so `দ্ম`
+becomes `দ` (never `দ্`), and a kar goes on its own (`করতে` → `করত` → `কর` → `ক`). What is left
+is still being typed: `dm`, Backspace, `h` gives `ধ`. **Placing the caret** after a word picks it
+up again: a vowel attaches as a kar (`i` after `র` in `করতে` gives `করিতে`), and a consonant
+continues the cluster (`h` after `করত` gives `করথ`).
+
 The same keys always produce the same text. A few rules make sure the output is always well-formed
 Bangla:
 
@@ -46,14 +52,14 @@ Three options can be turned off in the Mac input menu and in the playground: Ben
 
 ## Repository
 
-| Path | What it is |
-|---|---|
-| [`crates/druti-core`](crates/druti-core/) | The engine, in Rust: keystroke rules, the pending/commit composer, bulk conversion. Its behaviour is pinned by golden fixtures in `tests/fixtures/`. |
-| [`crates/druti-ffi`](crates/druti-ffi/) | UniFFI bindings for Swift, used by the Mac app. |
-| [`crates/druti-wasm`](crates/druti-wasm/) | wasm-bindgen bindings for JavaScript, used by the playground. |
-| [`examples/playground`](examples/playground/) | The web playground (Vite + TypeScript), deployed to GitHub Pages from `main`. |
-| [`macos`](macos/) | The Druti input source (Swift, AppKit, InputMethodKit). |
-| [`openspec`](openspec/) | Specs and the design history of each change. |
+| Path                                          | What it is                                                                                                                                           |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`crates/druti-core`](crates/druti-core/)     | The engine, in Rust: keystroke rules, the pending/commit composer, bulk conversion. Its behaviour is pinned by golden fixtures in `tests/fixtures/`. |
+| [`crates/druti-ffi`](crates/druti-ffi/)       | UniFFI bindings for Swift, used by the Mac app.                                                                                                      |
+| [`crates/druti-wasm`](crates/druti-wasm/)     | wasm-bindgen bindings for JavaScript, used by the playground.                                                                                        |
+| [`examples/playground`](examples/playground/) | The web playground (Vite + TypeScript), deployed to GitHub Pages from `main`.                                                                        |
+| [`macos`](macos/)                             | The Druti input source (Swift, AppKit, InputMethodKit).                                                                                              |
+| [`openspec`](openspec/)                       | Specs and the design history of each change.                                                                                                         |
 
 ## Development
 

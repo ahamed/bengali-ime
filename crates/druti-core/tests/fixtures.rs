@@ -39,6 +39,7 @@ struct Step {
     c: Option<String>,
     bs: Option<u8>,
     en: Option<u8>,
+    resume: Option<u8>,
     set: Option<String>,
     a: Vec<Value>,
     o: String,
@@ -74,6 +75,8 @@ fn describe_op(step: &Step) -> String {
         "backspace".into()
     } else if step.en.is_some() {
         "toggle English".into()
+    } else if step.resume.is_some() {
+        "resume cluster".into()
     } else {
         format!("set output {:?}", step.set.as_deref().unwrap_or_default())
     }
@@ -89,6 +92,9 @@ fn replay(case: &EngineCase) -> Result<(), String> {
             engine.process_backspace()
         } else if step.en.is_some() {
             engine.toggle_english_mode();
+            Vec::new()
+        } else if step.resume.is_some() {
+            engine.resume_cluster();
             Vec::new()
         } else {
             engine.set_output(step.set.as_deref().unwrap_or_default());

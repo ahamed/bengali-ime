@@ -32,9 +32,10 @@ A step is one operation plus the engine state after it:
 |---|---|
 | `k` | Key passed to `process` (a character, or `"Enter"`) |
 | `c` | `text_before_caret` passed with the key (absent = not passed) |
-| `bs` | `1` = `process_backspace()` (undoes the last keystroke) |
+| `bs` | `1` = `process_backspace()` (deletes the last letter and resumes the cluster before it) |
 | `en` | `1` = `toggle_english_mode()` |
-| `set` | `set_output()` (a host resync; clears the undo history) |
+| `resume` | `1` = `resume_cluster()` (the consonant run ending the output becomes the buffer) |
+| `set` | `set_output()` (a host resync; the buffer is kept) |
 | `a` | Returned actions: `["i", text]` insert, `["r", n, text]` replace, `["d", n]` delete, `["s"]` split block |
 | `o`, `b` | `output` and `buffer` after the step |
 

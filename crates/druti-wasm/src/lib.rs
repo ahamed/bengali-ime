@@ -58,14 +58,11 @@ impl From<druti_core::Config> for Config {
     }
 }
 
-/// What the host applies after a key; see `druti_core::Update`.
-/// `replaceBefore` is in UTF-16 code units, the unit of JavaScript strings.
+/// What the host applies after a key; see `druti_core::Update`. It never
+/// changes text committed earlier.
 #[wasm_bindgen(getter_with_clone)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Update {
-    /// UTF-16 units of committed text to delete before the pending text.
-    #[wasm_bindgen(js_name = replaceBefore)]
-    pub replace_before: u32,
     /// Text that replaces the pending text and becomes final.
     pub commit: String,
     /// The new pending text (empty: none).
@@ -77,7 +74,6 @@ pub struct Update {
 impl From<druti_core::Update> for Update {
     fn from(u: druti_core::Update) -> Self {
         Self {
-            replace_before: u.replace_before,
             commit: u.commit,
             pending: u.pending,
             handled: u.handled,
@@ -116,7 +112,8 @@ impl Composer {
         self.inner.key(key, text_before_caret.as_deref()).into()
     }
 
-    /// Backspace; see `druti_core::Composer::backspace`.
+    /// Backspace: removes one letter of the pending text; with nothing
+    /// pending it is left to the editor. See `druti_core::Composer::backspace`.
     pub fn backspace(&mut self) -> Update {
         self.inner.backspace().into()
     }
@@ -132,6 +129,18 @@ impl Composer {
         #[wasm_bindgen(js_name = textBeforeCaret)] text_before_caret: Option<String>,
     ) -> Update {
         self.inner.reset(text_before_caret.as_deref()).into()
+    }
+
+    /// Whether the text before the caret still matches what the composer
+    /// typed since its last reset; see
+    /// `druti_core::Composer::matches_text_before_caret`. Hosts ask this when
+    /// the caret isn't where they expected it.
+    #[wasm_bindgen(js_name = matchesTextBeforeCaret)]
+    pub fn matches_text_before_caret(
+        &self,
+        #[wasm_bindgen(js_name = textBeforeCaret)] text_before_caret: &str,
+    ) -> bool {
+        self.inner.matches_text_before_caret(text_before_caret)
     }
 
     /// The pending text the host should currently be showing.
@@ -218,7 +227,26 @@ mod tests {
                 core.key(key, Some("ক")).into()
             );
         }
-        assert_eq!(wasm.backspace(), core.backspace().into());
+        assert_eq!(wasm.backspace(), core.backspace().into(), "nothing pending");
+        for key in ["p", "o", "d", "m", "o"] {
+            assert_eq!(wasm.key(key, None), core.key(key, None).into());
+        }
+        assert_eq!(
+            wasm.backspace(),
+            core.backspace().into(),
+            "backspace in the word"
+        );
+        assert_eq!(
+            wasm.key("h", Some("করত".into())),
+            core.key("h", Some("করত")).into()
+        );
+        for context in ["ধ", "আমি "] {
+            assert_eq!(
+                wasm.matches_text_before_caret(context),
+                core.matches_text_before_caret(context),
+                "matches {context:?}"
+            );
+        }
         assert_eq!(wasm.flush(), core.flush().into());
         assert_eq!(wasm.reset(Some("ক".into())), core.reset(Some("ক")).into());
     }

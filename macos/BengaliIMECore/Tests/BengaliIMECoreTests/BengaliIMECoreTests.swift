@@ -21,7 +21,7 @@ struct ComposerBindingTests {
         #expect(composer.pending() == "")
     }
 
-    @Test func pendingThenGraphemeBackspace() {
+    @Test func pendingThenLetterBackspace() {
         let composer = Composer(config: defaultConfig())
         #expect(composer.key(key: "k", textBeforeCaret: nil).pending == "ক")
         #expect(composer.key(key: "h", textBeforeCaret: nil).pending == "খ")
@@ -31,16 +31,54 @@ struct ComposerBindingTests {
         #expect(!composer.backspace().handled)
     }
 
-    @Test func karAttachesToDocumentText() {
+    // whole-word-pending design D1: the word being typed stays pending, so
+    // Backspace edits it in every app.
+    @Test func podmoThenBackspaceRemovesTheLastConsonant() {
         let composer = Composer(config: defaultConfig())
-        #expect(composer.key(key: "i", textBeforeCaret: "ক").commit == "\u{09BF}")
-        #expect(Composer(config: defaultConfig()).key(key: "i", textBeforeCaret: nil).commit == "ই")
+        _ = type("podmo", into: composer)
+        #expect(composer.pending() == "পদ্ম")
+        let update = composer.backspace()
+        #expect(update.handled)
+        #expect(update.commit == "")
+        #expect(update.pending == "পদ")
     }
 
-    @Test func hyphenInDocumentBecomesEmDash() {
+    // Design D2: committed text is the app's; Backspace there is not handled.
+    @Test func backspaceWithNothingPendingIsLeftToTheApp() {
+        let composer = Composer(config: defaultConfig())
+        #expect(type("khub ", into: composer) == "খুব ")
+        #expect(!composer.backspace().handled)
+    }
+
+    // Design D3: a consonant after Backspace starts a new letter.
+    @Test func consonantAfterBackspaceStartsANewLetter() {
+        let composer = Composer(config: defaultConfig())
+        _ = type("ka", into: composer)
+        #expect(composer.backspace().pending == "ক")
+        #expect(composer.key(key: "k", textBeforeCaret: nil).pending == "কক")
+    }
+
+    // whole-word-pending design D4: a caret the app reports late is not a
+    // caret move when the text before it still ends like what the composer typed.
+    @Test func textBeforeCaretIsCheckedAgainstTheComposer() {
+        let composer = Composer(config: defaultConfig())
+        _ = type("po ", into: composer)
+        #expect(composer.matchesTextBeforeCaret(textBeforeCaret: "প "))
+        #expect(!composer.matchesTextBeforeCaret(textBeforeCaret: "আমি "))
+    }
+
+    @Test func karAttachesToDocumentText() {
+        let composer = Composer(config: defaultConfig())
+        #expect(composer.key(key: "i", textBeforeCaret: "ক").pending == "\u{09BF}")
+        #expect(
+            Composer(config: defaultConfig()).key(key: "i", textBeforeCaret: nil).pending == "ই")
+    }
+
+    // Design D2: a rule never rewrites committed text; the `-` is typed as is.
+    @Test func hyphenInDocumentIsNotRewritten() {
         let update = Composer(config: defaultConfig()).key(key: "-", textBeforeCaret: "a-")
-        #expect(update.replaceBefore == 1)
-        #expect(update.commit == "\u{2014}")
+        #expect(update.commit == "")
+        #expect(update.pending == "-")
     }
 
     @Test func configToggles() {
@@ -49,10 +87,13 @@ struct ComposerBindingTests {
         #expect(type("2", into: composer) == "2")
     }
 
+    // A consonant starts a new letter after committed text, so it never reads
+    // the document (whole-word-pending design D3).
     @Test func keyReadsDocumentOnlyForContextKeys() {
         #expect(keyReadsDocument(key: "i"))
         #expect(keyReadsDocument(key: "\""))
         #expect(!keyReadsDocument(key: "k"))
+        #expect(!keyReadsDocument(key: "1"))
     }
 
     @Test func transpileSelection() {

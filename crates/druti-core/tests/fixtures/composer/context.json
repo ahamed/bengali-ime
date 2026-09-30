@@ -1,14 +1,22 @@
 {
   "format": 1,
-  "description": "ime-composer spec: Document context with fallback; Flush and reset",
+  "description": "ime-composer spec: Document context with fallback; Flush and reset; Typing after Backspace or a caret move",
   "cases": [
-    {"name": "host provides context", "steps": [{"reset": 1}, {"key": "i", "ctx": "ক", "expect": {"replaceBefore": 0, "commit": "ি", "pending": "", "handled": true}}]},
-    {"name": "host context is followed by the pending text", "steps": [{"key": "k"}, {"key": "a", "ctx": "এ", "expect": {"replaceBefore": 0, "commit": "কা", "pending": "", "handled": true}}], "committed": "কা"},
-    {"name": "host cannot provide context mid-typing", "steps": [{"key": "a"}, {"key": "m"}, {"key": " "}, {"key": "i", "expect": {"replaceBefore": 0, "commit": "ই", "pending": "", "handled": true}}], "committed": "আম ই"},
-    {"name": "own output is the context without the host", "steps": [{"key": "k"}, {"key": "a", "expect": {"replaceBefore": 0, "commit": "কা", "pending": "", "handled": true}}]},
-    {"name": "host cannot provide context after reset", "steps": [{"reset": 1}, {"key": "i", "expect": {"replaceBefore": 0, "commit": "ই", "pending": "", "handled": true}}]},
-    {"name": "reset seeded with the text before the caret", "steps": [{"reset": 1, "ctx": "ক"}, {"key": "i", "expect": {"replaceBefore": 0, "commit": "ি", "pending": "", "handled": true}}]},
-    {"name": "flush on focus change", "steps": [{"key": "k"}, {"key": "h"}, {"flush": 1, "expect": {"replaceBefore": 0, "commit": "খ", "pending": "", "handled": true}}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "হ", "handled": true}}]},
-    {"name": "reset after caret move", "steps": [{"key": "k"}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "খ", "handled": true}}, {"reset": 1}, {"key": "h", "expect": {"replaceBefore": 0, "commit": "", "pending": "হ", "handled": true}}]}
+    {"name": "host provides context", "steps": [{"reset": 1}, {"key": "i", "ctx": "ক", "expect": {"commit": "", "pending": "ি", "handled": true}}]},
+    {"name": "host context is followed by the pending text", "steps": [{"key": "k"}, {"key": "a", "ctx": "এ", "expect": {"commit": "", "pending": "কা", "handled": true}}]},
+    {"name": "host cannot provide context mid-typing", "steps": [{"key": "a"}, {"key": "m"}, {"key": " "}, {"key": "i", "expect": {"commit": "", "pending": "ই", "handled": true}}], "committed": "আম "},
+    {"name": "own output is the context without the host", "steps": [{"key": "k"}, {"key": "a", "expect": {"commit": "", "pending": "কা", "handled": true}}]},
+    {"name": "host cannot provide context after reset", "steps": [{"reset": 1}, {"key": "i", "expect": {"commit": "", "pending": "ই", "handled": true}}]},
+    {"name": "reset seeded with the text before the caret", "steps": [{"reset": 1, "ctx": "ক"}, {"key": "i", "expect": {"commit": "", "pending": "ি", "handled": true}}]},
+    {"name": "flush on focus change", "steps": [{"key": "k"}, {"key": "h"}, {"flush": 1, "expect": {"commit": "খ", "pending": "", "handled": true}}, {"key": "h", "expect": {"commit": "", "pending": "হ", "handled": true}}]},
+    {"name": "reset after caret move", "steps": [{"key": "k"}, {"key": "h", "expect": {"commit": "", "pending": "খ", "handled": true}}, {"reset": 1}, {"key": "h", "expect": {"commit": "", "pending": "হ", "handled": true}}]},
+    {"name": "consonant after a caret move starts a new letter", "steps": [{"reset": 1, "ctx": "করত"}, {"key": "h", "ctx": "করত", "expect": {"commit": "", "pending": "হ", "handled": true}}]},
+    {"name": "no conjunct with the consonant before the caret", "steps": [{"reset": 1}, {"key": "m", "ctx": "দ", "expect": {"commit": "", "pending": "ম", "handled": true}}]},
+    {"name": "consonant and kar after a caret move", "document": "এক", "hostContext": true, "steps": [{"reset": 1}, {"key": "T", "expect": {"commit": "", "pending": "ট", "handled": true}}, {"key": "a", "expect": {"commit": "", "pending": "টা", "handled": true}}, {"flush": 1, "expect": {"commit": "টা", "pending": "", "handled": true}}], "committed": "একটা"},
+    {"name": "vowel in the middle of a word", "steps": [{"reset": 1, "ctx": "কর"}, {"key": "i", "ctx": "কর", "expect": {"commit": "", "pending": "ি", "handled": true}}]},
+    {"name": "consonant after a kar", "steps": [{"reset": 1, "ctx": "কি"}, {"key": "h", "ctx": "কি", "expect": {"commit": "", "pending": "হ", "handled": true}}]},
+    {"name": "silent o is not undone by context", "hostContext": true, "steps": [{"key": "k"}, {"key": "o"}, {"key": "m", "expect": {"commit": "", "pending": "কম", "handled": true}}]},
+    {"name": "a new composer starts a new letter", "steps": [{"key": "h", "ctx": "ত", "expect": {"commit": "", "pending": "হ", "handled": true}}]},
+    {"name": "consonant after a kar typed at the caret", "steps": [{"reset": 1}, {"key": "a", "ctx": "ক", "expect": {"commit": "", "pending": "া", "handled": true}}, {"key": "h", "ctx": "ক", "expect": {"commit": "", "pending": "াহ", "handled": true}}]}
   ]
 }

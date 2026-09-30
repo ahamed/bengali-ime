@@ -119,6 +119,21 @@
     {"name":"single quote balance from context","category":"scenario","steps":[{"set":"ক","a":[],"o":"ক","b":""},{"k":"'","c":"ক‘ব’","a":[["i","‘"]],"o":"ক‘","b":""}]},
     {"name":"apostrophe after kar","category":"scenario","steps":[{"k":"k","a":[["i","ক"]],"o":"ক","b":"ক"},{"k":"a","a":[["i","া"]],"o":"কা","b":""},{"k":"'","a":[["i","’"]],"o":"কা’","b":""}]},
     {"name":"apostrophe after digit","category":"scenario","steps":[{"k":"1","a":[["i","১"]],"o":"১","b":""},{"k":"'","a":[["i","’"]],"o":"১’","b":""}]},
-    {"name":"unmapped keys pass through","category":"scenario","steps":[{"k":"k","a":[["i","ক"]],"o":"ক","b":"ক"},{"k":"?","a":[["i","?"]],"o":"ক?","b":""},{"k":"a","a":[["i","আ"]],"o":"ক?আ","b":""},{"k":"!","a":[["i","!"]],"o":"ক?আ!","b":""},{"k":"(","a":[["i","("]],"o":"ক?আ!(","b":""}]}
+    {"name":"unmapped keys pass through","category":"scenario","steps":[{"k":"k","a":[["i","ক"]],"o":"ক","b":"ক"},{"k":"?","a":[["i","?"]],"o":"ক?","b":""},{"k":"a","a":[["i","আ"]],"o":"ক?আ","b":""},{"k":"!","a":[["i","!"]],"o":"ক?আ!","b":""},{"k":"(","a":[["i","("]],"o":"ক?আ!(","b":""}]},
+    {"name":"resume then aspiration","category":"scenario","steps":[{"set":"করত","a":[],"o":"করত","b":""},{"resume":1,"a":[],"o":"করত","b":"ত"},{"k":"h","a":[["r",1,"থ"]],"o":"করথ","b":"থ"}]},
+    {"name":"resume then conjunct","category":"scenario","steps":[{"set":"দ","a":[],"o":"দ","b":""},{"resume":1,"a":[],"o":"দ","b":"দ"},{"k":"m","a":[["i","্ম"]],"o":"দ্ম","b":"দ্ম"}]},
+    {"name":"resume a conjunct run","category":"scenario","steps":[{"set":"এন্ত","a":[],"o":"এন্ত","b":""},{"resume":1,"a":[],"o":"এন্ত","b":"ন্ত"}]},
+    {"name":"nothing to resume after a kar","category":"scenario","steps":[{"set":"কি","a":[],"o":"কি","b":""},{"resume":1,"a":[],"o":"কি","b":""}]},
+    {"name":"signs are not resumed","category":"scenario","steps":[{"set":"বাং","a":[],"o":"বাং","b":""},{"resume":1,"a":[],"o":"বাং","b":""}]},
+    {"name":"silent o still ends the cluster","category":"scenario","steps":[{"k":"k","a":[["i","ক"]],"o":"ক","b":"ক"},{"k":"o","a":[["i",""]],"o":"ক","b":""},{"k":"m","a":[["i","ম"]],"o":"কম","b":"ম"}]},
+    {"name":"backspace inside a conjunct","category":"scenario","steps":[{"k":"k","a":[["i","ক"]],"o":"ক","b":"ক"},{"k":"k","a":[["i","্ক"]],"o":"ক্ক","b":"ক্ক"},{"k":"h","a":[["d",3],["i","ক্ষ"]],"o":"ক্ষ","b":"ক্ষ"},{"bs":1,"a":[["d",2]],"o":"ক","b":"ক"}]},
+    {"name":"backspace on a two-consonant conjunct","category":"scenario","steps":[{"k":"d","a":[["i","দ"]],"o":"দ","b":"দ"},{"k":"m","a":[["i","্ম"]],"o":"দ্ম","b":"দ্ম"},{"bs":1,"a":[["d",2]],"o":"দ","b":"দ"}]},
+    {"name":"aspirated consonant is one letter","category":"scenario","steps":[{"k":"k","a":[["i","ক"]],"o":"ক","b":"ক"},{"k":"h","a":[["r",1,"খ"]],"o":"খ","b":"খ"},{"bs":1,"a":[["d",1]],"o":"","b":""}]},
+    {"name":"three-consonant conjunct loses one consonant at a time","category":"scenario","steps":[{"set":"ন্ত্র","a":[],"o":"ন্ত্র","b":""},{"bs":1,"a":[["d",2]],"o":"ন্ত","b":"ন্ত"},{"bs":1,"a":[["d",2]],"o":"ন","b":"ন"}]},
+    {"name":"kar is removed on its own","category":"scenario","steps":[{"k":"k","a":[["i","ক"]],"o":"ক","b":"ক"},{"k":"o","a":[["i",""]],"o":"ক","b":""},{"k":"r","a":[["i","র"]],"o":"কর","b":"র"},{"k":"o","a":[["i",""]],"o":"কর","b":""},{"k":"t","a":[["i","ত"]],"o":"করত","b":"ত"},{"k":"e","a":[["i","ে"]],"o":"করতে","b":""},{"bs":1,"a":[["d",1]],"o":"করত","b":"ত"},{"bs":1,"a":[["d",1]],"o":"কর","b":"র"},{"bs":1,"a":[["d",1]],"o":"ক","b":"ক"}]},
+    {"name":"silent o does not use up a backspace","category":"scenario","steps":[{"k":"k","a":[["i","ক"]],"o":"ক","b":"ক"},{"k":"o","a":[["i",""]],"o":"ক","b":""},{"bs":1,"a":[["d",1]],"o":"","b":""}]},
+    {"name":"remainder continues the cluster","category":"scenario","steps":[{"k":"d","a":[["i","দ"]],"o":"দ","b":"দ"},{"k":"m","a":[["i","্ম"]],"o":"দ্ম","b":"দ্ম"},{"bs":1,"a":[["d",2]],"o":"দ","b":"দ"},{"k":"h","a":[["r",1,"ধ"]],"o":"ধ","b":"ধ"}]},
+    {"name":"backspace after a resync","category":"scenario","steps":[{"set":"ক্ত","a":[],"o":"ক্ত","b":""},{"bs":1,"a":[["d",2]],"o":"ক","b":"ক"}]},
+    {"name":"emoji is one letter","category":"scenario","steps":[{"set":"ক👍🏽","a":[],"o":"ক👍🏽","b":""},{"bs":1,"a":[["d",4]],"o":"ক","b":"ক"}]}
   ]
 }
