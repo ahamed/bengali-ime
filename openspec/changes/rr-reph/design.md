@@ -1,0 +1,137 @@
+## Context
+
+`process_consonant` writes a hasant before any consonant typed after a kar-taking consonant in the
+buffer, র included, so `rt` gives `র্ত`. `rules::rassaw_ri` makes ঋ from a buffer ending in `র্র`
+(typed `rr`) followed by `i`, and ঋ-kar when a consonant is stacked before it. Only a silent `o`
+separates two consonants.
+
+The composer keeps the whole word pending (whole-word-pending D1). After a Backspace, the next
+consonant starts a new letter (whole-word-pending D3).
+
+How this rule was chosen:
+- An earlier draft, "smart hasant", resolved whole words using a verb-root list, a backtick join key,
+  and a re-check after every key. It was rejected: the word list made output hard to predict, and
+  text changed after it was shown (`কর্তা` → `করতাম`).
+- A four-letter variant (র before ত/ল/ব/ছ only, with a doubled consonant for reph) needed a set of
+  letters to memorise.
+- This design was settled in a review with the author.
+
+Evidence from a 2.4M-word Bengali corpus (hermitdave/FrequencyWords, subtitles):
+
+| র + consonant, mid-word | tokens |
+|---|---|
+| reph (র্C, excluding র্য) | 40,825 |
+| unwritten vowel (র C + kar) | 67,306 |
+| র্য (typed with `y`, unaffected) | 4,372 |
+
+## Goals / Non-Goals
+
+**Goals:**
+- One rule: a single `r` never forms reph; `rr` does.
+- Nothing before the last vowel ever changes. Each key changes only the cluster it is typed into.
+- ঋ, য-ফলা and every spelling that uses `o` keep working as before.
+
+**Non-Goals:**
+- Pairs that never form a conjunct (`dekhte` → `দেখ্তে` today). That is a follow-up change with its
+  own conjunct table.
+- `ড়` / `ঢ়` joining (`poRte` → `পড়্তে`); same follow-up.
+- A setting to keep the old behaviour.
+- Nouns that need `o` for other consonant pairs (`ekoTa`, `aponi`); out of scope.
+
+## Decisions
+
+### D1. The rule lives in the engine, decided by the key being typed
+The engine already rewrites only its buffer, which is the open cluster. All the new behaviour is a
+buffer rule:
+- `process_consonant`: when the last letter in the buffer is `র`, the consonant is written without a
+  hasant, and the buffer restarts with it. An `r` key there is the arming rule (D2), and `y` stays
+  য-ফলা (D4).
+- `process_vowel`: when the buffer ends in an armed `র্`, `i` makes ঋ (D3); any other vowel removes the
+  hasant first.
+
+No rule reads past the cluster or looks at later keys, so the output is a fixed function of the keys,
+like today. Bulk conversion, the composer and both bindings get the behaviour unchanged, because they
+all drive the engine.
+
+*Alternative:* a word-level pass in the composer, as in the dropped smart hasant draft. Rejected: it
+rewrites text after it is shown, and needs a word list.
+
+### D2. `rr` shows a visible hasant
+The second `r` inserts `্`, so `korr` shows `কর্`. The armed state is just "the buffer ends in `র্`".
+The engine never otherwise leaves a buffer ending in a hasant, so there are no hidden flags. A
+consonant then follows the hasant: `process_consonant` already writes no extra hasant when the last
+unit isn't a consonant, so `র্` + `ত` → `র্ত`. Aspiration, `kkh` and the nasal rules then work on the
+consonant as usual (`orrth` → `অর্থ`).
+
+*Alternative:* show `কর` and keep the reph pending invisibly, which was the author's first idea.
+Rejected in review: `kor` and `korr` would look the same, and Backspace couldn't show what it would
+undo.
+
+### D3. A vowel after `rr`
+- `i` keeps today's ঋ rule, now reading `র্` instead of `র্র`: with a consonant stacked before the র
+  (`krr` → `ক্র্`), the `্র্` becomes ঋ-kar (`কৃ`); otherwise `র্` becomes `ঋ`.
+- Any other vowel deletes the hasant, then is processed as after `র`. That covers the kar, the silent
+  `o`, and `O` keeping the buffer for `ঐ`/`ঔ`.
+
+Today `rr` is used only for ঋ, so ঋ typing is unchanged for users. Reph never comes before a vowel, so
+`rr` + vowel has no other use.
+
+### D4. `y` and `z`
+- `ja_fala` runs before the `r` rule and already turns `y` after `র` into `্য`.
+- After an armed `র্`, `y` appends `য`, so `karryo` also gives `কার্য`.
+- `z` is an ordinary consonant mapped to `য` and follows D1/D2 (`porzonto` → `পরযন্ত`).
+
+Changes from today:
+- `rz` used to give `র্য`.
+- `ry` after an armed reph is new.
+
+### D5. Backspace
+Letter Backspace already treats a lone trailing hasant as one letter, so Backspace on `কর্` gives `কর`.
+In the composer, a Backspace ends the cluster (whole-word-pending D3). So the next key starts a new
+letter: `t` gives `করত`, and so does `r` (`করর`).
+- To re-type a reph, remove the `র` too and type `rr` again.
+- Typing `r` again could instead re-arm the reph. That would make one consonant key read the letter
+  before a Backspace, which D3 forbids for every consonant. Keeping D3 whole is simpler to learn.
+
+The engine's own `process_backspace` resumes the cluster (rust-engine-core "Resuming the cluster from
+the output"), so at engine level an `r` after it does re-arm. Hosts use the composer, so they don't
+see this; the engine fixtures already pin the difference.
+
+### D6. Default, version and the config rule
+- The rule replaces the old one with no setting.
+- `openspec/config.yaml` asks that new behaviour default to the current one "unless a change says so
+  explicitly". This change says so.
+- Reason: the rule is core typing, and two variants would split users' muscle memory and double the
+  fixture set.
+- The app version goes to 2.0.0, because existing reph spellings (`korta`) change meaning.
+
+### Behaviour and fixture changes
+This change intentionally alters engine output. Fixtures edited in the same commit:
+- `engine/unit.json`: 5 cases that type `r` before a consonant or `rr`. The ঋ cases keep their final
+  output, but their per-key actions change: `r` now inserts `্`, and `i` deletes `্র্`.
+- `engine/words.json`: 18 cases.
+- `engine/random.json`: 201 of the 2,400 sequences.
+- `engine/transpile.json`: 9 cases.
+
+They are regenerated with a one-off script that replays each affected case on the new engine. The
+script asserts that every case without `r` + consonant key or `rr` is unchanged, and stays out of the
+repo. The review diff shows only these cases. `composer/` fixtures are unchanged; new composer cases
+are added for the ime-composer requirement.
+
+## Risks / Trade-offs
+
+- **[Trade-off] Every reph costs one extra key** (about 1.7% of words in the corpus). In return,
+  about 2.9% of words lose an unspoken `o`. The rule is one line to learn.
+- **[Risk] Existing users' muscle memory:** `korta` now gives `করতা`, and `dhormo` gives `ধরম`. →
+  2.0.0 release notes lead with a table from old to new spellings. The README typing table shows
+  `rr` first.
+- **[Trade-off] Reph after a Backspace needs the র re-typed** (D5).
+- **[Risk] Changed random sequences hide an unintended change.** → The regeneration script refuses to
+  touch any case without `r` + consonant or `rr`. The hosts property test (every host shows the same
+  text) runs on the new fixtures.
+
+## Migration Plan
+
+1. Land the engine change with its fixtures and docs, then bump to 2.0.0 and release with the
+   spelling table.
+2. Rollback is a revert of the change; no data or settings are involved.

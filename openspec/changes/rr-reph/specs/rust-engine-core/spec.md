@@ -1,0 +1,93 @@
+# Spec Delta
+
+## ADDED Requirements
+
+### Requirement: A single r never joins the next consonant
+When a consonant key follows a র that ends the current cluster, the engine SHALL write the consonant
+after the র without a hasant and start a new cluster with it. This holds for a র typed as র-ফলা too.
+`y` (য-ফলা) and a second `r` are handled by their own requirements.
+
+#### Scenario: Infinitive
+- **WHEN** the keys `k`, `o`, `r`, `t`, `e` are processed
+- **THEN** the output is `করতে`
+
+#### Scenario: Other verb forms and nouns
+- **WHEN** `korbo`, `korlam`, `korchi` and `dorkar` are each typed on a fresh engine
+- **THEN** the outputs are `করব`, `করলাম`, `করছি` and `দরকার`
+
+#### Scenario: Former reph spelling
+- **WHEN** the keys `k`, `o`, `r`, `t`, `a` are processed
+- **THEN** the output is `করতা`
+
+#### Scenario: র-ফলা is unchanged
+- **WHEN** `prothom` is typed on a fresh engine
+- **THEN** the output is `প্রথম`
+
+#### Scenario: Explicit o still separates
+- **WHEN** `korote` is typed on a fresh engine
+- **THEN** the output is `করতে`
+
+### Requirement: Double r makes reph
+An `r` typed directly after a র that ends the current cluster SHALL append a hasant, giving a visible
+`র্`. A consonant typed next SHALL follow that hasant, forming reph, and its cluster continues as
+usual (aspiration, conjuncts). The keys SHALL NOT change any letter before the র.
+
+#### Scenario: Reph appears as the consonant is typed
+- **WHEN** the keys `k`, `o`, `r`, `r`, `t`, `a` are processed
+- **THEN** the output is `কর` after the first `r`, `কর্` after the second, `কর্ত` after `t`, and `কর্তা` after `a`
+
+#### Scenario: Aspiration after reph
+- **WHEN** `orrtho` is typed on a fresh engine
+- **THEN** the output is `অর্থ`
+
+#### Scenario: Reph before a conjunct
+- **WHEN** `dhorrmo` and `porrzonto` are each typed on a fresh engine
+- **THEN** the outputs are `ধর্ম` and `পর্যন্ত`
+
+#### Scenario: Third r
+- **WHEN** `rrri` is typed on a fresh engine
+- **THEN** the output is `র্রি`
+
+#### Scenario: Armed reph at a word break
+- **WHEN** the keys `k`, `o`, `r`, `r`, space are processed
+- **THEN** the output is `কর্ `
+
+### Requirement: A vowel after double r cancels the reph
+A vowel key other than `i` typed directly after `র্` from a double `r` SHALL remove that hasant, and
+SHALL then act exactly as the same vowel typed after the র. That includes the silent `o`.
+
+#### Scenario: Vowel sign on র
+- **WHEN** `korra` is typed on a fresh engine
+- **THEN** the output is `করা`
+
+#### Scenario: Silent o after double r
+- **WHEN** `korrote` is typed on a fresh engine
+- **THEN** the output is `করতে`
+
+### Requirement: Double r and i make ঋ
+An `i` typed directly after `র্` from a double `r` SHALL replace it with ঋ-kar when that র is joined
+to a consonant before it (র-ফলা), and with the independent ঋ otherwise.
+
+#### Scenario: Independent ঋ
+- **WHEN** `rrin` is typed on a fresh engine
+- **THEN** the output is `ঋণ`
+
+#### Scenario: ঋ-kar
+- **WHEN** `krriShi` and `brriShTi` are each typed on a fresh engine
+- **THEN** the outputs are `কৃষি` and `বৃষ্টি`
+
+### Requirement: y after r is য-ফলা
+`y` typed after a র SHALL produce য-ফলা (`র্য`), whether or not that র is armed by a double `r`. `z` is
+the letter য and SHALL follow the `r` rules like any other consonant.
+
+#### Scenario: য-ফলা without doubling
+- **WHEN** `poryonto` and `bryanD` are each typed on a fresh engine
+- **THEN** the outputs are `পর্যন্ত` and `ব্র্যান্ড`
+
+#### Scenario: য-ফলা after double r
+- **WHEN** `karryo` is typed on a fresh engine
+- **THEN** the output is `কার্য`
+
+#### Scenario: The letter য
+- **WHEN** `porzonto` is typed on a fresh engine
+- **THEN** the output is `পরযন্ত`
