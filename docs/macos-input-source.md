@@ -155,10 +155,14 @@ impl Composer {
 }
 pub fn transpile_roman_document(input: &str, preserve_line_breaks: bool, config: Config) -> String;
 
-pub struct Config { pub bengali_digits: bool, pub dari_for_period: bool, pub smart_quotes: bool }
+pub struct Config {
+    pub bengali_digits: bool, pub dari_for_period: bool, pub smart_quotes: bool, pub autocorrect: bool,
+}
 ```
 
-`Config::default()` turns every toggle on. The engine fixtures run with the default config.
+`Config::default()` turns the output toggles on and Autocorrect off. The engine ignores
+`autocorrect`: the composer and bulk conversion apply it (autocorrect change). The engine fixtures
+run with the default config.
 
 All lengths crossing the FFI are counted in **UTF-16 code units** (what `NSString`/`NSRange` and JavaScript
 strings use), even though Rust stores UTF-8.
@@ -209,6 +213,7 @@ keys, Return and shortcuts commit and reset directly.
 - Bengali digits (on) — `1` → ১
 - `.` types দাঁড়ি (on) — `.` → ।
 - Smart quotes (on)
+- Autocorrect (off) — corrects a finished word from the Autocorrect list; Backspace undoes it
 - Convert selection to Bengali — reads the selected text, runs `transpile_roman_document`, and
   replaces it with `insertText(_:replacementRange:)`. Works in apps that expose their text (Cocoa,
   most browsers); disabled or no-op elsewhere.

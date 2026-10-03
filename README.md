@@ -62,7 +62,25 @@ and `o` always keeps them apart (`korote` → `করতে`):
   (`porzonto` → `পরযন্ত`).
 
 Three options can be turned off in the Mac input menu and in the playground: Bengali digits,
-দাঁড়ি for `.`, and smart quotes.
+দাঁড়ি for `.`, and smart quotes. A fourth, Autocorrect, is off until you turn it on.
+
+### Autocorrect
+
+Many words have a vowel that is written but not said: আমরা is said "amra", একটা "ekTa". Typed
+that way, the engine joins the consonants (`amra` → `আম্রা`), and you type the `o` to keep them
+apart (`amora` → `আমরা`). With **Autocorrect** on, you can leave it out in common words:
+
+- When a word ends (a space, punctuation, a digit or Enter), Druti looks it up in a fixed list of
+  about 1,300 common words and, if it's there, removes the extra hasant: `amra` + space → `আমরা `,
+  `amra ekTa jinis dekhte cai` → `আমরা একটা জিনিস দেখতে চাই`.
+- It only ever removes a hasant, so the result is exactly what typing the `o` gives. It never adds a
+  conjunct or a reph, and it leaves real words alone: `aste` stays `আস্তে`.
+- **Backspace** right after the correction undoes it (`আম্রা` again), and that word is left as you
+  typed it. Enter commits the corrected word at once.
+- The engine itself doesn't change: with Autocorrect off, or for any word not in the list, the same
+  keys give the same text as always. The list changes only with a new version of Druti.
+
+Convert selection and the playground's converter apply it too when it's on.
 
 ## Repository
 

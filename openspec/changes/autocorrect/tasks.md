@@ -24,11 +24,11 @@ Implement after `rr-reph` has landed.
 ## 3. Bindings and hosts (Linux, then Mac)
 
 - [x] 3.1 Add `autocorrect` to the `Config` of `druti-ffi` and `druti-wasm` with matching docs. Verify that the parity tests pass and that the WASM clippy target is clean (Linux).
-- [ ] 3.2 Add the playground toggle for typing and conversion (Linux). Verify the "Toggle in the playground" scenario in the browser.
-- [ ] 3.3 Add the macOS input-menu toggle, stored with the others and off after upgrade; apply it to Convert selection (Mac). Verify with `make -C macos test` and by hand for "Turning on Autocorrect" and "Upgrade keeps it off".
+- [x] 3.2 Add the playground toggle for typing and conversion (Linux). Verify the "Toggle in the playground" scenario in the browser.
+- [ ] 3.3 Add the macOS input-menu toggle, stored with the others and off after upgrade; apply it to Convert selection (Mac). Verify with `make -C macos test` and by hand for "Turning on Autocorrect" and "Upgrade keeps it off". (Swift written on Linux: `Settings`, the menu item and a binding test; not yet compiled.)
 - [ ] 3.4 Manually check word-end correction and Backspace undo in TextEdit, Notes, Safari and one Chromium-based app, watching the pending trailing space (Mac). Record the results in the PR.
 
 ## 4. Documentation and release (Linux)
 
-- [ ] 4.1 Document Autocorrect in `README.md`: off by default, what it changes (hidden vowels only, at word end), Backspace to undo, and that the engine's own rules are unchanged. Add the data attribution from task 0.1. Verify that every example is a fixture.
-- [ ] 4.2 Run the full CLAUDE.md command list (fmt, clippy native and WASM, tests, docs, MSRV; Swift targets on the Mac). Verify there are no warnings or failures.
+- [x] 4.1 Document Autocorrect in `README.md`: off by default, what it changes (hidden vowels only, at word end), Backspace to undo, and that the engine's own rules are unchanged. Add the data attribution from task 0.1. Verify that every example is a fixture.
+- [ ] 4.2 Run the full CLAUDE.md command list (fmt, clippy native and WASM, tests, docs, MSRV; Swift targets on the Mac). Verify there are no warnings or failures. (Linux part done and clean; Swift targets pending on the Mac.)

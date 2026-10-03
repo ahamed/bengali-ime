@@ -187,8 +187,12 @@ impl Composer {
         // Keep "committed + pending = engine output" true of the corrected text,
         // so later keys and `matches_text_before_caret` see what the host shows.
         let tail = word.len() + rest.len() + self.pending.len();
-        let start = self.engine.output.len() - tail;
-        debug_assert!(self.engine.output[start..].starts_with(&word));
+        let start = self.engine.output.len().checked_sub(tail)?;
+        let in_step = self.engine.output[start..].starts_with(&word);
+        debug_assert!(in_step, "the engine output ends with the ended word");
+        if !in_step {
+            return None;
+        }
         self.engine
             .output
             .splice(start..start + word.len(), corrected.iter().copied());
@@ -218,8 +222,11 @@ impl Composer {
         let Some(corrected) = autocorrect::lookup(&self.pending()) else {
             return;
         };
+        let Some(start) = self.engine.output.len().checked_sub(self.pending.len()) else {
+            debug_assert!(false, "the pending text is the end of the engine output");
+            return;
+        };
         let corrected = utf16(corrected);
-        let start = self.engine.output.len() - self.pending.len();
         self.engine
             .output
             .splice(start.., corrected.iter().copied());
