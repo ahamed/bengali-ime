@@ -212,6 +212,22 @@ fn a_consonant_after_backspace_starts_a_new_letter() {
 }
 
 #[test]
+fn a_reph_typed_with_rr_and_its_backspace_look_the_same_everywhere() {
+    // rr-reph design D2 and D5: the armed hasant shows at once, and Backspace
+    // removes only it.
+    check(&ALL_HOSTS, &[Op::Keys("korrta")], "কর্তা");
+    check(&ALL_HOSTS, &[Op::Keys("korr"), Op::Backspace(1)], "কর");
+    check(
+        &ALL_HOSTS,
+        &[Op::Keys("korr"), Op::Backspace(1), Op::Keys("ta")],
+        "করতা",
+    );
+    // Like দ্ম → দ, a consonant goes with the hasant joining it.
+    check(&ALL_HOSTS, &[Op::Keys("korrta"), Op::Backspace(2)], "কর");
+    check(&ALL_HOSTS, &[Op::Keys("pory"), Op::Backspace(1)], "পর");
+}
+
+#[test]
 fn a_vowel_after_backspace_still_attaches_as_a_kar() {
     check(
         &ALL_HOSTS,

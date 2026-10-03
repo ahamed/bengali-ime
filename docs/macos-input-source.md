@@ -96,8 +96,8 @@ text it already emitted: `k` then `h` replaces ক with খ. An input method can
 text it has already committed into another app, but it has full control over its **marked text**.
 
 The engine's own state bounds what can change: `buffer` is always a suffix of `output`, and every
-rule rewrites only inside `buffer` (aspiration, `kkh` → ক্ষ, `rri` → ঋ/ৃ, `Oi`/`OU`, ya-phala, nasal
-connectors). The composer keeps more than that pending: the whole Bengali word that ends the output
+rule rewrites only inside `buffer` (aspiration, `kkh` → ক্ষ, `rri` → ঋ/ৃ, a vowel removing the hasant
+of an `rr` reph, `Oi`/`OU`, ya-phala, nasal connectors). The composer keeps more than that pending: the whole Bengali word that ends the output
 (letters, signs, kars, hasant, nukta, joiners), so Backspace can also edit the word as marked text.
 After every key:
 

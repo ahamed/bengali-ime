@@ -47,6 +47,20 @@ Bangla:
 - **`.`** is `।`, except right after a digit (`1.5` → `১.৫`) or another dot; `...` → `...`.
 - **`^`** (chandrabindu) may be typed before or after the vowel: `k^a` and `ka^` both give `কাঁ`.
 
+Consonants typed together join with a hasant (`prothom` → `প্রথম`), with two exceptions you can hear,
+and `o` always keeps them apart (`korote` → `করতে`):
+
+- **A single `r` never joins the next consonant:** `korte` → `করতে`, `dorkar` → `দরকার`. Type
+  **`rr` for reph**: the second `r` shows the hasant at once (`korr` → `কর্`), and the next
+  consonant completes it (`korrta` → `কর্তা`). A vowel after `rr` cancels the reph (`korra` →
+  `করা`), except `i`, which makes ঋ (`rriN` → `ঋণ`, `krriShi` → `কৃষি`).
+- **Nothing joins after a breathy letter** (খ ঘ ছ ঝ ঠ ঢ থ ধ ফ ভ), হ, ড়, ঢ় or য়: `dekhte` → `দেখতে`,
+  `jayga` → `জায়গা`. The ফলা keys `r`, `l`, `m`, `n`, `N`, `w` and `y` still join (`cihno` →
+  `চিহ্ন`, `dhwoni` → `ধ্বনি`); `b` doesn't (`dekhbe` → `দেখবে`).
+- **`y`** after a consonant is য-ফলা. After a single `r` it stays visible as `র‍্য` (`poryonto` →
+  `পর‍্যন্ত`); reph over য is typed `rry` (`porryonto` → `পর্যন্ত`). **`z`** is the letter য
+  (`porzonto` → `পরযন্ত`).
+
 Three options can be turned off in the Mac input menu and in the playground: Bengali digits,
 দাঁড়ি for `.`, and smart quotes.
 

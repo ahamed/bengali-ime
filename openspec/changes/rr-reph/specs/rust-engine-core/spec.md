@@ -69,7 +69,7 @@ An `i` typed directly after `র্` from a double `r` SHALL replace it with ঋ
 to a consonant before it (র-ফলা), and with the independent ঋ otherwise.
 
 #### Scenario: Independent ঋ
-- **WHEN** `rrin` is typed on a fresh engine
+- **WHEN** `rriN` is typed on a fresh engine
 - **THEN** the output is `ঋণ`
 
 #### Scenario: ঋ-kar

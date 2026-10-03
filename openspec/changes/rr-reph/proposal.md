@@ -24,7 +24,7 @@ common verb forms in the language: করতে, করবে, করছি, প
   the next consonant completes the reph without changing any letter: `korrta` → `কর্তা`, `orrtho` →
   `অর্থ`, `dhorrmo` → `ধর্ম`.
 - A vowel after `rr` cancels the reph: `korra` → `করা`, `korro` → `কর`. The exception is `i`, which
-  keeps making ঋ / ঋ-kar as today: `rrin` → `ঋণ`, `krriShi` → `কৃষি`.
+  keeps making ঋ / ঋ-kar as today: `rriN` → `ঋণ`, `krriShi` → `কৃষি`.
 - **BREAKING** `y` after a single `r` is a visible য-ফলা, never reph: the engine writes র + ZWJ + `্য`
   (`poryonto` → `পর‍্যন্ত`, `ryab` → `র‍্যাব`). Reph over য is typed with `rr` like every other reph
   (`porryonto` or `porrzonto` → `পর্যন্ত`, `karryo` → `কার্য`). After র-ফলা, `y` gives plain `্য` as

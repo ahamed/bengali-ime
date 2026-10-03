@@ -243,6 +243,17 @@ fn data_tables_match_golden() {
         "aspiratedConsonantByBase"
     );
     assert_eq!(
+        strings(&ts["noJoinAfter"]),
+        owned(NO_JOIN_AFTER),
+        "noJoinAfter"
+    );
+    assert_eq!(
+        strings(&ts["pholaAfterNoJoin"]),
+        owned(PHOLA_AFTER_NO_JOIN),
+        "pholaAfterNoJoin"
+    );
+    assert_eq!(ts["zwj"].as_str().unwrap(), ZWJ);
+    assert_eq!(
         strings(&ts["phoneticConsonantGraphemes"]),
         owned(PHONETIC_CONSONANT_GRAPHEMES),
         "phoneticConsonantGraphemes"
