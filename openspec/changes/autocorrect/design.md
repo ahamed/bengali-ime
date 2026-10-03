@@ -108,7 +108,7 @@ touched, because the correction is still pending when it is undone.
 - `transpile` takes the same config: Convert selection and the playground converter correct words when
   it is on.
 
-### D7. Data licensing (decision needed before implementation)
+### D7. Data licensing (decided: CC BY-SA 4.0 for the list)
 The sources are CC BY-SA 4.0: Google Dakshina, and the FrequencyWords lists built from
 OpenSubtitles. Druti is MIT. Options:
 - (a) Ship `autocorrect.tsv` under CC BY-SA 4.0 with attribution in the README and the app's About
@@ -116,7 +116,15 @@ OpenSubtitles. Druti is MIT. Options:
 - (b) Build the lexicon only from public-domain or MIT-compatible sources. That means smaller coverage
   and more work.
 
-Recommended: (a). The author must confirm before task 1.
+**Decision (author, 2026-10-03): (a).** `crates/druti-core/data/autocorrect.tsv` is licensed CC BY-SA
+4.0, with a `LICENSE-DATA` file next to it and this attribution in the README and the macOS About
+text:
+
+> The Autocorrect word list is derived from the Dakshina dataset (Google Research, CC BY-SA 4.0) and
+> from FrequencyWords by Hermit Dave (built from OpenSubtitles, CC BY-SA 4.0). It is licensed CC BY-SA
+> 4.0. The rest of Druti is MIT.
+
+The code that reads the list stays MIT.
 
 ## Risks / Trade-offs
 
@@ -129,7 +137,8 @@ Recommended: (a). The author must confirm before task 1.
 - **[Risk] The list drifts from the engine** when rules change. → The consistency test fails until
   the list is regenerated.
 - **[Trade-off] App and WASM size grow** by an estimated 100–200 KB.
-- **[Risk] Licensing** (D7).
+- **[Trade-off] The list file is CC BY-SA**, not MIT (D7). Anyone redistributing it must keep the
+  attribution and licence; the code is unaffected.
 
 ## Migration Plan
 

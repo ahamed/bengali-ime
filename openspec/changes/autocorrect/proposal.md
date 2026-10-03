@@ -62,7 +62,7 @@ keys always giving the same letters. The typist who wants natural spellings turn
 - **Hosts**: macOS input menu toggle (Swift, settings only); playground toggle (TypeScript).
 - **Tooling**: a generator (kept in the repo, run by hand) that builds the list from downloaded
   corpora by running the engine.
-- **Licensing, to decide before implementation**: the corpora (Google Dakshina, OpenSubtitles via
-  FrequencyWords) are CC BY-SA 4.0, and Druti is MIT. Shipping a word list derived from them needs
-  attribution, and may need the data file to be CC BY-SA. See design D7.
+- **Licensing (decided)**: the word list is derived from CC BY-SA 4.0 corpora (Google Dakshina,
+  OpenSubtitles via FrequencyWords), so the list file ships under CC BY-SA 4.0 with attribution; the
+  code stays MIT. See design D7.
 - **Size**: an estimated 100–200 KB of data in the app and the WASM bundle.

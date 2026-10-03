@@ -1,10 +1,11 @@
 # Tasks
 
-Implement after `rr-reph` has landed. Task 0 needs the author's decision.
+Implement after `rr-reph` has landed.
 
 ## 0. Licensing (author)
 
-- [ ] 0.1 Decide the data licence (design D7). Record the decision and the attribution text in `design.md`.
+- [x] 0.1 Decide the data licence (design D7). Record the decision and the attribution text in `design.md`.
+- [ ] 0.2 Add `crates/druti-core/data/LICENSE-DATA` (CC BY-SA 4.0 text plus the attribution) with the list, and the attribution to the README and the macOS About text. Verify that `cargo package -p druti-core --list` includes both files.
 
 ## 1. Correction list (Linux)
 
