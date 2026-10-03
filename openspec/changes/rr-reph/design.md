@@ -22,19 +22,18 @@ Evidence from a 2.4M-word Bengali corpus (hermitdave/FrequencyWords, subtitles):
 |---|---|
 | reph (র্C, excluding র্য) | 40,825 |
 | unwritten vowel (র C + kar) | 67,306 |
-| র্য (typed with `y`, unaffected) | 4,372 |
+| র্য (typed with `y` today; `rry` or `rrz` after this change) | 4,372 |
 
 ## Goals / Non-Goals
 
 **Goals:**
 - One rule: a single `r` never forms reph; `rr` does.
 - Nothing before the last vowel ever changes. Each key changes only the cluster it is typed into.
-- ঋ, য-ফলা and every spelling that uses `o` keep working as before.
+- ঋ and every spelling that uses `o` keep working as before; `y` always gives a visible য-ফলা.
 
 **Non-Goals:**
-- Pairs that never form a conjunct (`dekhte` → `দেখ্তে` today). That is a follow-up change with its
-  own conjunct table.
-- `ড়` / `ঢ়` joining (`poRte` → `পড়্তে`); same follow-up.
+- Which other consonant pairs join (`dekhte` → `দেখ্তে` today), including `ড়` / `ঢ়` (`poRte` →
+  `পড়্তে`). That is the `conjunct-rules` change, which builds on this one.
 - A setting to keep the old behaviour.
 - Nouns that need `o` for other consonant pairs (`ekoTa`, `aponi`); out of scope.
 
@@ -77,13 +76,28 @@ Today `rr` is used only for ঋ, so ঋ typing is unchanged for users. Reph neve
 `rr` + vowel has no other use.
 
 ### D4. `y` and `z`
-- `ja_fala` runs before the `r` rule and already turns `y` after `র` into `্য`.
-- After an armed `র্`, `y` appends `য`, so `karryo` also gives `কার্য`.
-- `z` is an ordinary consonant mapped to `য` and follows D1/D2 (`porzonto` → `পরযন্ত`).
+Unicode writes "র + য-ফলা" and "reph over য" with the same code points (`র্য`), and fonts draw them as
+reph. A single `r` must never make reph (D1), so `y` after a lone র writes the visible য-ফলা form
+instead:
+- After a র that is not র-ফলা and not armed, `ja_fala` writes ZWJ + `্য` (`র‍্য`, U+09B0 U+200D U+09CD
+  U+09AF), the form used in র‍্যাব and র‍্যালি. Avro, Khipro and OpenBangla's fixed layouts write the
+  same sequence.
+- After র-ফলা (`bry`), `ja_fala` writes `্য` with no ZWJ, as today; the stacked র already shows.
+- After an armed `র্`, `y` appends `য`, giving reph over য: `porryonto` → `পর্যন্ত`, `karryo` → `কার্য`.
+- `z` is an ordinary consonant mapped to `য` and follows D1/D2 (`porzonto` → `পরযন্ত`, `porrzonto` →
+  `পর্যন্ত`).
+
+The ZWJ is part of the য-ফলা letter: letter Backspace removes ZWJ, hasant and য together, and every
+length counts it as one UTF-16 unit.
+
+The cost: র্য is reph in 99% of corpus occurrences (পর্যন্ত, সূর্য, কার্যক্রম), so those words need
+`rr`, like every other reph. The ZWJ form is about 2% of র+য in Wikipedia text. The author chose one
+rule ("only `rr` makes reph") over the frequency.
 
 Changes from today:
-- `rz` used to give `র্য`.
-- `ry` after an armed reph is new.
+- `ry` used to give `র্য` (reph); it now gives `র‍্য`.
+- `rz` used to give `র্য`; it now gives `রয`.
+- `rry` and `rrz` are new.
 
 ### D5. Backspace
 Letter Backspace already treats a lone trailing hasant as one letter, so Backspace on `কর্` gives `কর`.
@@ -107,6 +121,8 @@ see this; the engine fixtures already pin the difference.
 
 ### Behaviour and fixture changes
 This change intentionally alters engine output. Fixtures edited in the same commit:
+- Counts below were measured before the `ry` decision (D4); `ry` cases add a few more, and the
+  regeneration script reports the final numbers.
 - `engine/unit.json`: 5 cases that type `r` before a consonant or `rr`. The ঋ cases keep their final
   output, but their per-key actions change: `r` now inserts `্`, and `i` deletes `্র্`.
 - `engine/words.json`: 18 cases.
@@ -114,7 +130,7 @@ This change intentionally alters engine output. Fixtures edited in the same comm
 - `engine/transpile.json`: 9 cases.
 
 They are regenerated with a one-off script that replays each affected case on the new engine. The
-script asserts that every case without `r` + consonant key or `rr` is unchanged, and stays out of the
+script asserts that every case without an `r` before a consonant key, `rr` or `ry` is unchanged, and stays out of the
 repo. The review diff shows only these cases. `composer/` fixtures are unchanged; new composer cases
 are added for the ime-composer requirement.
 
@@ -122,12 +138,13 @@ are added for the ime-composer requirement.
 
 - **[Trade-off] Every reph costs one extra key** (about 1.7% of words in the corpus). In return,
   about 2.9% of words lose an unspoken `o`. The rule is one line to learn.
-- **[Risk] Existing users' muscle memory:** `korta` now gives `করতা`, and `dhormo` gives `ধরম`. →
+- **[Risk] Existing users' muscle memory:** `korta` now gives `করতা`, `dhormo` gives `ধরম`, and
+  `poryonto` gives `পর‍্যন্ত`. →
   2.0.0 release notes lead with a table from old to new spellings. The README typing table shows
   `rr` first.
 - **[Trade-off] Reph after a Backspace needs the র re-typed** (D5).
 - **[Risk] Changed random sequences hide an unintended change.** → The regeneration script refuses to
-  touch any case without `r` + consonant or `rr`. The hosts property test (every host shows the same
+  touch any case without an `r` before a consonant key, `rr` or `ry`. The hosts property test (every host shows the same
   text) runs on the new fixtures.
 
 ## Migration Plan

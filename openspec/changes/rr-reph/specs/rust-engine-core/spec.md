@@ -77,16 +77,25 @@ to a consonant before it (র-ফলা), and with the independent ঋ otherwise
 - **THEN** the outputs are `কৃষি` and `বৃষ্টি`
 
 ### Requirement: y after r is য-ফলা
-`y` typed after a র SHALL produce য-ফলা (`র্য`), whether or not that র is armed by a double `r`. `z` is
-the letter য and SHALL follow the `r` rules like any other consonant.
+`y` typed after a র SHALL produce য-ফলা, and SHALL NOT form reph:
+- after a র that stands alone (not র-ফলা, not armed), the engine SHALL write ZWJ + `্য`, giving the
+  visible য-ফলা form `র‍্য` (U+09B0 U+200D U+09CD U+09AF);
+- after a র-ফলা, it SHALL write `্য` with no ZWJ, as today;
+- after an armed `র্` from a double `r`, it SHALL write `য`, giving reph over য (`র্য`).
 
-#### Scenario: য-ফলা without doubling
-- **WHEN** `poryonto` and `bryanD` are each typed on a fresh engine
-- **THEN** the outputs are `পর্যন্ত` and `ব্র্যান্ড`
+`z` is the letter য and SHALL follow the `r` rules like any other consonant.
 
-#### Scenario: য-ফলা after double r
-- **WHEN** `karryo` is typed on a fresh engine
-- **THEN** the output is `কার্য`
+#### Scenario: য-ফলা after a single r
+- **WHEN** `poryonto` and `ryab` are each typed on a fresh engine
+- **THEN** the outputs are `পর‍্যন্ত` and `র‍্যাব`, each with a ZWJ after the র
+
+#### Scenario: য-ফলা after র-ফলা
+- **WHEN** `bryanD` is typed on a fresh engine
+- **THEN** the output is `ব্র্যান্ড`, with no ZWJ
+
+#### Scenario: Reph over য
+- **WHEN** `porryonto`, `porrzonto` and `karryo` are each typed on a fresh engine
+- **THEN** the outputs are `পর্যন্ত`, `পর্যন্ত` and `কার্য`
 
 #### Scenario: The letter য
 - **WHEN** `porzonto` is typed on a fresh engine
