@@ -17,7 +17,7 @@ keys always giving the same letters. The typist who wants natural spellings turn
 - **New, off by default:** an Autocorrect setting. When it is on and a word ends (space,
   punctuation, digit, Enter), the composer looks the finished word up in a fixed list. If the list
   has it, the word is replaced once by its correct form before it is committed: `amra` + space →
-  `আমরা `, `ekTa` → `একটা`, `apni` → `আপনি`, `bolte` → `বলতে`, `tahle` → `তাহলে`.
+  `আমরা `, `ekTa` → `একটা`, `apni` → `আপনি`, `bolte` → `বলতে`, `thakte` → `থাকতে`.
 - Corrections only ever **remove a hasant**, which is the "hidden o" the author described: the
   corrected word is exactly what the engine gives when the `o` is typed (`amora` → `আমরা`). Autocorrect
   never adds a conjunct, a reph or any other letter.
@@ -28,8 +28,8 @@ keys always giving the same letters. The typist who wants natural spellings turn
 - **Ambiguous words are never corrected.** If the engine's output is itself a real word, or two list
   words would come from the same output, there is no entry; the engine's output stands.
 - The list holds the words among the ~20,000 most frequent in two corpora that need a hidden-vowel
-  fix (an estimated 3,000–5,000 entries). They cover about 89% of hidden-vowel occurrences in
-  everyday text and about 71% in formal text. It ships inside `druti-core` as data, versioned with
+  fix and whose typing Dakshina attests (1,269 entries in the first generation; see design D3 for
+  coverage). It ships inside `druti-core` as data, versioned with
   the engine.
 - Everything stays deterministic: the result is a function of the keys, the settings and the list
   version. Nothing is learned from the user and nothing is suggested.
@@ -65,4 +65,4 @@ keys always giving the same letters. The typist who wants natural spellings turn
 - **Licensing (decided)**: the word list is derived from CC BY-SA 4.0 corpora (Google Dakshina,
   OpenSubtitles via FrequencyWords), so the list file ships under CC BY-SA 4.0 with attribution; the
   code stays MIT. See design D7.
-- **Size**: an estimated 100–200 KB of data in the app and the WASM bundle.
+- **Size**: about 75 KB of data in the app and the WASM bundle.

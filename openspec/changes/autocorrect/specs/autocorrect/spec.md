@@ -33,8 +33,8 @@ match the whole word exactly, after Unicode normalization of nukta letters to th
 forms (ড় U+09DC, ঢ় U+09DD, য় U+09DF).
 
 #### Scenario: Common words
-- **WHEN** the words `আম্রা`, `এক্টা`, `আপ্নি`, `বল্তে` and `তাহ্লে` are looked up
-- **THEN** the results are `আমরা`, `একটা`, `আপনি`, `বলতে` and `তাহলে`
+- **WHEN** the words `আম্রা`, `এক্টা`, `আপ্নি`, `বল্তে` and `থাক্তে` are looked up
+- **THEN** the results are `আমরা`, `একটা`, `আপনি`, `বলতে` and `থাকতে`
 
 #### Scenario: Words not in the list
 - **WHEN** the words `ভক্ত`, `কিন্তু` and `দেখতে` are looked up

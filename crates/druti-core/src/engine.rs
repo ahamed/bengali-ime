@@ -113,8 +113,12 @@ fn single_quote_from_prior(prior: &str) -> &'static str {
 }
 
 /// Output options (the macOS input menu and the playground toggles).
-/// `Config::default()` turns all of them on.
+/// `Config::default()` turns the output toggles on and Autocorrect off.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "independent on/off settings, one per menu item"
+)]
 pub struct Config {
     /// `1` → `১`. Off: digits stay ASCII.
     pub bengali_digits: bool,
@@ -122,6 +126,11 @@ pub struct Config {
     pub dari_for_period: bool,
     /// `"` and `'` become typographic quotes. Off: they stay ASCII.
     pub smart_quotes: bool,
+    /// Corrects a finished word from the Autocorrect list, which only removes
+    /// hasants (`আম্রা` → `আমরা`). The [`Engine`] ignores it: the
+    /// [`Composer`](crate::Composer) applies it when a word ends, and bulk
+    /// conversion to every word. Off by default (autocorrect design D6).
+    pub autocorrect: bool,
 }
 
 impl Default for Config {
@@ -130,6 +139,7 @@ impl Default for Config {
             bengali_digits: true,
             dari_for_period: true,
             smart_quotes: true,
+            autocorrect: false,
         }
     }
 }

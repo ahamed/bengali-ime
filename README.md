@@ -101,4 +101,8 @@ To change how something types, change `druti-core` and update the affected entri
 
 ## License
 
-[MIT](LICENSE)
+[MIT](LICENSE), except the Autocorrect word list.
+
+The Autocorrect word list is derived from the Dakshina dataset (Google Research, CC BY-SA 4.0) and
+from FrequencyWords by Hermit Dave (built from OpenSubtitles, CC BY-SA 4.0). It is licensed
+[CC BY-SA 4.0](crates/druti-core/data/LICENSE-DATA). The rest of Druti is MIT.

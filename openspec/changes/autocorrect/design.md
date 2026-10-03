@@ -73,6 +73,13 @@ Expected size: 3,000–5,000 entries. In the research corpora, the top 20,000 wo
 hidden-vowel occurrences in subtitles and 71% in Wikipedia (heuristic upper bound; Dakshina filtering
 removes words whose vowel is actually typed).
 
+**Result (first generation, 2026-10-03):** 1,269 entries (75 KB). The estimate above was too high
+because 5,826 of the 20,000 words have no Dakshina romanization, so there is no evidence of how they
+are typed, and they are skipped. Against every word in the corpora with that evidence (3,852
+entries), the 20,000-word list covers 98% of the hidden-vowel occurrences in subtitles and 88% in
+Wikipedia: 5.4% and 3.7% of all words. A hand review of 210 entries (the 60 most frequent and 150
+random) found no wrong correction.
+
 The data is embedded with `include_str!` and parsed once into a sorted table; lookup is a binary
 search. No new dependency.
 
@@ -136,7 +143,7 @@ The code that reads the list stays MIT.
   by the manual app checks; if an app misbehaves, commit immediately there (no undo), as for Enter.
 - **[Risk] The list drifts from the engine** when rules change. → The consistency test fails until
   the list is regenerated.
-- **[Trade-off] App and WASM size grow** by an estimated 100–200 KB.
+- **[Trade-off] App and WASM size grow** by about 75 KB (the first list).
 - **[Trade-off] The list file is CC BY-SA**, not MIT (D7). Anyone redistributing it must keep the
   attribution and licence; the code is unaffected.
 

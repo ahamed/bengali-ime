@@ -359,3 +359,49 @@ fn transpile_fixtures() {
         failures.join("\n")
     );
 }
+
+#[derive(Deserialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+struct AutocorrectTranspileCase {
+    name: String,
+    input: String,
+    preserve_line_breaks: Option<bool>,
+    autocorrect: Option<bool>,
+    output: String,
+}
+
+/// autocorrect spec, "Autocorrect in bulk conversion".
+#[test]
+fn autocorrect_transpile_fixtures() {
+    let path =
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/autocorrect/transpile.json");
+    let text = std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("{}: {e}", path.display()));
+    let file: CaseFile<AutocorrectTranspileCase> =
+        serde_json::from_str(&text).unwrap_or_else(|e| panic!("{}: {e}", path.display()));
+    let failures: Vec<String> = file
+        .cases
+        .iter()
+        .filter_map(|case| {
+            let mut config = druti_core::Config::default();
+            if let Some(autocorrect) = case.autocorrect {
+                config.autocorrect = autocorrect;
+            }
+            let preserve = case.preserve_line_breaks.unwrap_or(true);
+            let actual =
+                druti_core::transpile_roman_document_with_config(&case.input, preserve, config);
+            (actual != case.output).then(|| {
+                format!(
+                    "  {:?}: expected {:?} actual {actual:?}",
+                    case.name, case.output
+                )
+            })
+        })
+        .collect();
+    assert!(
+        failures.is_empty(),
+        "autocorrect/transpile.json: {} of {} failed\n{}",
+        failures.len(),
+        file.cases.len(),
+        failures.join("\n")
+    );
+}

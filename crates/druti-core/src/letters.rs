@@ -129,7 +129,7 @@ pub(crate) fn trailing_consonant_run_len_utf16(units: &[u16]) -> usize {
 
 /// Whether `ch` belongs to a Bengali word: a letter, a sign, a kar, the hasant
 /// or nukta, or a joiner. Digits, currency signs and punctuation end a word.
-fn is_word_char(ch: char) -> bool {
+pub(crate) fn is_word_char(ch: char) -> bool {
     ('\u{0980}'..='\u{09E3}').contains(&ch)
         || matches!(ch, '\u{09F0}' | '\u{09F1}' | '\u{200C}' | '\u{200D}')
 }
