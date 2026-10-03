@@ -71,12 +71,16 @@ impl From<druti_core::Config> for Config {
 
 /// What the host applies after a key; see `druti_core::Update`. It never
 /// changes text committed earlier.
-#[wasm_bindgen(getter_with_clone)]
+// `getter_with_clone` only on the `String` fields: on the whole struct it
+// would also clone the `bool`, which clippy's `clone_on_copy` rejects.
+#[wasm_bindgen]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Update {
     /// Text that replaces the pending text and becomes final.
+    #[wasm_bindgen(getter_with_clone)]
     pub commit: String,
     /// The new pending text (empty: none).
+    #[wasm_bindgen(getter_with_clone)]
     pub pending: String,
     /// Whether the key was consumed; if not, the editor also processes it.
     pub handled: bool,
