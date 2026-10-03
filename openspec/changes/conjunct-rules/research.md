@@ -96,7 +96,7 @@ The proposed list does as well as an oracle list fitted to subtitle frequencies.
 
 The real accuracy is somewhat higher than the table shows. The apart heuristic counts words such as উপরে, ঘোষণা and ধারণা, whose vowel is spoken and typed (র+ণ silent in 8 of 542 romanizations, প+র in 12 of 388) ([Dakshina lexicons](https://github.com/google-research-datasets/dakshina)) [corpus].
 
-The residual errors are concentrated. Words that come out wrongly joined are থাকতে (1,697), জানতে (1,282), আসবে (1,266), আসতে (1,168), শুনতে (1,025), একসাথে (704), থাকলে (559), মানুষকে (311), জিনিসটা (308) and কোনটা (256). Words that come out wrongly apart are স্বপ্ন (489), আল্লাহ (287), ডক্টর (219), গ্লাস (104) and উল্লেখ (80). A suffix exception would fix most of the first group, but it needs the letters *after* the pair. Druti's `rr`-reph design forbids that: every decision is made by the key being typed, and shown text never changes ([design D1](../rr-reph/design.md)) [code].
+The residual errors are concentrated. Words that come out wrongly joined are থাকতে (1,697), জানতে (1,282), আসবে (1,266), আসতে (1,168), শুনতে (1,025), একসাথে (704), থাকলে (559), মানুষকে (311), জিনিসটা (308) and কোনটা (256). Words that come out wrongly apart are স্বপ্ন (489), আল্লাহ (287), ডক্টর (219), গ্লাস (104) and উল্লেখ (80). A suffix exception would fix most of the first group, but it needs the letters *after* the pair. Druti's `rr`-reph design forbids that: every decision is made by the key being typed, and shown text never changes ([design D1](../archive/2026-10-03-rr-reph/design.md)) [code].
 
 The only key-so-far alternative is to check the stem typed so far, and it fails. The top 20 stems (আস, থাক, জান, শুন, মানুষ, আন, জিনিস, কোন…) cover 65% of the 21,044 suffix-boundary errors in subtitles, recovering about 13,700 occurrences. But they would block **17,370** correct joins in subtitles: কিন্তু (10,481), চিন্তা, ডাক্তার, আস্তে. In Wikipedia text they would block **51,699**, including আন্তর্জাতিক with 9,223 (computed for this report). So typists must type `o` in জানতে-type verb forms (`janote`). The data puts a ceiling of about 3 points on what any lookahead could add.
 
@@ -147,7 +147,7 @@ The other IMEs choose differently:
 - **Wikimedia bn-avro:** its cited rule `([ক-হড়ঢ়য়])y` → `$1্য` has no ZWJ case, which yields reph + য.
 - **ITRANS:** joins everything, so `ry` also gives র্য.
 
-Druti's planned rule, `y` after র → ্য (পর্যন্ত), with `z` as the apart letter (পরযন্ত) and `rr` + `y` also giving কার্য ([proposal](../rr-reph/proposal.md)), is the one exception to "a single `r` never forms reph". The 99% join rate justifies it. Druti still has no way to type র‍্যাব.
+Druti's planned rule, `y` after র → ্য (পর্যন্ত), with `z` as the apart letter (পরযন্ত) and `rr` + `y` also giving কার্য ([proposal](../archive/2026-10-03-rr-reph/proposal.md)), is the one exception to "a single `r` never forms reph". The 99% join rate justifies it. Druti still has no way to type র‍্যাব.
 
 ## Recommendations and open decisions
 
