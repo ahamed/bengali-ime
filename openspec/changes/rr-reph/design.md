@@ -27,7 +27,8 @@ Evidence from a 2.4M-word Bengali corpus (hermitdave/FrequencyWords, subtitles):
 ## Goals / Non-Goals
 
 **Goals:**
-- One rule: a single `r` never forms reph; `rr` does.
+- Two rules a typist can hear: a single `r` never forms reph (`rr` does), and nothing joins after a
+  breathy letter, হ, ড়, ঢ় or য় except a ফলা (D4b).
 - Nothing before the last vowel ever changes. Each key changes only the cluster it is typed into.
 - ঋ and every spelling that uses `o` keep working as before; `y` always gives a visible য-ফলা.
 
@@ -99,6 +100,23 @@ Changes from today:
 - `rz` used to give `র্য`; it now gives `রয`.
 - `rry` and `rrz` are new.
 
+### D4b. Nothing joins after a breathy letter
+The second rule of this change, chosen in review over the 107-pair list of `conjunct-rules` because
+it is a category a typist can hear, not a list to memorise:
+- After খ ঘ ছ ঝ ঠ ঢ থ ধ ফ ভ, হ, ড়, ঢ় or য়, `process_consonant` writes the consonant without a hasant and
+  restarts the buffer, exactly as after a single র (D1).
+- The ফলা keys still join: `r`, `l`, `m`, `n`, `N`, `w`, and `y` (`ja_fala`). The test is on the key,
+  not the letter, for ব: `w` joins (ধ্বনি), `b` does not (দেখবে, বুঝবে). `w` and `b` both give ব
+  everywhere else, so nothing changes for other letters.
+- The decision uses the letter as it stands when the key is typed. Aspiration only ever rewrites the
+  last letter, so a letter already written never becomes breathy behind a join.
+
+Evidence (subtitle and Wikipedia corpora, research in `conjunct-rules/research.md`): খ+ত, ঝ+ত, খ+ব
+have zero joined tokens; য়+গ and য়+ত appear thousands of times apart and never joined. With `rr-reph`
+alone, 57.9% / 70.6% of words need no extra `o`; with this rule about 62% / 73%. Joining a ফলা after
+these letters keeps চিহ্ন, ব্রাহ্মণ, ফ্লাইট, ভ্রমণ, ধ্বংস typable without any join key. The cost is
+হ+ল: `tahle` gives তাহ্লে, so তাহলে is typed `tahole` (or fixed by `autocorrect`).
+
 ### D5. Backspace
 Letter Backspace already treats a lone trailing hasant as one letter, so Backspace on `কর্` gives `কর`.
 In the composer, a Backspace ends the cluster (whole-word-pending D3). So the next key starts a new
@@ -121,7 +139,7 @@ see this; the engine fixtures already pin the difference.
 
 ### Behaviour and fixture changes
 This change intentionally alters engine output. Fixtures edited in the same commit:
-- Counts below were measured before the `ry` decision (D4); `ry` cases add a few more, and the
+- Counts below were measured before the `ry` (D4) and breathy-letter (D4b) rules, which add more; the
   regeneration script reports the final numbers.
 - `engine/unit.json`: 5 cases that type `r` before a consonant or `rr`. The ঋ cases keep their final
   output, but their per-key actions change: `r` now inserts `্`, and `i` deletes `্র্`.
@@ -130,7 +148,7 @@ This change intentionally alters engine output. Fixtures edited in the same comm
 - `engine/transpile.json`: 9 cases.
 
 They are regenerated with a one-off script that replays each affected case on the new engine. The
-script asserts that every case without an `r` before a consonant key, `rr` or `ry` is unchanged, and stays out of the
+script asserts that every case without an `r` before a consonant key, `rr`, `ry`, or a consonant key after a breathy letter, হ, ড়, ঢ় or য় is unchanged, and stays out of the
 repo. The review diff shows only these cases. `composer/` fixtures are unchanged; new composer cases
 are added for the ime-composer requirement.
 
@@ -144,7 +162,7 @@ are added for the ime-composer requirement.
   `rr` first.
 - **[Trade-off] Reph after a Backspace needs the র re-typed** (D5).
 - **[Risk] Changed random sequences hide an unintended change.** → The regeneration script refuses to
-  touch any case without an `r` before a consonant key, `rr` or `ry`. The hosts property test (every host shows the same
+  touch any case without an `r` before a consonant key, `rr`, `ry`, or a consonant key after a breathy letter, হ, ড়, ঢ় or য়. The hosts property test (every host shows the same
   text) runs on the new fixtures.
 
 ## Migration Plan

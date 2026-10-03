@@ -30,6 +30,11 @@ common verb forms in the language: করতে, করবে, করছি, প
   (`porryonto` or `porrzonto` → `পর্যন্ত`, `karryo` → `কার্য`). After র-ফলা, `y` gives plain `্য` as
   today (`bryanD` → `ব্র্যান্ড`). `z` is the letter য and follows the `r` rule like any consonant
   (`porzonto` → `পরযন্ত`).
+- **BREAKING** Nothing joins after a breathy letter (খ ঘ ছ ঝ ঠ ঢ থ ধ ফ ভ), হ, ড়, ঢ় or য়, except the
+  ফলা keys `r`, `l`, `m`, `n`/`N`, `w` and `y`: `dekhte` → `দেখতে`, `bujhte` → `বুঝতে`, `dekhbe` →
+  `দেখবে`, `poRte` → `পড়তে`, `jayga` → `জায়গা`, while `bhromoN` → `ভ্রমণ`, `cihno` → `চিহ্ন`,
+  `dhwoni` → `ধ্বনি` still join. Breathy sounds can't be pronounced in a cluster, so typists don't
+  have to learn it as a list.
 - `o` still separates consonants everywhere (`korote` → `করতে`), so the old spellings that use `o`
   keep working.
 - This becomes the default and only behaviour, with no setting. It ships as Druti 2.0.0. It
@@ -45,22 +50,25 @@ common verb forms in the language: করতে, করবে, করছি, প
 
 ### Modified Capabilities
 - `rust-engine-core`: new requirements for when `r` joins: a single `r` never forms reph; `rr` forms
-  reph; a vowel after `rr`; ঋ from `rr` + `i`; visible য-ফলা after `r`.
+  reph; a vowel after `rr`; ঋ from `rr` + `i`; visible য-ফলা after `r`; nothing joins after a breathy
+  letter except ফলা keys.
 - `ime-composer`: new requirements for the armed reph in the pending word (Backspace and committing)
   and for Backspace on `র‍্য`.
 
 ## Impact
 
-- **Rust**: `druti-core`, in `engine.rs` (`process_consonant`, `process_vowel`) and `rules.rs`
+- **Rust**: `druti-core`, in `engine.rs` (`process_consonant`, `process_vowel`; the breathy-letter set
+  in `data.rs`) and `rules.rs`
   (`rassaw_ri` now reads `র্`, not `র্র`; a new rule for `r` after `r`). The public API and the
   bindings don't change.
-- **Fixtures**: the engine fixtures that type `r` before a consonant key, `rr`, or `ry`. Before the
-  `ry` decision that was 5 unit cases, 18 curated words, 201 of the 2,400 random sequences, and 9 bulk
+- **Fixtures**: the engine fixtures that type `r` before a consonant key, `rr`, `ry`, or a consonant
+  after a breathy letter, হ, ড়, ঢ় or য়. Before those last two rules that was 5 unit cases, 18 curated words, 201 of the 2,400 random sequences, and 9 bulk
   conversion cases; the regeneration script reports the final counts. Each is
   updated in the same commit as the engine change. No other fixture changes.
 - **Hosts**: no code changes in Swift or TypeScript. Both pick up the new engine.
 - **Docs**: the "How typing works" section of `README.md`, the `rri` note in
   `docs/macos-input-source.md`, and release notes with a table from old to new spellings.
 - **Release**: Druti 2.0.0 (`macos/project.yml`).
-- **Follow-up, not in this change**: `conjunct-rules`, which makes the other consonants join only in
-  listed pairs (`dekhte` → `দেখতে`). It builds on this change and ships in the same 2.0.0 release.
+- **Not in this change**: `conjunct-rules` (a 107-pair joining list) is parked: it needs a list to be
+  memorised, which works against typing without looking. Words like আমরা, একটা, আপনি, বলতে are
+  handled instead by the optional `autocorrect` change, which leaves the engine untouched.

@@ -1,3 +1,9 @@
+> **Status: parked (2026-10-03). Do not apply.** The author chose not to ship a joining list: it
+> has to be memorised, which works against typing without looking at the screen. `rr-reph` takes only
+> its cheapest, audible rule (nothing joins after a breathy letter), and words such as আমরা, একটা,
+> আপনি are left to the optional `autocorrect` change. This folder is kept for its research
+> (`research.md`) and in case a joining list is offered later as an opt-in setting.
+
 ## Why
 
 Druti joins any two consonants typed in a row, so the typist has to type an `o` they neither say nor

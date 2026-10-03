@@ -100,3 +100,26 @@ to a consonant before it (র-ফলা), and with the independent ঋ otherwise
 #### Scenario: The letter য
 - **WHEN** `porzonto` is typed on a fresh engine
 - **THEN** the output is `পরযন্ত`
+
+### Requirement: Nothing joins after a breathy letter
+When a consonant key follows a breathy letter (খ ঘ ছ ঝ ঠ ঢ থ ধ ফ ভ), হ, ড় (U+09DC), ঢ় (U+09DD) or
+য় (U+09DF) at the end of the current cluster, the engine SHALL write the consonant without a hasant
+and start a new cluster with it, except for the ফলা keys: `r` (র-ফলা), `l` (ল-ফলা), `m` (ম-ফলা), `n`
+and `N` (ন/ণ-ফলা), `w` (ব-ফলা) and `y` (য-ফলা, unchanged). `b` is not a ফলা key here: it stays
+apart. The decision uses the letter as it stands when the key is typed (`kh` is খ).
+
+#### Scenario: Verb forms after a breathy letter
+- **WHEN** `dekhte`, `bujhte`, `dekhbe` and `poRte` are each typed on a fresh engine
+- **THEN** the outputs are `দেখতে`, `বুঝতে`, `দেখবে` and `পড়তে`
+
+#### Scenario: After য়
+- **WHEN** `jayga` is typed on a fresh engine
+- **THEN** the output is `জায়গা`
+
+#### Scenario: ফলা keys still join
+- **WHEN** `bhromoN`, `flaiT`, `brahmoN`, `cihno`, `dhwoni` and `madhyom` are each typed on a fresh engine
+- **THEN** the outputs are `ভ্রমণ`, `ফ্লাইট`, `ব্রাহ্মণ`, `চিহ্ন`, `ধ্বনি` and `মাধ্যম`
+
+#### Scenario: A plain letter before a breathy one still joins
+- **WHEN** `buddhi` and `iccha` are each typed on a fresh engine
+- **THEN** the outputs are `বুদ্ধি` and `ইচ্ছা`
